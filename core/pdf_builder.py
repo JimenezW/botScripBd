@@ -6,7 +6,7 @@ la capa de texto extraída para generar un documento idéntico al original, busc
 
 from pathlib import Path
 from typing import Dict, List, Optional
-import fitz  # PyMuPDF
+import pymupdf as fitz  # PyMuPDF
 from PIL import Image
 from core.extractor import ExtractedPage
 

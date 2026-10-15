@@ -7,7 +7,7 @@ import time
 import random
 from typing import Optional
 from playwright.sync_api import sync_playwright, Browser, BrowserContext, Page, Playwright
-from playwright_stealth import stealth_sync
+from playwright_stealth import Stealth
 from config import BotConfig
 
 
@@ -66,7 +66,7 @@ class BrowserManager:
         self.page = self.context.new_page()
 
         # Aplicar el plugin playwright-stealth para enmascarar navigator.webdriver, hardwareConcurrency, etc.
-        stealth_sync(self.page)
+        Stealth().apply_stealth_sync(self.page)
 
         # Inyección de scripts adicionales para blindaje extra
         self.page.add_init_script("""

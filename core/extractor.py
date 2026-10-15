@@ -1,16 +1,16 @@
 """
 Módulo Extractor de Capas de Contenido (Texto e Imágenes de Alta Resolución).
-Extrae texto ordenado de .text_layer y descarga imágenes vectoriales/renders de .image_layer.
+Intercepta las peticiones JSONP de cada página hacia el CDN de Scribd y descarga
+las capas de texto vectorizado y las imágenes originales de alta definición (.jpg/.webp).
 """
 
-import os
 import re
-import requests
 from pathlib import Path
-from typing import Dict, List, Optional, Set
-from pydantic import BaseModel, Field
-from playwright.sync_api import Page, Locator
+from typing import Dict, List, Optional
+import requests
 from bs4 import BeautifulSoup
+from playwright.sync_api import Page, Request
+from pydantic import BaseModel, Field
 
 
 class ExtractedPage(BaseModel):
@@ -24,7 +24,7 @@ class ExtractedPage(BaseModel):
 
 
 class DocumentExtractor:
-    """Gestiona el escaneo del DOM y la descarga de recursos por página."""
+    """Gestiona la intercepción de red, parseo de JSONP y descarga de recursos de alta resolución."""
 
     def __init__(self, page: Page, output_dir: Path, user_agent: str):
         self.page = page
@@ -34,112 +34,118 @@ class DocumentExtractor:
         self.user_agent = user_agent
         self.extracted_pages: Dict[int, ExtractedPage] = {}
 
-        # Sesión HTTP configurada para descargas de CDN
+        # Sesión HTTP persistente para descargar imágenes de alta resolución del CDN
         self.session = requests.Session()
         self.session.headers.update({
             "User-Agent": self.user_agent,
             "Referer": "https://www.scribd.com/",
-            "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8"
+            "Accept": "*/*"
         })
 
-    def extract_visible_pages(self) -> List[ExtractedPage]:
-        """
-        Escanea todos los contenedores .outer_page actualmente hidratados en el DOM
-        y extrae el contenido de aquellas páginas que aún no han sido procesadas.
-        """
-        new_pages: List[ExtractedPage] = []
+        # Configurar intercepción en tiempo real de peticiones de red
+        self.setup_network_interceptor()
 
+    def setup_network_interceptor(self):
+        """Escucha las peticiones salientes del navegador para capturar los chunks JSONP de cada página."""
+        self.page.on("request", self._handle_network_request)
+
+    def _handle_network_request(self, request: Request):
+        """Procesa peticiones dirigidas a los chunks JSONP de página."""
         try:
-            page_elements = self.page.locator(".outer_page").all()
-        except Exception:
-            return new_pages
+            url = request.url
+            if "scribdassets.com" in url and "/pages/" in url and url.endswith(".jsonp"):
+                match = re.search(r"/pages/(\d+)-", url)
+                if not match:
+                    return
+                page_num = int(match.group(1))
 
-        for idx, el in enumerate(page_elements, start=1):
-            try:
-                # 1. Determinar número de página
-                page_attr = el.get_attribute("data-page-number") or el.get_attribute("id")
-                page_num = idx
-                if page_attr:
-                    m = re.search(r"\d+", page_attr)
-                    if m:
-                        page_num = int(m.group(0))
-
-                # Si ya la procesamos y tiene texto, omitir
+                # Si ya fue extraída, omitir
                 if page_num in self.extracted_pages and self.extracted_pages[page_num].text_content:
-                    continue
+                    return
 
-                # 2. Verificar si está difuminada (blurred)
-                classes = el.get_attribute("class") or ""
-                is_blurred = "blurred_page" in classes
+                # Descargar payload JSONP directamente
+                resp = self.session.get(url, timeout=10)
+                if resp.status_code == 200:
+                    self._parse_jsonp_payload(page_num, resp.text)
+        except Exception:
+            pass
 
-                # 3. Extraer Capa de Texto (.text_layer)
-                html_snippet = el.inner_html()
-                soup = BeautifulSoup(html_snippet, "lxml")
-                
-                text_layer = soup.find(class_=re.compile(r"text_layer"))
-                lines: List[str] = []
-                if text_layer:
-                    # Extraer spans de texto
-                    spans = text_layer.find_all(["span", "div"])
-                    for sp in spans:
-                        txt = sp.get_text(strip=True)
-                        if txt and len(txt) > 0:
-                            lines.append(txt)
+    def _parse_jsonp_payload(self, page_num: int, jsonp_text: str):
+        """Parsea el callback JSONP de Scribd, extrayendo texto e imágenes."""
+        try:
+            # Formato típico: window.page1_callback(["<html>..."]);
+            m = re.search(r'callback\(\s*\["(.*)"\]\s*\);', jsonp_text, re.DOTALL)
+            if not m:
+                m = re.search(r'\["(.*)"\]', jsonp_text, re.DOTALL)
+                if not m:
+                    return
 
-                text_content = "\n".join(lines).strip()
+            raw_html = m.group(1)
+            # Reemplazar escapes comunes de JavaScript
+            clean_html = (
+                raw_html.replace(r'\"', '"')
+                .replace(r"\'", "'")
+                .replace(r"\n", "\n")
+                .replace(r"\/", "/")
+            )
 
-                # 4. Extraer Capa de Imágenes (.image_layer)
-                image_urls: List[str] = []
-                local_paths: List[str] = []
+            soup = BeautifulSoup(clean_html, "lxml")
 
-                img_tags = soup.find_all("img")
-                for img_idx, img in enumerate(img_tags, start=1):
-                    src = img.get("src") or img.get("data-src")
-                    if src and src.startswith("http") and "scribdassets.com" in src:
-                        # Excluir iconos pequeños o avatares
-                        if "avatar" in src or "icon" in src:
-                            continue
-                        
-                        image_urls.append(src)
-                        # Descargar la imagen de alta resolución
-                        local_file = self._download_image(src, page_num, img_idx)
-                        if local_file:
-                            local_paths.append(str(local_file))
+            # 1. Extraer Capa de Texto (.text_layer)
+            lines: List[str] = []
+            text_layer = soup.find(class_=re.compile(r"text_layer"))
+            if text_layer:
+                spans = text_layer.find_all(["span", "div"])
+                for sp in spans:
+                    txt = sp.get_text(strip=True)
+                    if txt and len(txt) > 0 and txt not in lines:
+                        lines.append(txt)
 
-                # 5. Si hay imagen pero no hubo spans de texto, capturar screenshot como respaldo
-                if not local_paths:
-                    screenshot_file = self._capture_page_screenshot(el, page_num)
-                    if screenshot_file:
-                        local_paths.append(str(screenshot_file))
+            text_content = "\n".join(lines).strip()
 
-                extracted = ExtractedPage(
-                    page_number=page_num,
-                    text_content=text_content,
-                    lines=lines,
-                    image_urls=image_urls,
-                    local_image_paths=local_paths,
-                    is_blurred=is_blurred
-                )
+            # 2. Extraer Capa de Imagen de Alta Resolución (.image_layer)
+            image_urls: List[str] = []
+            local_paths: List[str] = []
 
-                self.extracted_pages[page_num] = extracted
-                new_pages.append(extracted)
+            img_tags = soup.find_all("img")
+            for img_idx, img in enumerate(img_tags, start=1):
+                src = img.get("orig") or img.get("src") or img.get("data-src")
+                if src:
+                    # Asegurar protocolo HTTPS
+                    if src.startswith("http://"):
+                        src = src.replace("http://", "https://")
+                    if src.startswith("//"):
+                        src = "https:" + src
 
-            except Exception:
-                continue
+                    image_urls.append(src)
+                    local_img = self._download_image(src, page_num, img_idx)
+                    if local_img:
+                        local_paths.append(str(local_img))
 
-        return new_pages
+            extracted = ExtractedPage(
+                page_number=page_num,
+                text_content=text_content,
+                lines=lines,
+                image_urls=image_urls,
+                local_image_paths=local_paths,
+                is_blurred=False
+            )
+
+            self.extracted_pages[page_num] = extracted
+
+        except Exception:
+            pass
 
     def _download_image(self, url: str, page_num: int, img_idx: int) -> Optional[Path]:
-        """Descarga una imagen de la página desde el CDN de Scribd y la guarda localmente."""
+        """Descarga la imagen original en alta definición desde el CDN de Scribd."""
         try:
-            # Obtener extensión del archivo
-            ext = ".webp"
+            ext = ".jpg"
             if ".png" in url:
                 ext = ".png"
-            elif ".jpg" in url or ".jpeg" in url:
-                ext = ".jpg"
+            elif ".webp" in url:
+                ext = ".webp"
 
-            dest_file = self.images_dir / f"pag_{page_num:03d}_img_{img_idx}{ext}"
+            dest_file = self.images_dir / f"pag_{page_num:04d}_img_{img_idx}{ext}"
             if dest_file.exists() and dest_file.stat().st_size > 500:
                 return dest_file
 
@@ -152,14 +158,6 @@ class DocumentExtractor:
             pass
         return None
 
-    def _capture_page_screenshot(self, locator: Locator, page_num: int) -> Optional[Path]:
-        """Captura un render directo del contenedor de página en caso de no hallar enlace img directo."""
-        try:
-            dest_file = self.images_dir / f"pag_{page_num:03d}_render.png"
-            if dest_file.exists():
-                return dest_file
-            locator.screenshot(path=str(dest_file))
-            return dest_file
-        except Exception:
-            pass
-        return None
+    def extract_visible_pages(self) -> List[ExtractedPage]:
+        """Retorna las páginas extraídas hasta el momento."""
+        return list(self.extracted_pages.values())
