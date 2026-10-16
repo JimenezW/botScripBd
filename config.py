@@ -36,6 +36,9 @@ class BotConfig(BaseModel):
     )
     viewport_width: int = 1920
     viewport_height: int = 1080
+    insumo_html: Optional[Path] = None
+    export_pdf: bool = False
+    export_md: bool = False
 
 
 def extract_document_info(url: str) -> DocumentTarget:
@@ -116,10 +119,27 @@ def parse_arguments() -> BotConfig:
         default=None,
         help="Límite opcional de páginas a extraer (None para extraer todo el documento)"
     )
+    parser.add_argument(
+        "--insumo-html",
+        type=str,
+        default=None,
+        help="Ruta a un archivo .html guardado en disco para extraer directamente sin navegar"
+    )
+    parser.add_argument(
+        "--export-pdf",
+        action="store_true",
+        help="Exportar documento reconstruido a formato PDF (opcional)"
+    )
+    parser.add_argument(
+        "--export-md",
+        action="store_true",
+        help="Exportar documento estructurado a formato Markdown (opcional)"
+    )
 
     args = parser.parse_args()
 
     batch_path = Path(args.batch) if args.batch else None
+    insumo_path = Path(args.insumo_html) if args.insumo_html else None
     output_path = Path(args.output_dir)
 
     return BotConfig(
@@ -129,7 +149,10 @@ def parse_arguments() -> BotConfig:
         headless=not args.no_headless,
         min_delay=args.min_delay,
         max_delay=args.max_delay,
-        max_pages=args.max_pages
+        max_pages=args.max_pages,
+        insumo_html=insumo_path,
+        export_pdf=args.export_pdf,
+        export_md=args.export_md
     )
 
 

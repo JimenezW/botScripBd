@@ -57,6 +57,7 @@ class BrowserManager:
 
         self.context = self.browser.new_context(
             viewport={"width": self.config.viewport_width, "height": self.config.viewport_height},
+            device_scale_factor=2.0,
             user_agent=self.config.user_agent,
             locale="es-ES",
             timezone_id="America/Mexico_City",

@@ -17,6 +17,7 @@ __pycache__/
 
 # Salidas de descargas temporales y artefactos grandes
 output/
+insumo/
 downloads/
 *.tmp
 

@@ -46,88 +46,96 @@ def process_document(url: str, config: BotConfig):
         border_style="green"
     ))
 
-    bm = BrowserManager(config)
+    bm = None
     try:
-        console.print("[yellow]Iniciando navegador Chromium con perfil Stealth...[/yellow]")
-        page = bm.start()
+        if config.insumo_html and config.insumo_html.exists():
+            console.print(f"[bold cyan]Modo Insumo:[/bold cyan] Extrayendo páginas directamente de {config.insumo_html}...")
+            from playwright.sync_api import sync_playwright
+            pw = sync_playwright().start()
+            br = pw.chromium.launch(headless=True)
+            ctx = br.new_context(viewport={"width": 1200, "height": 1600}, device_scale_factor=2.0)
+            render_pg = ctx.new_page()
 
-        # Inicializar extractor ANTES de goto para capturar las páginas iniciales de la carga
-        extractor = DocumentExtractor(page, doc_output_dir, config.user_agent)
-        exporter = DocumentExporter(doc_output_dir)
+            extractor = DocumentExtractor(render_pg, doc_output_dir, config.user_agent)
+            exporter = DocumentExporter(doc_output_dir)
+            
+            target_limit = config.max_pages or 5
+            extractor.extract_from_insumo_html(config.insumo_html, max_pages=target_limit)
+            exporter.export_pages_json(extractor.extracted_pages)
 
-        console.print(f"[yellow]Navegando a:[/yellow] {target.canonical_url}")
-        page.goto(target.canonical_url, timeout=45000, wait_until="domcontentloaded")
-        time.sleep(3.0)
-
-        # Despejar banners de cookies
-        bm.dismiss_cookie_banners()
-
-        # Extraer metadatos iniciales
-        doc_title = page.title().split("|")[0].strip() or target.slug
-        doc_author = "Autor Scribd"
-        try:
-            author_el = page.locator("a[data-testid='author-link'], [itemprop='author']").first
-            if author_el.is_visible(timeout=1000):
-                doc_author = author_el.inner_text().strip()
-        except Exception:
-            pass
-
-        navigator = DocumentNavigator(page, config)
-
-        # Determinar meta de páginas
-        total_pages = navigator.get_total_pages() or 3712
-        if config.max_pages and config.max_pages < total_pages:
-            target_limit = config.max_pages
+            doc_title = "GoAnywhere MFT User Guide 7.7.0"
+            doc_author = "Fortra, LLC"
+            br.close()
+            pw.stop()
         else:
-            target_limit = total_pages
+            bm = BrowserManager(config)
+            console.print("[yellow]Iniciando navegador Chromium con perfil Stealth...[/yellow]")
+            page = bm.start()
 
-        console.print(f"[bold green]Titulo detectado:[/bold green] {doc_title}")
-        console.print(f"[bold green]Paginas estimadas:[/bold green] {target_limit}")
+            extractor = DocumentExtractor(page, doc_output_dir, config.user_agent)
+            exporter = DocumentExporter(doc_output_dir)
 
-        # Bucle de extracción secuencial
-        stuck_count = 0
-        last_page_count = 0
+            console.print(f"[yellow]Navegando a:[/yellow] {target.canonical_url}")
+            page.goto(target.canonical_url, timeout=45000, wait_until="domcontentloaded")
+            time.sleep(3.0)
 
-        with Progress(
-            TextColumn("[bold cyan]{task.description}"),
-            BarColumn(bar_width=40),
-            TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
-            TextColumn("({task.completed}/{task.total} pags)"),
-            TimeElapsedColumn(),
-            console=console
-        ) as progress:
-            task = progress.add_task("Extrayendo paginas...", total=target_limit)
+            bm.dismiss_cookie_banners()
 
-            while True:
-                current_extracted = len(extractor.extracted_pages)
-                progress.update(task, completed=current_extracted)
+            doc_title = page.title().split("|")[0].strip() or target.slug
+            doc_author = "Autor Scribd"
+            try:
+                author_el = page.locator("a[data-testid='author-link'], [itemprop='author']").first
+                if author_el.is_visible(timeout=1000):
+                    doc_author = author_el.inner_text().strip()
+            except Exception:
+                pass
 
-                # Persistencia incremental en caliente
-                if current_extracted > 0:
-                    exporter.export_pages_json(extractor.extracted_pages)
+            navigator = DocumentNavigator(page, config)
+            total_pages = navigator.get_total_pages() or 3712
+            target_limit = config.max_pages if (config.max_pages and config.max_pages < total_pages) else total_pages
 
-                # Comprobar si alcanzamos la meta
-                if current_extracted >= target_limit:
-                    break
+            console.print(f"[bold green]Titulo detectado:[/bold green] {doc_title}")
+            console.print(f"[bold green]Paginas estimadas:[/bold green] {target_limit}")
 
-                # Desplazamiento sutil para disparar la carga diferida
-                page.mouse.wheel(0, 900)
-                time.sleep(1.2)
+            stuck_count = 0
+            last_page_count = 0
 
-                # Si no han llegado páginas nuevas, usar el botón de siguiente página
-                if len(extractor.extracted_pages) == current_extracted:
-                    navigator.advance_next_page()
+            with Progress(
+                TextColumn("[bold cyan]{task.description}"),
+                BarColumn(bar_width=40),
+                TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+                TextColumn("({task.completed}/{task.total} pags)"),
+                TimeElapsedColumn(),
+                console=console
+            ) as progress:
+                task = progress.add_task("Extrayendo paginas...", total=target_limit)
 
-                if len(extractor.extracted_pages) == last_page_count:
-                    stuck_count += 1
-                    if stuck_count >= 8:
-                        console.print("\n[yellow]No se detectaron nuevas paginas tras 8 intentos. Finalizando avance.[/yellow]")
+                while True:
+                    current_extracted = len(extractor.extracted_pages)
+                    progress.update(task, completed=current_extracted)
+
+                    if current_extracted > 0:
+                        exporter.export_pages_json(extractor.extracted_pages)
+
+                    if current_extracted >= target_limit:
                         break
-                else:
-                    stuck_count = 0
-                    last_page_count = len(extractor.extracted_pages)
 
-        # Fase de Consolidación y Exportación
+                    page.mouse.wheel(0, 900)
+                    time.sleep(1.2)
+
+                    if len(extractor.extracted_pages) == current_extracted:
+                        navigator.advance_next_page()
+
+                    if len(extractor.extracted_pages) == last_page_count:
+                        stuck_count += 1
+                        if stuck_count >= 8:
+                            console.print("\n[yellow]No se detectaron nuevas paginas tras 8 intentos. Finalizando avance.[/yellow]")
+                            break
+                    else:
+                        stuck_count = 0
+                        last_page_count = len(extractor.extracted_pages)
+
+        # Fase de Consolidación
         console.print("\n[bold yellow]Consolidando salidas finales...[/bold yellow]")
 
         # 1. Metadatos
@@ -142,33 +150,40 @@ def process_document(url: str, config: BotConfig):
             "fecha": datetime.now().isoformat()
         }
         exporter.export_metadata(meta_dict)
+        exporter.export_pages_json(extractor.extracted_pages)
 
-        # 2. Markdown enriquecido con imágenes
-        md_file = exporter.export_markdown(
-            extractor.extracted_pages,
-            title=doc_title,
-            author=doc_author,
-            source_url=target.canonical_url
-        )
+        # 2. Markdown enriquecido (condicional)
+        md_file = None
+        if config.export_md:
+            md_file = exporter.export_markdown(
+                extractor.extracted_pages,
+                title=doc_title,
+                author=doc_author,
+                source_url=target.canonical_url
+            )
 
-        # 3. PDF Reconstruido 1:1 de Alta Resolución
-        pdf_path = doc_output_dir / f"{target.slug}.pdf"
-        pdf_builder = PDFBuilder(pdf_path)
-        pdf_file = pdf_builder.build_searchable_pdf(extractor.extracted_pages)
+        # 3. PDF Reconstruido (condicional)
+        pdf_file = None
+        if config.export_pdf:
+            pdf_path = doc_output_dir / f"{target.slug}.pdf"
+            pdf_builder = PDFBuilder(pdf_path)
+            pdf_file = pdf_builder.build_searchable_pdf(extractor.extracted_pages)
 
         elapsed = round(time.time() - start_time, 2)
         console.print(Panel(
             f"[bold green]Extraccion completada con exito en {elapsed} segundos.[/bold green]\n\n"
-            f"[bold cyan]Paginas extraidas:[/bold cyan] {len(extractor.extracted_pages)}\n"
-            f"[bold cyan]PDF 1:1 Reconstruido:[/bold cyan] {pdf_file or 'No disponible'}\n"
-            f"[bold cyan]Markdown Enriquecido:[/bold cyan] {md_file}\n"
-            f"[bold cyan]Imagenes de Paginas:[/bold cyan] {doc_output_dir / 'imagenes'}",
+            f"[bold cyan]Paginas extraidas e integradas:[/bold cyan] {len(extractor.extracted_pages)}\n"
+            f"[bold cyan]Metadatos & JSON:[/bold cyan] {doc_output_dir / 'paginas.json'}\n"
+            f"[bold cyan]Imagenes de Paginas (HD 2x):[/bold cyan] {doc_output_dir / 'imagenes'}\n"
+            f"[bold cyan]PDF Reconstruido:[/bold cyan] {pdf_file or 'Pospuesto para fase final'}\n"
+            f"[bold cyan]Markdown:[/bold cyan] {md_file or 'Pospuesto para fase final'}",
             title="[bold green]Resumen de Resultados[/bold green]",
             border_style="green"
         ))
 
     finally:
-        bm.close()
+        if bm:
+            bm.close()
 
 
 def main():
