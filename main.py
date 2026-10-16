@@ -99,12 +99,13 @@ def main():
 
     console.print(f"  [green]✓[/green] Documento: [bold]{doc.title}[/bold] ({doc.slug})")
     console.print(f"  [green]✓[/green] Total páginas documento original: [bold]{doc.total_document_pages}[/bold]")
-    console.print(f"  [green]✓[/green] Páginas pobladas encontradas en insumo: [bold]{len(doc.populated_pages)}[/bold] {sorted(list(doc.populated_pages.keys()))}")
+    all_available = sorted(list(set(list(doc.populated_pages.keys()) + list(doc.page_hashes.keys()))))
+    console.print(f"  [green]✓[/green] Páginas catalogadas en insumo: [bold]{len(all_available)}[/bold] (Pre-renderizadas en DOM: {len(doc.populated_pages)})")
     if doc.files_dir:
         console.print(f"  [green]✓[/green] Carpeta de recursos asociada: [bold]{doc.files_dir.name}[/bold]")
 
-    if not doc.populated_pages:
-        console.print("[yellow]No se encontraron páginas con contenido en el insumo. Finalizando.[/yellow]")
+    if not all_available:
+        console.print("[yellow]No se encontraron páginas catalogadas en el insumo. Finalizando.[/yellow]")
         return
 
     # Fase 2: Renderizado de Páginas
@@ -114,7 +115,7 @@ def main():
         headless=config.headless
     )
 
-    pages_to_render = sorted(list(doc.populated_pages.keys()))
+    pages_to_render = all_available
     if config.max_pages is not None:
         pages_to_render = pages_to_render[:config.max_pages]
 

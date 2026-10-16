@@ -51,7 +51,7 @@ class InsumoRenderer:
         images_dir = doc_output_dir / "imagenes"
         images_dir.mkdir(parents=True, exist_ok=True)
 
-        pages_to_render = sorted(list(document.populated_pages.keys()))
+        pages_to_render = sorted(list(set(list(document.populated_pages.keys()) + list(document.page_hashes.keys()))))
         if max_pages is not None:
             pages_to_render = pages_to_render[:max_pages]
 
@@ -100,7 +100,14 @@ class InsumoRenderer:
             page.route("**/*", handle_route)
 
             for page_num in pages_to_render:
-                insumo_page = document.populated_pages[page_num]
+                insumo_page = document.populated_pages.get(page_num)
+                if not insumo_page and page_num in document.page_hashes:
+                    from core.insumo_parser import InsumoParser
+                    insumo_page = InsumoParser.fetch_page_from_jsonp(document, page_num, session)
+
+                if not insumo_page:
+                    continue
+
                 out_path = images_dir / f"pagina_{page_num:04d}.png"
 
                 w = insumo_page.width or 902

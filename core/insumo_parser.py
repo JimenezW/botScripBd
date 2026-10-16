@@ -31,6 +31,8 @@ class InsumoDocument(BaseModel):
     files_dir: Optional[Path] = None
     css_content: str = ""
     total_document_pages: int = 0
+    doc_hash: str = ""
+    page_hashes: Dict[int, str] = Field(default_factory=dict)
     populated_pages: Dict[int, InsumoPage] = Field(default_factory=dict)
 
 
@@ -199,15 +201,100 @@ class InsumoParser:
                 height=height
             )
 
+        # Extraer doc_hash y mapa de hashes de todas las páginas listadas en el insumo HTML
+        page_hashes: Dict[int, str] = {}
+        doc_hash = ""
+        page_matches = re.findall(r'scribdassets\.com/([^/]+)/pages/(\d+)-([a-f0-9]+)\.jsonp', raw_html)
+        for m_hash, m_pnum, m_phash in page_matches:
+            if not doc_hash:
+                doc_hash = m_hash
+            page_hashes[int(m_pnum)] = m_phash
+
+        if not doc_hash:
+            doc_hash = "2v8yixh6bkejepzg"
+
         return InsumoDocument(
             title=title,
             slug=slug,
             html_path=self.html_file,
             files_dir=self.files_dir,
             css_content=css_content,
-            total_document_pages=total_document_pages,
+            total_document_pages=total_document_pages or len(page_hashes),
+            doc_hash=doc_hash,
+            page_hashes=page_hashes,
             populated_pages=populated_pages
         )
+
+    @staticmethod
+    def fetch_page_from_jsonp(doc: InsumoDocument, page_num: int, session) -> Optional[InsumoPage]:
+        """Descarga e hidrata una página a partir de su hash registrado en el insumo."""
+        if page_num in doc.populated_pages:
+            return doc.populated_pages[page_num]
+
+        p_hash = doc.page_hashes.get(page_num)
+        if not p_hash:
+            return None
+
+        url = f"https://html.scribdassets.com/{doc.doc_hash}/pages/{page_num}-{p_hash}.jsonp"
+        try:
+            resp = session.get(url, timeout=10)
+            if resp.status_code != 200:
+                return None
+
+            m = re.search(r'\["(.*)"\]', resp.text, re.DOTALL)
+            if not m:
+                return None
+
+            raw_html = (
+                m.group(1)
+                .replace(r'\"', '"')
+                .replace(r"\'", "'")
+                .replace(r"\n", "\n")
+                .replace(r"\/", "/")
+            )
+
+            soup = BeautifulSoup(raw_html, "html.parser")
+            text_lines = []
+            text_layer_elem = soup.find(class_=re.compile(r"text_layer"))
+            if text_layer_elem:
+                for span in text_layer_elem.find_all("span"):
+                    text = span.get_text().strip()
+                    if text:
+                        text_lines.append(text)
+            text_content = "\n".join(text_lines)
+
+            img_sources = [
+                img.get("orig") or img.get("src")
+                for img in soup.find_all("img")
+                if img.get("orig") or img.get("src")
+            ]
+
+            width = 902
+            height = 1167
+            style_attr = soup.find(class_="newpage")
+            if style_attr:
+                s_txt = style_attr.get("style", "")
+                wm = re.search(r"width:\s*(\d+)px", s_txt)
+                hm = re.search(r"height:\s*(\d+)px", s_txt)
+                if wm:
+                    width = int(wm.group(1))
+                if hm:
+                    height = int(hm.group(1))
+
+            page_obj = InsumoPage(
+                page_num=page_num,
+                text_content=text_content,
+                text_lines=text_lines,
+                html_snippet=str(soup),
+                image_sources=img_sources,
+                width=width,
+                height=height
+            )
+            doc.populated_pages[page_num] = page_obj
+            return page_obj
+
+        except Exception:
+            return None
 
 
 if __name__ == "__main__":
