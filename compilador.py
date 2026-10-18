@@ -951,21 +951,90 @@ def _parsear_items_toc(lineas_limpias: list[str]) -> list[dict]:
     return deduped
 
 
-def _parsear_contenido_pagina(num: int, lineas_limpias: list[str]) -> dict:
-    """Extrae elementos estructurados (running header, títulos, viñetas, pasos, tips, párrafos) de páginas de contenido."""
+CAPITULOS_CANONICOS = {
+    "gettingstarted": "Getting Started",
+    "dashboard": "Dashboard",
+    "workflows": "Workflows",
+    "projectdesign": "Project Design",
+    "taskreference": "Task Reference",
+    "databasetasks": "Database Tasks",
+    "datatranslationtasks": "Data Translation Tasks",
+    "resources": "Resources",
+}
+
+
+def _construir_indice_toc(paginas_completas: list[dict]) -> dict:
+    """Extrae y normaliza el índice del TOC de las páginas 3 a 38 para guiar las cabeceras de contenido."""
+    temas_norm: dict[str, str] = {}
+    inicios_tema: dict[int, list[str]] = {}
+
+    for pag in paginas_completas:
+        p_num = pag.get("numero_pagina", 0)
+        if 3 <= p_num <= 38:
+            raw = pag.get("lineas_texto") or []
+            limp = _limpiar_lineas_scribd(raw)
+            items = _parsear_items_toc(limp)
+            for it in items:
+                t = it["titulo"]
+                try:
+                    p_dest = int(it["pagina"])
+                    norm = re.sub(r'[^a-zA-Z0-9]', '', t).lower()
+                    if norm and len(norm) > 4:
+                        temas_norm[norm] = t
+                    inicios_tema.setdefault(p_dest, []).append(t)
+                except ValueError:
+                    pass
+    return {"temas_norm": temas_norm, "inicios": inicios_tema}
+
+
+def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: dict | None = None) -> dict:
+    """Extrae elementos estructurados de páginas de contenido guiado por el índice canónico del TOC."""
     if not lineas_limpias:
         return {"running_header": "", "elementos": []}
 
+    indice_toc = indice_toc or {}
+    temas_norm = indice_toc.get("temas_norm", {})
+    inicios_tema = indice_toc.get("inicios", {})
+
     lineas = list(lineas_limpias)
     running_header = ""
-    if lineas and (lineas[0].endswith('/') or '/' in lineas[0] or lineas[0] in ('GettingStarted', 'Dashboard', 'Resources')):
-        raw_h = lineas.pop(0)
-        running_header = _reparar_palabras_rotas(re.sub(r'([a-z])([A-Z])', r'\1 \2', raw_h).strip())
 
+    # 1. Determinar running header canónico
+    if lineas and '/' in lineas[0]:
+        first = lineas.pop(0).strip()
+        raw_cap = first.split('/')[0].strip()
+        norm_cap = re.sub(r'[^a-zA-Z0-9]', '', raw_cap).lower()
+        nom_cap = CAPITULOS_CANONICOS.get(
+            norm_cap,
+            _reparar_palabras_rotas(re.sub(r'([a-z])([A-Z])', r'\1 \2', raw_cap).strip())
+        )
+        running_header = nom_cap
+
+        # Verificar si la siguiente línea es un tema mayor registrado en el TOC
+        if lineas:
+            sig = lineas[0].strip()
+            norm_sig = re.sub(r'[^a-zA-Z0-9]', '', sig).lower()
+            if norm_sig in temas_norm:
+                titulo_oficial = temas_norm[norm_sig]
+                running_header = f"{nom_cap} / {titulo_oficial}"
+                lineas.pop(0)  # Consumida como sección del encabezado
+
+    # Descartar pie de página Scribd
     while lineas and ('www.goanywhere.com' in lineas[-1] or 'GoAnywhere MFT' in lineas[-1] or re.match(r'^page:\s*\d+$', lineas[-1], re.I)):
         lineas.pop()
 
     elementos = []
+
+    # Si esta página es el inicio oficial de un tema en el TOC, asegurar el título H1 correspondiente
+    temas_que_inician = inicios_tema.get(num, [])
+    if temas_que_inician:
+        primer_tema = temas_que_inician[0]
+        primer_linea_norm = re.sub(r'[^a-zA-Z0-9]', '', lineas[0]).lower() if lineas else ""
+        tema_norm = re.sub(r'[^a-zA-Z0-9]', '', primer_tema).lower()
+        if primer_linea_norm == tema_norm:
+            lineas.pop(0)
+        elementos.append({"tipo": "h1", "texto": primer_tema})
+
     i = 0
     n = len(lineas)
 
@@ -1071,8 +1140,8 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str]) -> dict:
     return {"running_header": running_header, "elementos": elementos}
 
 
-def _reconstruir_paginas_documento(paginas: list[dict], doc_meta: dict) -> list[dict]:
-    """Genera la lista de páginas reconstruidas fielmente a partir de paginas.json."""
+def _reconstruir_paginas_documento(paginas: list[dict], doc_meta: dict, indice_toc: dict | None = None) -> list[dict]:
+    """Genera la lista de páginas reconstruidas fielmente a partir de paginas.json guiado por el TOC."""
     paginas_doc = []
 
     for idx, pag in enumerate(paginas, start=1):
@@ -1124,7 +1193,7 @@ def _reconstruir_paginas_documento(paginas: list[dict], doc_meta: dict) -> list[
                 "columna_der": items[mid:],
             })
         else:
-            cnt = _parsear_contenido_pagina(num, limpias)
+            cnt = _parsear_contenido_pagina(num, limpias, indice_toc)
             paginas_doc.append({
                 "tipo": "contenido",
                 "numero": num,
@@ -1147,6 +1216,9 @@ def adaptar_paginas_json(datos: dict, limite: int | None, pagina_objetivo: int |
         raise PrecondicionError("paginas.json no contiene una lista 'paginas' con elementos.")
 
     total = len(paginas)
+    # Construir el índice canónico del TOC a partir del catálogo completo
+    indice_toc = _construir_indice_toc(paginas)
+
     if pagina_objetivo:
         seleccion = [p for p in paginas if p.get("numero_pagina") == pagina_objetivo]
         if not seleccion:
@@ -1164,7 +1236,7 @@ def adaptar_paginas_json(datos: dict, limite: int | None, pagina_objetivo: int |
     titulo = _txt(doc.get("titulo")) or _txt(doc.get("slug")) or "Documento reconstruido"
     version = _txt(doc.get("version")) or (RE_VERSION.search(titulo).group(0) if RE_VERSION.search(titulo) else "7.7.0")
 
-    paginas_doc = _reconstruir_paginas_documento(seleccion, doc)
+    paginas_doc = _reconstruir_paginas_documento(seleccion, doc, indice_toc)
 
     return {
         "modo_documento": True,
