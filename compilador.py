@@ -280,6 +280,220 @@ def filtro_css_string(valor: Any):
 
 
 # ════════════════════════════════════════════════════════════════════════════
+# Desfragmentación léxica de palabras (reparación de espaciado por kerning de Scribd)
+# ════════════════════════════════════════════════════════════════════════════
+
+RE_PATRONES_DESFRAGMENTACION: list[tuple[re.Pattern, str]] = [
+    # 3 partes (letras iniciales + raíz + terminación)
+    (re.compile(r'\bA\s+ctio\s*n\b', re.I), 'Action'),
+    (re.compile(r'\bA\s+ctio\s*ns\b', re.I), 'Actions'),
+    (re.compile(r'\bA\s+dmi\s*n\b', re.I), 'Admin'),
+    (re.compile(r'\bA\s+nyw\s*here\b', re.I), 'Anywhere'),
+    (re.compile(r'\bE\s+lem\s*ent\b', re.I), 'Element'),
+    (re.compile(r'\bE\s+lem\s*ents\b', re.I), 'Elements'),
+    (re.compile(r'\bE\s+xa\s*mple\b', re.I), 'Example'),
+    (re.compile(r'\bEle\s+me\s*nt\b', re.I), 'Element'),
+    (re.compile(r'\bEle\s+me\s*nts\b', re.I), 'Elements'),
+    (re.compile(r'\bElem\s+e\s*nt\b', re.I), 'Element'),
+    (re.compile(r'\bElem\s+e\s*nts\b', re.I), 'Elements'),
+    (re.compile(r'\bExec\s+utio\s*n\b', re.I), 'Execution'),
+    (re.compile(r'\bExem\s+ption\s*s\b', re.I), 'Exemptions'),
+    (re.compile(r'\bF\s+aile\s*d\b', re.I), 'Failed'),
+    (re.compile(r'\bFe\s+atur\s*es\b', re.I), 'Features'),
+    (re.compile(r'\bCom\s+plet\s*ed\b', re.I), 'Completed'),
+    (re.compile(r'\bConf\s+igur\s*e\b', re.I), 'Configure'),
+    (re.compile(r'\bConf\s+igur\s*ing\b', re.I), 'Configuring'),
+    (re.compile(r'\bData\s+bas\s*e\b', re.I), 'Database'),
+    (re.compile(r'\bDa\s+taba\s*se\b', re.I), 'Database'),
+    (re.compile(r'\bC\s+reatin\s*g\b', re.I), 'Creating'),
+    (re.compile(r'\bCh\s+oosi\s*ng\b', re.I), 'Choosing'),
+    (re.compile(r'\bCert\s+ifica\s*tes\b', re.I), 'Certificates'),
+
+    # Prefijos de 2 letras partidos
+    (re.compile(r'\bCo\s+nnector\b', re.I), 'Connector'),
+    (re.compile(r'\bCo\s+nnectors\b', re.I), 'Connectors'),
+    (re.compile(r'\bAc\s+tive\b', re.I), 'Active'),
+    (re.compile(r'\bAd\s+min\b', re.I), 'Admin'),
+    (re.compile(r'\bAg\s+ent\b', re.I), 'Agent'),
+    (re.compile(r'\bAg\s+ents\b', re.I), 'Agents'),
+    (re.compile(r'\bAg\s+reements\b', re.I), 'Agreements'),
+    (re.compile(r'\bCe\s+rtificate\b', re.I), 'Certificate'),
+    (re.compile(r'\bCe\s+rtificates\b', re.I), 'Certificates'),
+    (re.compile(r'\bCh\s+annels\b', re.I), 'Channels'),
+    (re.compile(r'\bCl\s+uster\b', re.I), 'Cluster'),
+    (re.compile(r'\bCo\s+nfig\b', re.I), 'Config'),
+    (re.compile(r'\bCo\s+nfigure\b', re.I), 'Configure'),
+    (re.compile(r'\bCo\s+nfiguring\b', re.I), 'Configuring'),
+    (re.compile(r'\bCo\s+ntact\b', re.I), 'Contact'),
+    (re.compile(r'\bDa\s+ta\b', re.I), 'Data'),
+    (re.compile(r'\bDe\s+fine\b', re.I), 'Define'),
+    (re.compile(r'\bDe\s+tails\b', re.I), 'Details'),
+    (re.compile(r'\bDo\s+main\b', re.I), 'Domain'),
+    (re.compile(r'\bDo\s+mains\b', re.I), 'Domains'),
+    (re.compile(r'\bEm\s+ail\b', re.I), 'Email'),
+    (re.compile(r'\bEnc\s+rypt\b', re.I), 'Encrypt'),
+    (re.compile(r'\bFe\s+ature\b', re.I), 'Feature'),
+    (re.compile(r'\bFe\s+atures\b', re.I), 'Features'),
+    (re.compile(r'\bFo\s+lders\b', re.I), 'Folders'),
+    (re.compile(r'\bGr\s+oups\b', re.I), 'Groups'),
+    (re.compile(r'\bHi\s+story\b', re.I), 'History'),
+    (re.compile(r'\bLo\s+gin\b', re.I), 'Login'),
+    (re.compile(r'\bLo\s+g\b', re.I), 'Log'),
+    (re.compile(r'\bLo\s+gs\b', re.I), 'Logs'),
+    (re.compile(r'\bMo\s+nitors\b', re.I), 'Monitors'),
+    (re.compile(r'\bPa\s+ssword\b', re.I), 'Password'),
+    (re.compile(r'\bPa\s+sswords\b', re.I), 'Passwords'),
+    (re.compile(r'\bPr\s+oject\b', re.I), 'Project'),
+    (re.compile(r'\bPr\s+ojects\b', re.I), 'Projects'),
+    (re.compile(r'\bPro\s+ject\b', re.I), 'Project'),
+    (re.compile(r'\bPro\s+jects\b', re.I), 'Projects'),
+    (re.compile(r'\bRe\s+source\b', re.I), 'Resource'),
+    (re.compile(r'\bRe\s+sources\b', re.I), 'Resources'),
+    (re.compile(r'\bSe\s+rver\b', re.I), 'Server'),
+    (re.compile(r'\bSe\s+rvers\b', re.I), 'Servers'),
+    (re.compile(r'\bSe\s+rvice\b', re.I), 'Service'),
+    (re.compile(r'\bSe\s+rvices\b', re.I), 'Services'),
+    (re.compile(r'\bSy\s+stem\b', re.I), 'System'),
+    (re.compile(r'\bTr\s+igger\b', re.I), 'Trigger'),
+    (re.compile(r'\bTr\s+iggers\b', re.I), 'Triggers'),
+    (re.compile(r'\bVa\s+riable\b', re.I), 'Variable'),
+    (re.compile(r'\bVa\s+riables\b', re.I), 'Variables'),
+    (re.compile(r'\bWo\s+rkflow\b', re.I), 'Workflow'),
+    (re.compile(r'\bWo\s+rkflows\b', re.I), 'Workflows'),
+
+    # Mayúscula inicial aislada antes de término técnico
+    (re.compile(r'\bA\s+gent\b', re.I), 'Agent'),
+    (re.compile(r'\bA\s+gents\b', re.I), 'Agents'),
+    (re.compile(r'\bA\s+lgorithms\b', re.I), 'Algorithms'),
+    (re.compile(r'\bA\s+ctivity\b', re.I), 'Activity'),
+    (re.compile(r'\bB\s+ased\b', re.I), 'Based'),
+    (re.compile(r'\bB\s+uffer\b', re.I), 'Buffer'),
+    (re.compile(r'\bC\s+ertificate\b', re.I), 'Certificate'),
+    (re.compile(r'\bC\s+ertificates\b', re.I), 'Certificates'),
+    (re.compile(r'\bC\s+hange\b', re.I), 'Change'),
+    (re.compile(r'\bC\s+hecksum\b', re.I), 'Checksum'),
+    (re.compile(r'\bC\s+onfiguration\b', re.I), 'Configuration'),
+    (re.compile(r'\bC\s+onfiguring\b', re.I), 'Configuring'),
+    (re.compile(r'\bC\s+onsiderations\b', re.I), 'Considerations'),
+    (re.compile(r'\bD\s+ashboard\b', re.I), 'Dashboard'),
+    (re.compile(r'\bD\s+ecrypted\b', re.I), 'Decrypted'),
+    (re.compile(r'\bE\s+dit\b', re.I), 'Edit'),
+    (re.compile(r'\bE\s+lse\b', re.I), 'Else'),
+    (re.compile(r'\bE\s+rror\b', re.I), 'Error'),
+    (re.compile(r'\bE\s+rrors\b', re.I), 'Errors'),
+    (re.compile(r'\bE\s+xample\b', re.I), 'Example'),
+    (re.compile(r'\bE\s+xamples\b', re.I), 'Examples'),
+    (re.compile(r'\bF\s+ile\b', re.I), 'File'),
+    (re.compile(r'\bF\s+iles\b', re.I), 'Files'),
+    (re.compile(r'\bF\s+older\b', re.I), 'Folder'),
+    (re.compile(r'\bF\s+olders\b', re.I), 'Folders'),
+    (re.compile(r'\bF\s+or\b', re.I), 'For'),
+    (re.compile(r'\bF\s+or-\s*Each\b', re.I), 'For-Each'),
+    (re.compile(r'\bG\s+roup\b', re.I), 'Group'),
+    (re.compile(r'\bG\s+roups\b', re.I), 'Groups'),
+    (re.compile(r'\bL\s+ogin\b', re.I), 'Login'),
+    (re.compile(r'\bM\s+anage\b', re.I), 'Manage'),
+    (re.compile(r'\bM\s+anagement\b', re.I), 'Management'),
+    (re.compile(r'\bM\s+anager\b', re.I), 'Manager'),
+    (re.compile(r'\bM\s+anually\b', re.I), 'Manually'),
+    (re.compile(r'\bM\s+aster\b', re.I), 'Master'),
+    (re.compile(r'\bM\s+odule\b', re.I), 'Module'),
+    (re.compile(r'\bM\s+odules\b', re.I), 'Modules'),
+    (re.compile(r'\bN\s+ode\b', re.I), 'Node'),
+    (re.compile(r'\bN\s+odes\b', re.I), 'Nodes'),
+    (re.compile(r'\bO\s+ptions\b', re.I), 'Options'),
+    (re.compile(r'\bO\s+utline\b', re.I), 'Outline'),
+    (re.compile(r'\bO\s+verview\b', re.I), 'Overview'),
+    (re.compile(r'\bP\s+arty\b', re.I), 'Party'),
+    (re.compile(r'\bP\s+ermissions\b', re.I), 'Permissions'),
+    (re.compile(r'\bP\s+roject\b', re.I), 'Project'),
+    (re.compile(r'\bP\s+rojects\b', re.I), 'Projects'),
+    (re.compile(r'\bP\s+rovider\b', re.I), 'Provider'),
+    (re.compile(r'\bP\s+roxy\b', re.I), 'Proxy'),
+    (re.compile(r'\bP\s+ull\b', re.I), 'Pull'),
+    (re.compile(r'\bQ\s+uick\b', re.I), 'Quick'),
+    (re.compile(r'\bR\s+ead\b', re.I), 'Read'),
+    (re.compile(r'\bR\s+eceipt\b', re.I), 'Receipt'),
+    (re.compile(r'\bR\s+ecovery\b', re.I), 'Recovery'),
+    (re.compile(r'\bR\s+esponse\b', re.I), 'Response'),
+    (re.compile(r'\bS\s+chedule\b', re.I), 'Schedule'),
+    (re.compile(r'\bS\s+chedules\b', re.I), 'Schedules'),
+    (re.compile(r'\bS\s+cheduler\b', re.I), 'Scheduler'),
+    (re.compile(r'\bS\s+ervice\b', re.I), 'Service'),
+    (re.compile(r'\bS\s+ervices\b', re.I), 'Services'),
+    (re.compile(r'\bS\s+ettings\b', re.I), 'Settings'),
+    (re.compile(r'\bS\s+ize\b', re.I), 'Size'),
+    (re.compile(r'\bT\s+ask\b', re.I), 'Task'),
+    (re.compile(r'\bT\s+asks\b', re.I), 'Tasks'),
+    (re.compile(r'\bT\s+emplate\b', re.I), 'Template'),
+    (re.compile(r'\bT\s+emplates\b', re.I), 'Templates'),
+    (re.compile(r'\bT\s+ool\b', re.I), 'Tool'),
+    (re.compile(r'\bT\s+ools\b', re.I), 'Tools'),
+    (re.compile(r'\bU\s+ser\b', re.I), 'User'),
+    (re.compile(r'\bU\s+sers\b', re.I), 'Users'),
+    (re.compile(r'\bW\s+izard\b', re.I), 'Wizard'),
+
+    # Letra final partida por espaciado de margen/kerning
+    (re.compile(r'\bCas\s+e\b', re.I), 'Case'),
+    (re.compile(r'\bChrom\s+e\b', re.I), 'Chrome'),
+    (re.compile(r'\bCluste\s+r\b', re.I), 'Cluster'),
+    (re.compile(r'\bCod\s+e\b', re.I), 'Code'),
+    (re.compile(r'\bCoul\s+d\b', re.I), 'Could'),
+    (re.compile(r'\bCrea\s+te\b', re.I), 'Create'),
+    (re.compile(r'\bDele\s+te\b', re.I), 'Delete'),
+    (re.compile(r'\bDen\s+y\b', re.I), 'Deny'),
+    (re.compile(r'\bDirector\s+y\b', re.I), 'Directory'),
+    (re.compile(r'\bDomai\s+n\b', re.I), 'Domain'),
+    (re.compile(r'\bDomain\s+s\b', re.I), 'Domains'),
+    (re.compile(r'\bElemen\s+t\b', re.I), 'Element'),
+    (re.compile(r'\bExecutin\s+g\b', re.I), 'Executing'),
+    (re.compile(r'\bFile\s+s\b', re.I), 'Files'),
+    (re.compile(r'\bFor\s+m\b', re.I), 'Form'),
+    (re.compile(r'\bGoAnywher\s+e\b', re.I), 'GoAnywhere'),
+    (re.compile(r'\bGoFas\s+t\b', re.I), 'GoFast'),
+    (re.compile(r'\bGrou\s+p\b', re.I), 'Group'),
+    (re.compile(r'\bHistor\s+y\b', re.I), 'History'),
+    (re.compile(r'\bInterne\s+t\b', re.I), 'Internet'),
+    (re.compile(r'\bMetho\s+d\b', re.I), 'Method'),
+    (re.compile(r'\bMicrosof\s+t\b', re.I), 'Microsoft'),
+    (re.compile(r'\bOption\s+s\b', re.I), 'Options'),
+    (re.compile(r'\bPartne\s+r\b', re.I), 'Partner'),
+    (re.compile(r'\bProjec\s+t\b', re.I), 'Project'),
+    (re.compile(r'\bQuic\s+k\b', re.I), 'Quick'),
+    (re.compile(r'\bSecur\s+e\b', re.I), 'Secure'),
+    (re.compile(r'\bSen\s+d\b', re.I), 'Send'),
+    (re.compile(r'\bStar\s+t\b', re.I), 'Start'),
+    (re.compile(r'\bTas\s+k\b', re.I), 'Task'),
+    (re.compile(r'\bTrigge\s+r\b', re.I), 'Trigger'),
+    (re.compile(r'\bUpda\s+te\b', re.I), 'Update'),
+    (re.compile(r'\bUse\s+r\b', re.I), 'User'),
+    (re.compile(r'\bVariabl\s+e\b', re.I), 'Variable'),
+    (re.compile(r'\bVariable\s+s\b', re.I), 'Variables'),
+    (re.compile(r'\bVie\s+w\b', re.I), 'View'),
+    (re.compile(r'\bWhil\s+e\b', re.I), 'While'),
+    (re.compile(r'\btransfer\s+s\b', re.I), 'transfers'),
+    (re.compile(r'\byou\s+r\b', re.I), 'your'),
+
+    # Casos de marca y nombres compuestos
+    (re.compile(r'\bGo\s+A\s+nywhere\b', re.I), 'GoAnywhere'),
+    (re.compile(r'\bGo\s+Anywhere\b', re.I), 'GoAnywhere'),
+]
+
+
+def _reparar_palabras_rotas(texto: str) -> str:
+    """Normaliza y recompone palabras separadas por espacios indeseados debido a la fragmentación de glifos en Scribd."""
+    if not texto:
+        return ""
+    res = texto
+    for pat, rep in RE_PATRONES_DESFRAGMENTACION:
+        def _rep_func(m: re.Match) -> str:
+            t = m.group(0)
+            return rep.lower() if t.islower() else rep
+        res = pat.sub(_rep_func, res)
+    return res
+
+
+# ════════════════════════════════════════════════════════════════════════════
 # Carga de datos
 # ════════════════════════════════════════════════════════════════════════════
 
@@ -415,7 +629,7 @@ def _parsear_items_toc(lineas_limpias: list[str]) -> list[dict]:
                 buffer_text.append(f"{t_cand}{p_cand}")
                 continue
 
-            full_title = " ".join(buffer_text + [t_cand]).strip()
+            full_title = _reparar_palabras_rotas(" ".join(buffer_text + [t_cand]).strip())
 
             # Corrección de OCR en "Monitoring Files on an Agent 227" -> 2277
             if p_cand == "227" and "Monitoring" in full_title:
@@ -439,7 +653,7 @@ def _parsear_items_toc(lineas_limpias: list[str]) -> list[dict]:
                 continue
 
             if buffer_text:
-                raw_items.append((" ".join(buffer_text).strip(), pg))
+                raw_items.append((_reparar_palabras_rotas(" ".join(buffer_text).strip()), pg))
                 buffer_text = []
             elif raw_items:
                 prev_t, prev_p = raw_items[-1]
@@ -453,7 +667,7 @@ def _parsear_items_toc(lineas_limpias: list[str]) -> list[dict]:
     # Post-procesamiento: resolver fusiones y números desplazados al título
     items_procesados: list[tuple[str, str]] = []
     for title, pg in raw_items:
-        clean_title = re.sub(r'\s+', ' ', title).strip()
+        clean_title = _reparar_palabras_rotas(re.sub(r'\s+', ' ', title).strip())
         clean_pg = str(pg).strip()
 
         # Prefijo de página atrapado al final del título (ej. "Google Chrome 29" -> 51 => "Google Chrome" -> 2951)
@@ -581,7 +795,7 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str]) -> dict:
     running_header = ""
     if lineas and (lineas[0].endswith('/') or '/' in lineas[0] or lineas[0] in ('GettingStarted', 'Dashboard', 'Resources')):
         raw_h = lineas.pop(0)
-        running_header = re.sub(r'([a-z])([A-Z])', r'\1 \2', raw_h).strip()
+        running_header = _reparar_palabras_rotas(re.sub(r'([a-z])([A-Z])', r'\1 \2', raw_h).strip())
 
     while lineas and ('www.goanywhere.com' in lineas[-1] or 'GoAnywhere MFT' in lineas[-1] or re.match(r'^page:\s*\d+$', lineas[-1], re.I)):
         lineas.pop()
@@ -612,8 +826,7 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str]) -> dict:
                     break
                 i += 1
             if buf_bullet:
-                txt = " ".join(buf_bullet)
-                txt = re.sub(r'\s+', ' ', txt)
+                txt = _reparar_palabras_rotas(re.sub(r'\s+', ' ', " ".join(buf_bullet)))
                 elementos.append({"tipo": "bullet", "texto": txt})
             continue
 
@@ -628,8 +841,7 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str]) -> dict:
                     i += 1
                     break
                 i += 1
-            txt = " ".join(buf_num)
-            txt = re.sub(r'\s+', ' ', txt)
+            txt = _reparar_palabras_rotas(re.sub(r'\s+', ' ', " ".join(buf_num)))
             elementos.append({"tipo": "numero", "texto": txt})
             continue
 
@@ -644,14 +856,14 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str]) -> dict:
                     i += 1
                     break
                 i += 1
-            txt = " ".join(buf_tip)
+            txt = _reparar_palabras_rotas(re.sub(r'\s+', ' ', " ".join(buf_tip)))
             elementos.append({"tipo": "tip", "texto": txt})
             continue
 
         # Posibles encabezados (h1 o h2)
         es_posible_titulo = (len(l) < 55 and not l.endswith('.') and not l.endswith(',') and not l.endswith(';'))
         if es_posible_titulo:
-            t = re.sub(r'([a-z])([A-Z])', r'\1 \2', l).strip()
+            t = _reparar_palabras_rotas(re.sub(r'([a-z])([A-Z])', r'\1 \2', l).strip())
             if elementos and elementos[-1].get("texto") == t:
                 i += 1
                 continue
@@ -673,8 +885,7 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str]) -> dict:
                 break
             i += 1
 
-        txt = " ".join(buf_p)
-        txt = re.sub(r'\s+', ' ', txt)
+        txt = _reparar_palabras_rotas(re.sub(r'\s+', ' ', " ".join(buf_p)))
         if not elementos or elementos[-1].get("texto") != txt:
             elementos.append({"tipo": "p", "texto": txt})
 
