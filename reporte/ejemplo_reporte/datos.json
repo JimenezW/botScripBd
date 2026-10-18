@@ -1,0 +1,169 @@
+{
+  "meta": {
+    "titulo": "Arquitectura del Pipeline de Compilación Documental",
+    "subtitulo": "Diseño técnico del flujo HTML + Jinja2 + WeasyPrint en dos fases desacopladas",
+    "tipo_documento": "Documento de arquitectura",
+    "version": "1.2.0",
+    "fecha": "2026-10-16",
+    "autor": "Equipo de Ingeniería de Automatización",
+    "organizacion": "botScribd Labs",
+    "estado": "Aprobado",
+    "clasificacion": "Uso interno",
+    "codigo_documento": "ARQ-DOC-2026-014",
+    "idioma": "es",
+    "palabras_clave": ["WeasyPrint", "Jinja2", "PDF", "automatización", "arquitectura"]
+  },
+  "resumen": [
+    "Este documento describe la arquitectura del **compilador de reportes técnicos**, una herramienta de línea de comandos que transforma insumos estructurados (JSON e imágenes) en documentos PDF con calidad editorial.",
+    "El flujo se divide en dos fases independientes: la **Fase 1** genera un `preview.html` revisable en navegador y la **Fase 2** lo compila a PDF con WeasyPrint, resolviendo rutas relativas de imágenes y fuentes sin depender de rutas absolutas."
+  ],
+  "secciones": [
+    {
+      "titulo": "Contexto y alcance",
+      "bloques": [
+        {"tipo": "parrafo", "texto": "La extracción documental produce carpetas autocontenidas con metadatos, texto e imágenes. Se requiere un mecanismo reproducible que convierta esas carpetas en reportes técnicos con paginación, encabezados corridos y numeración de figuras y tablas."},
+        {"tipo": "subtitulo", "texto": "Objetivos"},
+        {"tipo": "lista", "items": [
+          "Separar la **maquetación** (HTML/CSS) de la **compilación** (PDF).",
+          {"texto": "Permitir la revisión visual inmediata antes de compilar:", "items": [
+            "Vista previa en navegador o Live Server.",
+            {"texto": "Iteración rápida sobre la plantilla:", "items": [
+              "Sin recompilar el PDF en cada cambio.",
+              "Sin dependencias nativas en la Fase 1."
+            ]}
+          ]},
+          "Garantizar trazabilidad con logs por fase y códigos de salida.",
+          "Soportar tanto `datos.json` (reporte) como `paginas.json` (extracción)."
+        ]},
+        {"tipo": "subtitulo", "texto": "Fuera de alcance"},
+        {"tipo": "lista", "ordenada": true, "items": [
+          "Edición colaborativa del contenido.",
+          {"texto": "Formatos de salida distintos a PDF:", "items": ["DOCX.", "EPUB."]},
+          "Firma digital del documento."
+        ]}
+      ]
+    },
+    {
+      "titulo": "Arquitectura de la solución",
+      "bloques": [
+        {"tipo": "parrafo", "texto": "La solución se organiza en dos capas. La capa de extracción produce la carpeta de origen; la capa de compilación la consume a través del parámetro `--origen` y genera los artefactos intermedios y finales."},
+        {"tipo": "figura", "imagen": "imagenes/arquitectura.svg", "ancho": "100%", "pie": "Vista lógica del pipeline: capas de extracción y compilación, y artefactos que fluyen entre fases.", "fuente": "Elaboración propia"},
+        {"tipo": "nota", "nivel": "info", "texto": "Todas las rutas declaradas en `datos.json` son **relativas a la carpeta de origen**. El compilador las reescribe como rutas relativas al HTML generado, por lo que el mismo archivo funciona en navegador y en WeasyPrint."}
+      ]
+    },
+    {
+      "titulo": "Componentes y responsabilidades",
+      "bloques": [
+        {"tipo": "tabla", "titulo": "Componentes del compilador",
+         "columnas": [
+           {"titulo": "Componente", "ancho": "24%"},
+           {"titulo": "Responsabilidad", "ancho": "40%"},
+           {"titulo": "Entrada", "ancho": "18%"},
+           {"titulo": "Salida", "ancho": "18%"}
+         ],
+         "filas": [
+           ["`ResolutorRecursos`", "Traduce rutas relativas al origen en rutas relativas al HTML y registra faltantes.", "Rutas declaradas", "URLs relativas"],
+           ["`ConstructorContexto`", "Valida el esquema, numera tablas y figuras, normaliza listas jerárquicas.", "JSON crudo", "Contexto Jinja2"],
+           ["`adaptar_paginas_json`", "Convierte el esquema de extracción al esquema de reporte.", "paginas.json", "Esquema reporte"],
+           ["`renderizar_plantilla`", "Renderiza la plantilla con autoescape y `StrictUndefined`.", "Contexto", "preview.html"],
+           ["`fase_2_pdf`", "Maqueta con WeasyPrint y escribe el PDF de forma atómica.", "preview.html", "reporte.pdf"]
+         ],
+         "nota": "Los componentes de la Fase 1 no importan WeasyPrint: la vista previa funciona aun sin librerías nativas (Pango)."
+        },
+        {"tipo": "subtitulo", "texto": "Configuración del pipeline"},
+        {"tipo": "parrafo", "texto": "El bloque siguiente se carga desde un archivo externo ubicado en la carpeta de origen mediante la clave `archivo`, demostrando la resolución relativa de insumos de texto."},
+        {"tipo": "codigo", "lenguaje": "yaml", "titulo": "snippets/pipeline.yaml", "archivo": "snippets/pipeline.yaml"}
+      ]
+    },
+    {
+      "titulo": "Flujo de compilación",
+      "bloques": [
+        {"tipo": "parrafo", "texto": "La Fase 2 utiliza la carpeta del HTML como `base_url`. De esta forma, `imagenes/arquitectura.svg` se resuelve exactamente igual que en el navegador."},
+        {"tipo": "codigo", "lenguaje": "python", "titulo": "compilador.py · núcleo de la Fase 2", "contenido": [
+          "from weasyprint import HTML",
+          "",
+          "def compilar(html_path: Path, pdf_path: Path) -> int:",
+          "    base_url = html_path.parent.as_uri() + \"/\"",
+          "    documento = HTML(filename=str(html_path), base_url=base_url).render()",
+          "    temporal = pdf_path.with_name(pdf_path.name + \".tmp\")",
+          "    documento.write_pdf(str(temporal))   # escritura atómica",
+          "    os.replace(temporal, pdf_path)",
+          "    return len(documento.pages)"
+        ]},
+        {"tipo": "nota", "nivel": "advertencia", "texto": "En Windows, WeasyPrint requiere las DLL de Pango (MSYS2). Si no están disponibles, la Fase 2 aborta con un mensaje de diagnóstico y la Fase 1 sigue siendo utilizable."}
+      ]
+    },
+    {
+      "titulo": "Matriz de pruebas",
+      "bloques": [
+        {"tipo": "parrafo", "texto": "La tabla siguiente se marca con `\"dividir\": true`: puede extenderse a varias páginas y su encabezado se repite automáticamente en cada salto."},
+        {"tipo": "tabla", "titulo": "Casos de prueba del compilador", "dividir": true,
+         "columnas": [
+           {"titulo": "ID", "ancho": "9%"},
+           {"titulo": "Escenario", "ancho": "41%"},
+           {"titulo": "Fase", "alineacion": "centro", "ancho": "10%"},
+           {"titulo": "Resultado esperado", "ancho": "28%"},
+           {"titulo": "Estado", "alineacion": "centro", "ancho": "12%"}
+         ],
+         "filas": [
+           ["CP-01", "Ejecución con valores por defecto", "all", "HTML y PDF generados", "OK"],
+           ["CP-02", "`--fase 1` con origen válido", "1", "preview.html generado", "OK"],
+           ["CP-03", "`--fase 1` con origen inexistente", "1", "Aviso y código 1", "OK"],
+           ["CP-04", "`--fase 2` sin HTML previo", "2", "Aborta con código 1", "OK"],
+           ["CP-05", "`--fase 2` con HTML vacío", "2", "Aborta con código 1", "OK"],
+           ["CP-06", "`--salida` solo con nombre", "2", "PDF dentro de --origen", "OK"],
+           ["CP-07", "`--salida` con ruta relativa", "2", "PDF en la ruta indicada", "OK"],
+           ["CP-08", "`--salida` sin extensión .pdf", "2", "Se agrega .pdf", "OK"],
+           ["CP-09", "JSON con error de sintaxis", "1", "Línea y columna reportadas", "OK"],
+           ["CP-10", "Imagen declarada inexistente", "1", "Aviso + marcador visual", "OK"],
+           ["CP-11", "Imagen inexistente con `--estricto`", "1", "Aborta con código 1", "OK"],
+           ["CP-12", "Esquema paginas.json", "1", "Adaptación automática", "OK"],
+           ["CP-13", "paginas.json con `--limite-paginas 10`", "1", "Solo 10 figuras", "OK"],
+           ["CP-14", "Tabla con filas incompletas", "1", "Relleno + aviso", "OK"],
+           ["CP-15", "Tipo de bloque desconocido", "1", "Bloque omitido + aviso", "OK"],
+           ["CP-16", "Plantilla con error de sintaxis", "1", "Archivo y línea reportados", "OK"],
+           ["CP-17", "Fuentes en `fuentes/`", "1", "@font-face relativo", "OK"],
+           ["CP-18", "HTML y recursos en unidades distintas", "1", "URI file:// absoluta", "OK"],
+           ["CP-19", "PDF abierto en visor (Windows)", "2", "Mensaje de permiso", "OK"],
+           ["CP-20", "WeasyPrint sin Pango", "2", "Diagnóstico de DLL", "OK"],
+           ["CP-21", "Datos más recientes que el HTML", "2", "Aviso de desactualización", "OK"],
+           ["CP-22", "Tabla larga dividida", "2", "thead repetido", "OK"],
+           ["CP-23", "Bloque de código extenso", "2", "Ajuste de línea", "OK"],
+           ["CP-24", "Figura SVG", "2", "Vector nítido", "OK"],
+           ["CP-25", "Índice con números de página", "2", "target-counter", "OK"],
+           ["CP-26", "Marcadores PDF por encabezado", "2", "Árbol de bookmarks", "OK"],
+           ["CP-27", "Metadatos PDF (autor, título)", "2", "Propiedades del PDF", "OK"],
+           ["CP-28", "Interrupción con Ctrl+C", "all", "Código 130", "OK"],
+           ["CP-29", "Variable `COMPILADOR_ORIGEN`", "all", "Origen por defecto alterado", "OK"],
+           ["CP-30", "Texto con caracteres `<script>`", "1", "Escapado por autoescape", "OK"],
+           ["CP-31", "Ancho CSS inválido en figura", "1", "Valor por defecto + aviso", "OK"],
+           ["CP-32", "Sección con `nueva_pagina`", "2", "Salto de página previo", "OK"],
+           ["CP-33", "Lista con 4 niveles de anidación", "1", "Estilo del nivel 3 reutilizado", "OK"],
+           ["CP-34", "Resumen como lista de párrafos", "1", "Párrafos independientes", "OK"],
+           ["CP-35", "Fila de tabla como objeto", "1", "Mapeo por título de columna", "OK"],
+           ["CP-36", "Fecha ISO con hora", "1", "Formato AAAA-MM-DD", "OK"]
+         ]
+        }
+      ]
+    },
+    {
+      "titulo": "Riesgos y mitigaciones",
+      "bloques": [
+        {"tipo": "tabla", "titulo": "Registro de riesgos técnicos",
+         "columnas": [
+           {"titulo": "Riesgo", "ancho": "34%"},
+           {"titulo": "Impacto", "alineacion": "centro", "ancho": "12%"},
+           {"titulo": "Mitigación", "ancho": "54%"}
+         ],
+         "filas": [
+           {"Riesgo": "Dependencias nativas de WeasyPrint en Windows", "Impacto": "Alto", "Mitigación": "Import diferido, autodetección de MSYS2 y mensaje de diagnóstico."},
+           {"Riesgo": "Documentos con miles de páginas", "Impacto": "Medio", "Mitigación": "Aviso por umbral y opción `--limite-paginas`."},
+           {"Riesgo": "Rutas absolutas rotas al mover carpetas", "Impacto": "Alto", "Mitigación": "Rutas siempre relativas al HTML generado."},
+           {"Riesgo": "PDF corrupto por fallo a mitad de escritura", "Impacto": "Medio", "Mitigación": "Escritura en `.tmp` y reemplazo atómico."}
+         ]
+        },
+        {"tipo": "nota", "nivel": "exito", "texto": "Ejecute siempre `--fase 1` durante el diseño de la plantilla y reserve `--fase all` para la generación final."}
+      ]
+    }
+  ]
+}

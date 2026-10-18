@@ -1,0 +1,15 @@
+# Configuración del pipeline de compilación documental
+pipeline:
+  nombre: reporte-arquitectura
+  fases:
+    - id: html
+      motor: jinja2
+      plantilla: plantilla.html
+      salida: preview.html
+    - id: pdf
+      motor: weasyprint
+      entrada: preview.html
+      salida: reporte.pdf
+  validaciones:
+    estricto: true          # aborta si falta una imagen o fuente
+    limite_paginas: null    # solo aplica a paginas.json

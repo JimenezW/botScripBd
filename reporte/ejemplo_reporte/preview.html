@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Arquitectura del Pipeline de Compilación Documental · v1.2.0</title>
+  <meta name="description" content="Este documento describe la arquitectura del compilador de reportes técnicos, una herramienta de línea de comandos que transforma insumos estructurados (JSON e imágenes) en documentos PDF con calidad editorial. El flujo se divide en dos fases independientes: la Fase 1 genera...">
+<meta name="author" content="Equipo de Ingeniería de Automatización"><meta name="keywords" content="WeasyPrint, Jinja2, PDF, automatización, arquitectura">  <meta name="generator" content="compilador.py (Jinja2 3.1.6 + WeasyPrint)">
+  <meta name="dcterms.created" content="2026-10-16T10:25:10">
+  <style>
+    /* ═════════════════════ Fuentes locales (rutas relativas al HTML) ═════════════════════ */
+
+    /* ═════════════════════ Paginación (WeasyPrint / CSS Paged Media) ═════════════════════ */
+    @page {
+      size: A4 portrait;
+      margin: 26mm 18mm 22mm 18mm;
+
+      @top-left {
+        content: "Arquitectura del Pipeline de Compilación Documental";
+        font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, "Liberation Sans", "DejaVu Sans", sans-serif;
+        font-size: 7.5pt; font-weight: 600; color: #102a43;
+        vertical-align: bottom; padding-bottom: 3.5mm;
+        border-bottom: 0.75pt solid #1d4e89;
+      }
+      @top-right {
+        content: "Versión 1.2.0   ·   2026-10-16";
+        font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, "Liberation Sans", "DejaVu Sans", sans-serif;
+        font-size: 7.5pt; color: #52606d; text-align: right;
+        vertical-align: bottom; padding-bottom: 3.5mm;
+        border-bottom: 0.75pt solid #1d4e89;
+      }
+      @bottom-left {
+        content: "ARQ-DOC-2026-014 · botScribd Labs";
+        font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, "Liberation Sans", "DejaVu Sans", sans-serif;
+        font-size: 7pt; color: #52606d;
+        vertical-align: top; padding-top: 3mm; border-top: 0.5pt solid #d9e2ec;
+      }
+      @bottom-center {
+        content: "USO INTERNO";
+        font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, "Liberation Sans", "DejaVu Sans", sans-serif;
+        font-size: 6.5pt; letter-spacing: 0.8pt; color: #1d4e89;
+        vertical-align: top; padding-top: 3mm; border-top: 0.5pt solid #d9e2ec;
+      }
+      @bottom-right {
+        content: "Página " counter(page) " de " counter(pages);
+        font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, "Liberation Sans", "DejaVu Sans", sans-serif;
+        font-size: 7pt; color: #52606d; text-align: right;
+        vertical-align: top; padding-top: 3mm; border-top: 0.5pt solid #d9e2ec;
+      }
+    }
+    /* La primera página ya muestra el encabezado del documento: sin cabecera corrida */
+    @page :first {
+      @top-left  { content: none; border: none; }
+      @top-right { content: none; border: none; }
+    }
+
+    /* ═════════════════════ Base tipográfica ═════════════════════ */
+    html {
+      font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, "Liberation Sans", "DejaVu Sans", sans-serif;
+      font-size: 9.6pt;
+      line-height: 1.55;
+      color: #1f2933;
+    }
+    body { margin: 0; }
+    h1, h2, h3 {
+      color: #102a43;
+      line-height: 1.25;
+      page-break-after: avoid; break-after: avoid;
+    }
+    p { margin: 0 0 3.2mm; text-align: justify; hyphens: auto; orphans: 3; widows: 3; }
+    strong { font-weight: 700; color: #102a43; }
+    code {
+      font-family: "JetBrains Mono", "Cascadia Code", "Fira Code", Consolas, "Liberation Mono", "DejaVu Sans Mono", monospace;
+      font-size: 0.86em;
+      background: #f3f6f9;
+      border: 0.5pt solid #d9e2ec;
+      border-radius: 2pt;
+      padding: 0 2.5pt;
+    }
+    a { color: #1d4e89; text-decoration: none; }
+    .num { color: #2f80a8; margin-right: 3mm; font-variant-numeric: tabular-nums; }
+
+    /* ═════════════════════ Encabezado del documento ═════════════════════ */
+    .portada { margin-bottom: 8mm; }
+    .portada__franja {
+      display: flex; justify-content: space-between;
+      font-size: 7.5pt; letter-spacing: 1pt; text-transform: uppercase;
+      color: #52606d;
+      border-top: 3pt solid #1d4e89;
+      padding-top: 2.5mm; margin-bottom: 14mm;
+    }
+    .portada__tipo {
+      font-size: 8.5pt; font-weight: 600; letter-spacing: 1.2pt; text-transform: uppercase;
+      color: #2f80a8; margin: 0 0 2mm;
+    }
+    .portada__titulo { font-size: 24pt; font-weight: 700; margin: 0 0 2.5mm; bookmark-level: 1; }
+    .portada__subtitulo { font-size: 12pt; color: #52606d; margin: 0 0 8mm; text-align: left; }
+
+    .ficha { width: 100%; border-collapse: collapse; margin-bottom: 8mm; font-size: 8.6pt; page-break-inside: avoid; }
+    .ficha th, .ficha td { padding: 2mm 3mm; border-bottom: 0.5pt solid #d9e2ec; text-align: left; vertical-align: top; }
+    .ficha th {
+      width: 17%; font-weight: 600; color: #52606d;
+      text-transform: uppercase; font-size: 7pt; letter-spacing: 0.6pt;
+    }
+    .ficha td { width: 33%; color: #102a43; font-weight: 500; }
+
+    .resumen {
+      background: #f7f9fb;
+      border-left: 3pt solid #1d4e89;
+      padding: 4mm 5mm 1.5mm;
+      page-break-inside: avoid;
+    }
+    .resumen__titulo {
+      font-size: 8pt; letter-spacing: 1.2pt; text-transform: uppercase;
+      color: #1d4e89; margin: 0 0 2mm;
+    }
+
+    /* ═════════════════════ Índice ═════════════════════ */
+    .indice { page-break-after: always; break-after: page; margin-top: 8mm; }
+    .indice__titulo {
+      font-size: 8pt; letter-spacing: 1.2pt; text-transform: uppercase;
+      color: #1d4e89; margin: 0 0 3mm; bookmark-level: none;
+    }
+    .indice ol { list-style: none; margin: 0; padding: 0; }
+    .indice li { border-bottom: 0.5pt dotted #d9e2ec; padding: 1.6mm 0; }
+    .indice a { color: #1f2933; display: block; }
+    @media print {
+      .indice a::after { content: leader(" ") target-counter(attr(href), page); color: #52606d; }
+    }
+
+    /* ═════════════════════ Secciones ═════════════════════ */
+    .seccion { margin-bottom: 6mm; }
+    .seccion--nueva-pagina { page-break-before: always; break-before: page; }
+    .seccion__titulo {
+      font-size: 14.5pt; margin: 9mm 0 4mm; padding-bottom: 2mm;
+      border-bottom: 0.75pt solid #d9e2ec;
+    }
+    .seccion:first-child .seccion__titulo { margin-top: 0; }
+    .subtitulo { font-size: 11pt; margin: 6mm 0 2.5mm; }
+
+    /* ═════════════════════ Viñetas jerárquicas ═════════════════════ */
+    .lista { margin: 0 0 3.5mm; padding-left: 0; }
+    .lista .lista { margin: 1.2mm 0 0.8mm; }
+    .lista li { margin-bottom: 1.2mm; }
+    .lista--vinetas { list-style: none; }
+    .lista--vinetas li { position: relative; padding-left: 5.5mm; }
+    .lista--vinetas li::before { content: ""; position: absolute; }
+    /* Nivel 1: cuadrado sólido de acento */
+    .lista--vinetas.lista--n1 > li::before {
+      left: 1mm; top: 0.62em; width: 1.6mm; height: 1.6mm; background: #1d4e89;
+    }
+    /* Nivel 2: círculo hueco */
+    .lista--vinetas.lista--n2 > li { color: #1f2933; }
+    .lista--vinetas.lista--n2 > li::before {
+      left: 1mm; top: 0.58em; width: 1.3mm; height: 1.3mm;
+      border: 0.7pt solid #2f80a8; border-radius: 50%;
+    }
+    /* Nivel 3+: guion fino */
+    .lista--vinetas.lista--n3 { font-size: 0.95em; }
+    .lista--vinetas.lista--n3 > li { color: #52606d; }
+    .lista--vinetas.lista--n3 > li::before {
+      left: 1mm; top: 0.78em; width: 2mm; height: 0; border-top: 0.7pt solid #52606d;
+    }
+    /* Listas ordenadas: 1. → a. → i. */
+    .lista--ordenada { padding-left: 6mm; }
+    .lista--ordenada.lista--n1 { list-style-type: decimal; }
+    .lista--ordenada.lista--n2 { list-style-type: lower-alpha; }
+    .lista--ordenada.lista--n3 { list-style-type: lower-roman; }
+    .lista--ordenada li::marker { color: #1d4e89; font-weight: 600; }
+
+    /* ═════════════════════ Tablas técnicas ═════════════════════ */
+    .bloque-tabla { margin: 4mm 0 5mm; page-break-inside: avoid; break-inside: avoid; }
+    .bloque-tabla--dividir { page-break-inside: auto; break-inside: auto; }
+    .tabla {
+      width: 100%; border-collapse: collapse; font-size: 8.3pt; line-height: 1.4;
+      page-break-inside: avoid; break-inside: avoid;
+    }
+    .bloque-tabla--dividir .tabla { page-break-inside: auto; break-inside: auto; }
+    .tabla caption {
+      caption-side: top; text-align: left; font-size: 8.3pt; color: #52606d;
+      padding-bottom: 2mm;
+    }
+    .etiqueta { font-weight: 700; color: #102a43; }
+    /* Repetición del encabezado en cada página */
+    .tabla thead { display: table-header-group; }
+    .tabla tfoot { display: table-footer-group; }
+    .tabla tr, .tabla th, .tabla td { page-break-inside: avoid; break-inside: avoid; }
+    .tabla th {
+      background: #102a43; color: #ffffff; font-weight: 600;
+      font-size: 7.6pt; letter-spacing: 0.4pt; text-transform: uppercase;
+      padding: 2.2mm 2.6mm; border: 0.5pt solid #102a43;
+    }
+    .tabla td { padding: 1.9mm 2.6mm; border-bottom: 0.5pt solid #d9e2ec; vertical-align: top; }
+    .tabla tbody tr:nth-child(even) td { background: #f3f6f9; }
+    .tabla tbody tr:last-child td { border-bottom: 1pt solid #102a43; }
+    .al-left { text-align: left; } .al-center { text-align: center; } .al-right { text-align: right; }
+    .tabla__nota { font-size: 7.6pt; color: #52606d; margin-top: 1.8mm; text-align: left; }
+
+    /* ═════════════════════ Bloques de código ═════════════════════ */
+    .codigo {
+      margin: 4mm 0 5mm; border-radius: 3pt; overflow: hidden;
+      background: #0f1923;
+      page-break-inside: avoid; break-inside: avoid;
+    }
+    .codigo__barra {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1.6mm 3.5mm; background: #1a2733; border-bottom: 0.5pt solid #2a3b4c;
+      font-size: 7pt; color: #9fb3c8;
+    }
+    .codigo__lenguaje { font-weight: 700; letter-spacing: 1pt; color: #7cc4e4; }
+    .codigo__titulo { font-family: "JetBrains Mono", "Cascadia Code", "Fira Code", Consolas, "Liberation Mono", "DejaVu Sans Mono", monospace; }
+    .codigo__cuerpo {
+      margin: 0; padding: 3mm 3.5mm;
+      font-family: "JetBrains Mono", "Cascadia Code", "Fira Code", Consolas, "Liberation Mono", "DejaVu Sans Mono", monospace; font-size: 7.8pt; line-height: 1.55;
+      color: #dbe4ee;
+      white-space: pre-wrap; word-wrap: break-word; overflow-wrap: anywhere;
+      counter-reset: ln;
+    }
+    .codigo__cuerpo code { font: inherit; background: none; border: none; padding: 0; color: inherit; }
+    .codigo__cuerpo .ln { display: block; min-height: 1.55em; }
+    .codigo__cuerpo--numerado .ln { padding-left: 9mm; text-indent: -9mm; }
+    .codigo__cuerpo--numerado .ln::before {
+      counter-increment: ln; content: counter(ln);
+      display: inline-block; width: 6mm; margin-right: 3mm; text-indent: 0;
+      text-align: right; color: #5c6f82;
+    }
+
+    /* ═════════════════════ Figuras ═════════════════════ */
+    .figura { margin: 5mm 0 6mm; text-align: center; page-break-inside: avoid; break-inside: avoid; }
+    .figura img { max-width: 100%; height: auto; border: 0.5pt solid #d9e2ec; }
+    .figura--pagina img { width: auto; max-height: 212mm; }
+    .figura figcaption {
+      margin-top: 2.5mm; font-size: 8pt; color: #52606d;
+      max-width: 85%; margin-left: auto; margin-right: auto;
+    }
+    .figura__fuente { display: block; font-size: 7pt; margin-top: 0.8mm; font-style: italic; }
+    .figura__faltante {
+      margin: 0 auto; width: 70%; padding: 10mm 4mm; font-size: 8.5pt;
+      border: 1pt dashed #c0392b; color: #c0392b; background: #fdf2f1;
+    }
+
+    /* ═════════════════════ Notas / callouts ═════════════════════ */
+    .nota {
+      margin: 4mm 0; padding: 3mm 4mm 1mm; border-left: 3pt solid; border-radius: 0 2pt 2pt 0;
+      page-break-inside: avoid; break-inside: avoid;
+    }
+    .nota__titulo { font-size: 7.5pt; font-weight: 700; letter-spacing: 1pt; text-transform: uppercase; margin: 0 0 1mm; }
+    .nota--info        { background: #eef5fb; border-color: #2f80a8; } .nota--info .nota__titulo { color: #2f80a8; }
+    .nota--exito       { background: #edf7f1; border-color: #2e8b57; }  .nota--exito .nota__titulo { color: #2e7d4f; }
+    .nota--advertencia { background: #fdf6e9; border-color: #d48806; }  .nota--advertencia .nota__titulo { color: #ad6c00; }
+    .nota--critico     { background: #fbefee; border-color: #c0392b; }  .nota--critico .nota__titulo { color: #a93226; }
+
+    /* ═════════════════════ Cierre ═════════════════════ */
+    .cierre {
+      margin-top: 10mm; padding-top: 3mm; border-top: 0.5pt solid #d9e2ec;
+      font-size: 7pt; color: #52606d; page-break-inside: avoid;
+    }
+
+    /* ═════════════════════ Vista previa en navegador (no afecta al PDF) ═════════════════════ */
+    .preview-aviso { display: none; }
+    @media screen {
+      html { background: #dfe5ec; }
+      body {
+        max-width: 210mm; min-height: 297mm; box-sizing: border-box;
+        margin: 0 auto 12mm; padding: 20mm 18mm;
+        background: #ffffff; box-shadow: 0 6px 30px rgba(16, 42, 67, 0.18);
+      }
+      .preview-aviso {
+        display: block; position: sticky; top: 0; z-index: 10;
+        margin: -20mm -18mm 12mm; padding: 2.5mm 18mm;
+        background: #102a43; color: #d9e2ec; font-size: 8pt;
+      }
+      .preview-aviso strong { color: #ffffff; }
+      .indice { border-bottom: 1px dashed #d9e2ec; padding-bottom: 8mm; }
+      .codigo__cuerpo { overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="preview-aviso" role="note">
+    <strong>Vista previa HTML</strong> · El encabezado, el pie y la numeración «Página X de Y» se materializan en la Fase 2 (PDF).
+  </div>
+
+  <header class="portada" id="inicio">
+    <div class="portada__franja">
+      <span>botScribd Labs</span>
+      <span>ARQ-DOC-2026-014</span>
+    </div>
+    <p class="portada__tipo">Documento de arquitectura</p>
+    <h1 class="portada__titulo">Arquitectura del Pipeline de Compilación Documental</h1>
+<p class="portada__subtitulo">Diseño técnico del flujo HTML + Jinja2 + WeasyPrint en dos fases desacopladas</p>
+    <table class="ficha" aria-label="Metadatos del documento">
+      <tr>
+<th scope="row">Versión</th><td>1.2.0</td><th scope="row">Fecha</th><td>2026-10-16</td>      </tr>
+      <tr>
+<th scope="row">Autor</th><td>Equipo de Ingeniería de Automatización</td><th scope="row">Organización</th><td>botScribd Labs</td>      </tr>
+      <tr>
+<th scope="row">Estado</th><td>Aprobado</td><th scope="row">Código</th><td>ARQ-DOC-2026-014</td>      </tr>
+      <tr>
+<th scope="row">Clasificación</th><td>Uso interno</td><th scope="row"></th><td></td>      </tr>
+    </table>
+
+    <section class="resumen" aria-labelledby="resumen-titulo">
+      <h2 class="resumen__titulo" id="resumen-titulo">Resumen</h2>
+<p>Este documento describe la arquitectura del <strong>compilador de reportes técnicos</strong>, una herramienta de línea de comandos que transforma insumos estructurados (JSON e imágenes) en documentos PDF con calidad editorial.</p><p>El flujo se divide en dos fases independientes: la <strong>Fase 1</strong> genera un <code>preview.html</code> revisable en navegador y la <strong>Fase 2</strong> lo compila a PDF con WeasyPrint, resolviendo rutas relativas de imágenes y fuentes sin depender de rutas absolutas.</p>    </section>
+  </header>
+
+  <nav class="indice" aria-labelledby="indice-titulo">
+    <h2 class="indice__titulo" id="indice-titulo">Contenido</h2>
+    <ol>
+      <li><a href="#sec-1"><span class="num">1</span>Contexto y alcance</a></li>
+      <li><a href="#sec-2"><span class="num">2</span>Arquitectura de la solución</a></li>
+      <li><a href="#sec-3"><span class="num">3</span>Componentes y responsabilidades</a></li>
+      <li><a href="#sec-4"><span class="num">4</span>Flujo de compilación</a></li>
+      <li><a href="#sec-5"><span class="num">5</span>Matriz de pruebas</a></li>
+      <li><a href="#sec-6"><span class="num">6</span>Riesgos y mitigaciones</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <section class="seccion" id="sec-1">
+      <h2 class="seccion__titulo"><span class="num">1</span>Contexto y alcance</h2>
+      <p>La extracción documental produce carpetas autocontenidas con metadatos, texto e imágenes. Se requiere un mecanismo reproducible que convierta esas carpetas en reportes técnicos con paginación, encabezados corridos y numeración de figuras y tablas.</p>
+      <h3 class="subtitulo" id="sec-1-1"><span class="num">1.1</span>Objetivos</h3>
+      <ul class="lista lista--vinetas lista--n1">  <li>Separar la <strong>maquetación</strong> (HTML/CSS) de la <strong>compilación</strong> (PDF).</li>  <li>Permitir la revisión visual inmediata antes de compilar:<ul class="lista lista--vinetas lista--n2">  <li>Vista previa en navegador o Live Server.</li>  <li>Iteración rápida sobre la plantilla:<ul class="lista lista--vinetas lista--n3">  <li>Sin recompilar el PDF en cada cambio.</li>  <li>Sin dependencias nativas en la Fase 1.</li></ul></li></ul></li>  <li>Garantizar trazabilidad con logs por fase y códigos de salida.</li>  <li>Soportar tanto <code>datos.json</code> (reporte) como <code>paginas.json</code> (extracción).</li></ul>
+      <h3 class="subtitulo" id="sec-1-2"><span class="num">1.2</span>Fuera de alcance</h3>
+      <ol class="lista lista--ordenada lista--n1">  <li>Edición colaborativa del contenido.</li>  <li>Formatos de salida distintos a PDF:<ol class="lista lista--ordenada lista--n2">  <li>DOCX.</li>  <li>EPUB.</li></ol></li>  <li>Firma digital del documento.</li></ol>
+    </section>
+    <section class="seccion" id="sec-2">
+      <h2 class="seccion__titulo"><span class="num">2</span>Arquitectura de la solución</h2>
+      <p>La solución se organiza en dos capas. La capa de extracción produce la carpeta de origen; la capa de compilación la consume a través del parámetro <code>--origen</code> y genera los artefactos intermedios y finales.</p>
+      <figure class="figura">
+  <img src="imagenes/arquitectura.svg" alt="Vista lógica del pipeline: capas de extracción y compilación, y artefactos que fluyen entre fases." style="width: 100%">
+  <figcaption>
+    <span class="etiqueta">Figura 1.</span> Vista lógica del pipeline: capas de extracción y compilación, y artefactos que fluyen entre fases.
+<span class="figura__fuente">Fuente: Elaboración propia</span>  </figcaption>
+</figure>
+      <aside class="nota nota--info">
+  <p class="nota__titulo">Nota</p>
+  <p class="nota__texto">Todas las rutas declaradas en <code>datos.json</code> son <strong>relativas a la carpeta de origen</strong>. El compilador las reescribe como rutas relativas al HTML generado, por lo que el mismo archivo funciona en navegador y en WeasyPrint.</p>
+</aside>
+    </section>
+    <section class="seccion" id="sec-3">
+      <h2 class="seccion__titulo"><span class="num">3</span>Componentes y responsabilidades</h2>
+      <div class="bloque-tabla">
+  <table class="tabla">
+    <caption><span class="etiqueta">Tabla 1.</span> Componentes del compilador</caption>
+    <colgroup>
+<col style="width: 24%"><col style="width: 40%"><col style="width: 18%"><col style="width: 18%">    </colgroup>
+    <thead>
+      <tr><th class="al-left" scope="col">Componente</th><th class="al-left" scope="col">Responsabilidad</th><th class="al-left" scope="col">Entrada</th><th class="al-left" scope="col">Salida</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="al-left"><code>ResolutorRecursos</code></td><td class="al-left">Traduce rutas relativas al origen en rutas relativas al HTML y registra faltantes.</td><td class="al-left">Rutas declaradas</td><td class="al-left">URLs relativas</td></tr>
+      <tr><td class="al-left"><code>ConstructorContexto</code></td><td class="al-left">Valida el esquema, numera tablas y figuras, normaliza listas jerárquicas.</td><td class="al-left">JSON crudo</td><td class="al-left">Contexto Jinja2</td></tr>
+      <tr><td class="al-left"><code>adaptar_paginas_json</code></td><td class="al-left">Convierte el esquema de extracción al esquema de reporte.</td><td class="al-left">paginas.json</td><td class="al-left">Esquema reporte</td></tr>
+      <tr><td class="al-left"><code>renderizar_plantilla</code></td><td class="al-left">Renderiza la plantilla con autoescape y <code>StrictUndefined</code>.</td><td class="al-left">Contexto</td><td class="al-left">preview.html</td></tr>
+      <tr><td class="al-left"><code>fase_2_pdf</code></td><td class="al-left">Maqueta con WeasyPrint y escribe el PDF de forma atómica.</td><td class="al-left">preview.html</td><td class="al-left">reporte.pdf</td></tr>
+    </tbody>
+  </table>
+<p class="tabla__nota">Los componentes de la Fase 1 no importan WeasyPrint: la vista previa funciona aun sin librerías nativas (Pango).</p></div>
+      <h3 class="subtitulo" id="sec-3-1"><span class="num">3.1</span>Configuración del pipeline</h3>
+      <p>El bloque siguiente se carga desde un archivo externo ubicado en la carpeta de origen mediante la clave <code>archivo</code>, demostrando la resolución relativa de insumos de texto.</p>
+      <figure class="codigo">
+  <div class="codigo__barra">
+    <span class="codigo__lenguaje">YAML</span>
+<span class="codigo__titulo">snippets/pipeline.yaml</span>  </div>
+  <pre class="codigo__cuerpo codigo__cuerpo--numerado"><code><span class="ln"># Configuración del pipeline de compilación documental</span><span class="ln">pipeline:</span><span class="ln">  nombre: reporte-arquitectura</span><span class="ln">  fases:</span><span class="ln">    - id: html</span><span class="ln">      motor: jinja2</span><span class="ln">      plantilla: plantilla.html</span><span class="ln">      salida: preview.html</span><span class="ln">    - id: pdf</span><span class="ln">      motor: weasyprint</span><span class="ln">      entrada: preview.html</span><span class="ln">      salida: reporte.pdf</span><span class="ln">  validaciones:</span><span class="ln">    estricto: true          # aborta si falta una imagen o fuente</span><span class="ln">    limite_paginas: null    # solo aplica a paginas.json</span></code></pre>
+</figure>
+    </section>
+    <section class="seccion" id="sec-4">
+      <h2 class="seccion__titulo"><span class="num">4</span>Flujo de compilación</h2>
+      <p>La Fase 2 utiliza la carpeta del HTML como <code>base_url</code>. De esta forma, <code>imagenes/arquitectura.svg</code> se resuelve exactamente igual que en el navegador.</p>
+      <figure class="codigo">
+  <div class="codigo__barra">
+    <span class="codigo__lenguaje">PYTHON</span>
+<span class="codigo__titulo">compilador.py · núcleo de la Fase 2</span>  </div>
+  <pre class="codigo__cuerpo codigo__cuerpo--numerado"><code><span class="ln">from weasyprint import HTML</span><span class="ln"></span><span class="ln">def compilar(html_path: Path, pdf_path: Path) -&gt; int:</span><span class="ln">    base_url = html_path.parent.as_uri() + &#34;/&#34;</span><span class="ln">    documento = HTML(filename=str(html_path), base_url=base_url).render()</span><span class="ln">    temporal = pdf_path.with_name(pdf_path.name + &#34;.tmp&#34;)</span><span class="ln">    documento.write_pdf(str(temporal))   # escritura atómica</span><span class="ln">    os.replace(temporal, pdf_path)</span><span class="ln">    return len(documento.pages)</span></code></pre>
+</figure>
+      <aside class="nota nota--advertencia">
+  <p class="nota__titulo">Advertencia</p>
+  <p class="nota__texto">En Windows, WeasyPrint requiere las DLL de Pango (MSYS2). Si no están disponibles, la Fase 2 aborta con un mensaje de diagnóstico y la Fase 1 sigue siendo utilizable.</p>
+</aside>
+    </section>
+    <section class="seccion" id="sec-5">
+      <h2 class="seccion__titulo"><span class="num">5</span>Matriz de pruebas</h2>
+      <p>La tabla siguiente se marca con <code>&#34;dividir&#34;: true</code>: puede extenderse a varias páginas y su encabezado se repite automáticamente en cada salto.</p>
+      <div class="bloque-tabla bloque-tabla--dividir">
+  <table class="tabla">
+    <caption><span class="etiqueta">Tabla 2.</span> Casos de prueba del compilador</caption>
+    <colgroup>
+<col style="width: 9%"><col style="width: 41%"><col style="width: 10%"><col style="width: 28%"><col style="width: 12%">    </colgroup>
+    <thead>
+      <tr><th class="al-left" scope="col">ID</th><th class="al-left" scope="col">Escenario</th><th class="al-center" scope="col">Fase</th><th class="al-left" scope="col">Resultado esperado</th><th class="al-center" scope="col">Estado</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="al-left">CP-01</td><td class="al-left">Ejecución con valores por defecto</td><td class="al-center">all</td><td class="al-left">HTML y PDF generados</td><td class="al-center">OK</td></tr>
+      <tr><td class="al-left">CP-02</td><td class="al-left"><code>--fase 1</code> con origen válido</td><td class="al-center">1</td><td class="al-left">preview.html generado</td><td class="al-center">OK</td></tr>
+      <tr><td class="al-left">CP-03</td><td class="al-left"><code>--fase 1</code> con origen inexistente</td><td class="al-center">1</td><td class="al-left">Aviso y código 1</td><td class="al-center">OK</td></tr>
+      <tr><td class="al-left">CP-04</td><td class="al-left"><code>--fase 2</code> sin HTML previo</td><td class="al-center">2</td><td class="al-left">Aborta con código 1</td><td class="al-center">OK</td></tr>
+      <tr><td class="al-left">CP-05</td><td class="al-left"><code>--fase 2</code> con HTML vacío</td><td class="al-center">2</td><td class="al-left">Aborta con código 1</td><td class="al-center">OK</td></tr>
+      <tr><td class="al-left">CP-06</td><td class="al-left"><code>--salida</code> solo con nombre</td><td class="al-center">2</td><td class="al-left">PDF dentro de --origen</td><td class="al-center">OK</td></tr>
+      <tr><td class="al-left">CP-07</td><td class="al-left"><code>--salida</code> con ruta relativa</td><td class="al-center">2</td><td class="al-left">PDF en la ruta indicada</td><td class="al-center">OK</td></tr>
+      <tr><td class="al-left">CP-08</td><td class="al-left"><code>--salida</code> sin extensión .pdf</td><td class="al-center">2</td><td class="al-left">Se agrega .pdf</td><td class="al-center">OK</td></tr>
+      <tr><td class="al-left">CP-09</td><td class="al-left">JSON con error de sintaxis</td><td class="al-center">1</td><td class="al-left">Línea y columna reportadas</td><td class="al-center">OK</td></tr>
+      <tr><td class="al-left">CP-10</td><td class="al-left">Imagen declarada inexistente</td><td class="al-center">1</td><td class="al-left">Aviso + marcador visual</td><td class="al-center">OK</td></tr>
+      <tr><td class="al-left">CP-11</td><td class="al-left">Imagen inexistente con <code>--estricto</code></td><td class="al-center">1</td><td class="al-left">Aborta con código 1</td><td class="al-center">OK</td></tr>
+      <tr><td class="al-left">CP-12</td><td class="al-left">Esquema paginas.json</td><td class="al-center">1</td><td class="al-left">Adaptación automática</td><td class="al-center">OK</td></tr>
+      <tr><td class="al-left">CP-13</td><td class="al-left">paginas.json con <code>--limite-paginas 10</code></td><td class="al-center">1</td><td class="al-left">Solo 10 figuras</td><td class="al-center">OK</td></tr>
+      <tr><td class="al-left">CP-14</td><td class="al-left">Tabla con filas incompletas</td><td class="al-center">1</td><td class="al-left">Relleno + aviso</td><td class="al-center">OK</td></tr>
+      <tr><td class="al-left">CP-15</td><td class="al-left">Tipo de bloque desconocido</td><td class="al-center">1</td><td class="al-left">Bloque omitido + aviso</td><td class="al-center">OK</td></tr>
+      <tr><td class="al-left">CP-16</td><td class="al-left">Plantilla con error de sintaxis</td><td class="al-center">1</td><td class="al-left">Archivo y línea reportados</td><td class="al-center">OK</td></tr>
+      <tr><td class="al-left">CP-17</td><td class="al-left">Fuentes en <code>fuentes/</code></td><td class="al-center">1</td><td class="al-left">@font-face relativo</td><td class="al-center">OK</td></tr>
+      <tr><td class="al-left">CP-18</td><td class="al-left">HTML y recursos en unidades distintas</td><td class="al-center">1</td><td class="al-left">URI file:// absoluta</td><td class="al-center">OK</td></tr>
+      <tr><td class="al-left">CP-19</td><td class="al-left">PDF abierto en visor (Windows)</td><td class="al-center">2</td><td class="al-left">Mensaje de permiso</td><td class="al-center">OK</td></tr>
+      <tr><td class="al-left">CP-20</td><td class="al-left">WeasyPrint sin Pango</td><td class="al-center">2</td><td class="al-left">Diagnóstico de DLL</td><td class="al-center">OK</td></tr>
+      <tr><td class="al-left">CP-21</td><td class="al-left">Datos más recientes que el HTML</td><td class="al-center">2</td><td class="al-left">Aviso de desactualización</td><td class="al-center">OK</td></tr>
+      <tr><td class="al-left">CP-22</td><td class="al-left">Tabla larga dividida</td><td class="al-center">2</td><td class="al-left">thead repetido</td><td class="al-center">OK</td></tr>
+      <tr><td class="al-left">CP-23</td><td class="al-left">Bloque de código extenso</td><td class="al-center">2</td><td class="al-left">Ajuste de línea</td><td class="al-center">OK</td></tr>
+      <tr><td class="al-left">CP-24</td><td class="al-left">Figura SVG</td><td class="al-center">2</td><td class="al-left">Vector nítido</td><td class="al-center">OK</td></tr>
+      <tr><td class="al-left">CP-25</td><td class="al-left">Índice con números de página</td><td class="al-center">2</td><td class="al-left">target-counter</td><td class="al-center">OK</td></tr>
+      <tr><td class="al-left">CP-26</td><td class="al-left">Marcadores PDF por encabezado</td><td class="al-center">2</td><td class="al-left">Árbol de bookmarks</td><td class="al-center">OK</td></tr>
+      <tr><td class="al-left">CP-27</td><td class="al-left">Metadatos PDF (autor, título)</td><td class="al-center">2</td><td class="al-left">Propiedades del PDF</td><td class="al-center">OK</td></tr>
+      <tr><td class="al-left">CP-28</td><td class="al-left">Interrupción con Ctrl+C</td><td class="al-center">all</td><td class="al-left">Código 130</td><td class="al-center">OK</td></tr>
+      <tr><td class="al-left">CP-29</td><td class="al-left">Variable <code>COMPILADOR_ORIGEN</code></td><td class="al-center">all</td><td class="al-left">Origen por defecto alterado</td><td class="al-center">OK</td></tr>
+      <tr><td class="al-left">CP-30</td><td class="al-left">Texto con caracteres <code>&lt;script&gt;</code></td><td class="al-center">1</td><td class="al-left">Escapado por autoescape</td><td class="al-center">OK</td></tr>
+      <tr><td class="al-left">CP-31</td><td class="al-left">Ancho CSS inválido en figura</td><td class="al-center">1</td><td class="al-left">Valor por defecto + aviso</td><td class="al-center">OK</td></tr>
+      <tr><td class="al-left">CP-32</td><td class="al-left">Sección con <code>nueva_pagina</code></td><td class="al-center">2</td><td class="al-left">Salto de página previo</td><td class="al-center">OK</td></tr>
+      <tr><td class="al-left">CP-33</td><td class="al-left">Lista con 4 niveles de anidación</td><td class="al-center">1</td><td class="al-left">Estilo del nivel 3 reutilizado</td><td class="al-center">OK</td></tr>
+      <tr><td class="al-left">CP-34</td><td class="al-left">Resumen como lista de párrafos</td><td class="al-center">1</td><td class="al-left">Párrafos independientes</td><td class="al-center">OK</td></tr>
+      <tr><td class="al-left">CP-35</td><td class="al-left">Fila de tabla como objeto</td><td class="al-center">1</td><td class="al-left">Mapeo por título de columna</td><td class="al-center">OK</td></tr>
+      <tr><td class="al-left">CP-36</td><td class="al-left">Fecha ISO con hora</td><td class="al-center">1</td><td class="al-left">Formato AAAA-MM-DD</td><td class="al-center">OK</td></tr>
+    </tbody>
+  </table>
+</div>
+    </section>
+    <section class="seccion" id="sec-6">
+      <h2 class="seccion__titulo"><span class="num">6</span>Riesgos y mitigaciones</h2>
+      <div class="bloque-tabla">
+  <table class="tabla">
+    <caption><span class="etiqueta">Tabla 3.</span> Registro de riesgos técnicos</caption>
+    <colgroup>
+<col style="width: 34%"><col style="width: 12%"><col style="width: 54%">    </colgroup>
+    <thead>
+      <tr><th class="al-left" scope="col">Riesgo</th><th class="al-center" scope="col">Impacto</th><th class="al-left" scope="col">Mitigación</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="al-left">Dependencias nativas de WeasyPrint en Windows</td><td class="al-center">Alto</td><td class="al-left">Import diferido, autodetección de MSYS2 y mensaje de diagnóstico.</td></tr>
+      <tr><td class="al-left">Documentos con miles de páginas</td><td class="al-center">Medio</td><td class="al-left">Aviso por umbral y opción <code>--limite-paginas</code>.</td></tr>
+      <tr><td class="al-left">Rutas absolutas rotas al mover carpetas</td><td class="al-center">Alto</td><td class="al-left">Rutas siempre relativas al HTML generado.</td></tr>
+      <tr><td class="al-left">PDF corrupto por fallo a mitad de escritura</td><td class="al-center">Medio</td><td class="al-left">Escritura en <code>.tmp</code> y reemplazo atómico.</td></tr>
+    </tbody>
+  </table>
+</div>
+      <aside class="nota nota--exito">
+  <p class="nota__titulo">Recomendación</p>
+  <p class="nota__texto">Ejecute siempre <code>--fase 1</code> durante el diseño de la plantilla y reserve <code>--fase all</code> para la generación final.</p>
+</aside>
+    </section>
+  </main>
+
+  <footer class="cierre">
+    Generado el 2026-10-16 10:25 por compilador.py (Jinja2 3.1.6 + WeasyPrint) a partir de
+    <code>datos.json</code> (esquema «reporte») ·
+    6 secciones, 3 tablas,
+    1 figuras, 2 bloques de código.
+  </footer>
+
+</body>
+</html>

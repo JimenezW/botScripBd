@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 400" width="960" height="400" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="flecha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#52606d"/>
+    </marker>
+  </defs>
+  <rect width="960" height="400" fill="#ffffff"/>
+
+  <!-- Capa 1: extracción -->
+  <text x="24" y="32" font-size="12" font-weight="700" fill="#1d4e89" letter-spacing="1.5">CAPA DE EXTRACCIÓN · botScribd</text>
+  <rect x="16" y="44" width="928" height="130" rx="10" fill="#f3f6f9" stroke="#bcccdc" stroke-dasharray="5 4"/>
+
+  <rect x="40" y="74" width="190" height="70" rx="8" fill="#e8f1fa" stroke="#2f80a8" stroke-width="1.5"/>
+  <text x="135" y="104" font-size="14" font-weight="700" fill="#102a43" text-anchor="middle">insumo/</text>
+  <text x="135" y="124" font-size="11" fill="#52606d" text-anchor="middle">HTML guardado + recursos</text>
+
+  <rect x="280" y="74" width="190" height="70" rx="8" fill="#ffffff" stroke="#102a43" stroke-width="1.5"/>
+  <text x="375" y="104" font-size="14" font-weight="700" fill="#102a43" text-anchor="middle">insumo_parser</text>
+  <text x="375" y="124" font-size="11" fill="#52606d" text-anchor="middle">detección de páginas</text>
+
+  <rect x="520" y="74" width="190" height="70" rx="8" fill="#ffffff" stroke="#102a43" stroke-width="1.5"/>
+  <text x="615" y="104" font-size="14" font-weight="700" fill="#102a43" text-anchor="middle">insumo_renderer</text>
+  <text x="615" y="124" font-size="11" fill="#52606d" text-anchor="middle">captura Retina (Playwright)</text>
+
+  <rect x="760" y="74" width="160" height="70" rx="8" fill="#e8f1fa" stroke="#2f80a8" stroke-width="1.5"/>
+  <text x="840" y="100" font-size="13" font-weight="700" fill="#102a43" text-anchor="middle">output/&lt;slug&gt;/</text>
+  <text x="840" y="118" font-size="10.5" fill="#52606d" text-anchor="middle">paginas.json</text>
+  <text x="840" y="132" font-size="10.5" fill="#52606d" text-anchor="middle">imagenes/*.png</text>
+
+  <line x1="230" y1="109" x2="278" y2="109" stroke="#52606d" stroke-width="1.6" marker-end="url(#flecha)"/>
+  <line x1="470" y1="109" x2="518" y2="109" stroke="#52606d" stroke-width="1.6" marker-end="url(#flecha)"/>
+  <line x1="710" y1="109" x2="758" y2="109" stroke="#52606d" stroke-width="1.6" marker-end="url(#flecha)"/>
+
+  <!-- Conector entre capas -->
+  <path d="M840,144 V194 H135 V250" fill="none" stroke="#52606d" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#flecha)"/>
+  <text x="488" y="188" font-size="10.5" fill="#52606d" text-anchor="middle">--origen (carpeta de extracción)</text>
+
+  <!-- Capa 2: compilación -->
+  <text x="24" y="218" font-size="12" font-weight="700" fill="#1d4e89" letter-spacing="1.5">CAPA DE COMPILACIÓN · compilador.py</text>
+  <rect x="16" y="230" width="928" height="150" rx="10" fill="#f3f6f9" stroke="#bcccdc" stroke-dasharray="5 4"/>
+
+  <rect x="40" y="254" width="190" height="80" rx="8" fill="#102a43"/>
+  <text x="135" y="284" font-size="11" font-weight="700" fill="#7cc4e4" text-anchor="middle" letter-spacing="1.2">FASE 1</text>
+  <text x="135" y="304" font-size="14" font-weight="700" fill="#ffffff" text-anchor="middle">Jinja2</text>
+  <text x="135" y="322" font-size="10.5" fill="#bcccdc" text-anchor="middle">normaliza · resuelve rutas</text>
+
+  <rect x="280" y="264" width="190" height="60" rx="8" fill="#e8f1fa" stroke="#2f80a8" stroke-width="1.5"/>
+  <text x="375" y="291" font-size="14" font-weight="700" fill="#102a43" text-anchor="middle">preview.html</text>
+  <text x="375" y="309" font-size="10.5" fill="#52606d" text-anchor="middle">navegador / Live Server</text>
+
+  <rect x="520" y="254" width="190" height="80" rx="8" fill="#102a43"/>
+  <text x="615" y="284" font-size="11" font-weight="700" fill="#7cc4e4" text-anchor="middle" letter-spacing="1.2">FASE 2</text>
+  <text x="615" y="304" font-size="14" font-weight="700" fill="#ffffff" text-anchor="middle">WeasyPrint</text>
+  <text x="615" y="322" font-size="10.5" fill="#bcccdc" text-anchor="middle">base_url = carpeta del HTML</text>
+
+  <rect x="760" y="264" width="160" height="60" rx="8" fill="#e8f1fa" stroke="#2f80a8" stroke-width="1.5"/>
+  <text x="840" y="291" font-size="14" font-weight="700" fill="#102a43" text-anchor="middle">reporte.pdf</text>
+  <text x="840" y="309" font-size="10.5" fill="#52606d" text-anchor="middle">A4 · Página X de Y</text>
+
+  <line x1="230" y1="294" x2="278" y2="294" stroke="#52606d" stroke-width="1.6" marker-end="url(#flecha)"/>
+  <line x1="470" y1="294" x2="518" y2="294" stroke="#52606d" stroke-width="1.6" marker-end="url(#flecha)"/>
+  <line x1="710" y1="294" x2="758" y2="294" stroke="#52606d" stroke-width="1.6" marker-end="url(#flecha)"/>
+
+  <text x="480" y="364" font-size="10.5" fill="#52606d" text-anchor="middle">Las fases son independientes: --fase 1 | --fase 2 | --fase all</text>
+</svg>

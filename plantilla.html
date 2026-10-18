@@ -1,0 +1,875 @@
+{#
+  plantilla.html — Plantilla Jinja2 para reportes técnicos (HTML + WeasyPrint)
+
+  Variables de contexto (ver ConstructorContexto en compilador.py):
+    meta, resumen, resumen_plano, secciones, fuentes, fuente_principal,
+    estadisticas, generacion
+
+  Filtros personalizados:
+    |inline      -> escapa HTML y soporta **negrita** y `código`
+    |css_string  -> literal de cadena CSS seguro (para content: en @page)
+#}
+{%- set paleta = {
+  "tinta":      "#1f2933",
+  "tinta_suave":"#52606d",
+  "titulo":     "#102a43",
+  "acento":     "#1d4e89",
+  "acento_2":   "#2f80a8",
+  "linea":      "#d9e2ec",
+  "zebra":      "#f3f6f9",
+  "fondo_suave":"#f7f9fb",
+  "codigo_bg":  "#0f1923",
+  "codigo_fg":  "#dbe4ee",
+  "codigo_ln":  "#5c6f82",
+} -%}
+{%- set fuente_texto -%}
+{% if fuente_principal %}{{ fuente_principal | css_string }}, {% endif %}"Inter", "Segoe UI", "Helvetica Neue", Arial, "Liberation Sans", "DejaVu Sans", sans-serif
+{%- endset -%}
+{%- set fuente_mono -%}
+"JetBrains Mono", "Cascadia Code", "Fira Code", Consolas, "Liberation Mono", "DejaVu Sans Mono", monospace
+{%- endset -%}
+
+{# ───────────────────────── Macros de bloques ───────────────────────── #}
+
+{%- macro render_lista(items, ordenada, nivel=1) -%}
+{%- set etiqueta = "ol" if ordenada else "ul" -%}
+<{{ etiqueta }} class="lista lista--{{ 'ordenada' if ordenada else 'vinetas' }} lista--n{{ nivel if nivel <= 3 else 3 }}">
+{%- for it in items %}
+  <li>{{ it.texto | inline }}{% if it.elementos %}{{ render_lista(it.elementos, ordenada, nivel + 1) }}{% endif %}</li>
+{%- endfor %}
+</{{ etiqueta }}>
+{%- endmacro -%}
+
+{%- macro render_bloque(b) -%}
+{%- if b.tipo == "parrafo" %}
+<p>{{ b.texto | inline }}</p>
+
+{%- elif b.tipo == "subtitulo" %}
+<h3 class="subtitulo" id="{{ b.id }}"><span class="num">{{ b.numero }}</span>{{ b.texto | inline }}</h3>
+
+{%- elif b.tipo == "lista" %}
+{{ render_lista(b.elementos, b.ordenada) }}
+
+{%- elif b.tipo == "tabla" %}
+<div class="bloque-tabla{% if b.dividir %} bloque-tabla--dividir{% endif %}">
+  <table class="tabla">
+    <caption><span class="etiqueta">Tabla {{ b.numero }}.</span> {{ b.titulo | inline }}</caption>
+    <colgroup>
+      {% for c in b.columnas %}<col{% if c.ancho %} style="width: {{ c.ancho }}"{% endif %}>{% endfor %}
+    </colgroup>
+    <thead>
+      <tr>{% for c in b.columnas %}<th class="al-{{ c.alineacion }}" scope="col">{{ c.titulo }}</th>{% endfor %}</tr>
+    </thead>
+    <tbody>
+      {% for fila in b.filas %}
+      <tr>{% for celda in fila %}<td class="al-{{ b.columnas[loop.index0].alineacion }}">{{ celda | inline }}</td>{% endfor %}</tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% if b.nota %}<p class="tabla__nota">{{ b.nota | inline }}</p>{% endif %}
+</div>
+
+{%- elif b.tipo == "codigo" %}
+<figure class="codigo">
+  <div class="codigo__barra">
+    <span class="codigo__lenguaje">{{ b.lenguaje | upper }}</span>
+    {% if b.titulo %}<span class="codigo__titulo">{{ b.titulo }}</span>{% endif %}
+  </div>
+  <pre class="codigo__cuerpo{% if b.numerar %} codigo__cuerpo--numerado{% endif %}"><code>{% for l in b.lineas %}<span class="ln">{{ l }}</span>{% endfor %}</code></pre>
+</figure>
+
+{%- elif b.tipo == "figura" %}
+<figure class="figura{% if b.pagina_completa %} figura--pagina{% endif %}">
+  {% if b.existe %}
+  <img src="{{ b.src }}" alt="{{ b.alt }}"{% if not b.pagina_completa %} style="width: {{ b.ancho }}"{% endif %}>
+  {% else %}
+  <div class="figura__faltante">Imagen no encontrada<br><code>{{ b.ruta_declarada }}</code></div>
+  {% endif %}
+  <figcaption>
+    <span class="etiqueta">Figura {{ b.numero }}.</span> {{ b.pie | inline }}
+    {% if b.fuente %}<span class="figura__fuente">Fuente: {{ b.fuente }}</span>{% endif %}
+  </figcaption>
+</figure>
+
+{%- elif b.tipo == "nota" %}
+<aside class="nota nota--{{ b.nivel }}">
+  <p class="nota__titulo">{{ b.titulo }}</p>
+  <p class="nota__texto">{{ b.texto | inline }}</p>
+</aside>
+{%- endif %}
+{%- endmacro -%}
+
+<!DOCTYPE html>
+<html lang="{{ meta.idioma }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ meta.titulo }} · v{{ meta.version }}</title>
+  <meta name="description" content="{{ resumen_plano | truncate(280) }}">
+  {% if meta.autor %}<meta name="author" content="{{ meta.autor }}">{% endif %}
+  {% if meta.palabras_clave %}<meta name="keywords" content="{{ meta.palabras_clave | join(', ') }}">{% endif %}
+  <meta name="generator" content="{{ generacion.generador }}">
+  <meta name="dcterms.created" content="{{ generacion.fecha_iso }}">
+  <style>
+    /* ═════════════════════ Fuentes locales (rutas relativas al HTML) ═════════════════════ */
+    {% for f in fuentes %}
+    @font-face {
+      font-family: {{ f.familia | css_string }};
+      src: url("{{ f.src }}") format("{{ f.formato }}");
+      font-weight: {{ f.peso }};
+      font-style: {{ f.estilo }};
+    }
+    {% endfor %}
+
+    /* ═════════════════════ Paginación (WeasyPrint / CSS Paged Media) ═════════════════════ */
+    {% if modo_documento %}
+    @page {
+      size: letter portrait;
+      margin: 0;
+    }
+    {% else %}
+    @page {
+      size: A4 portrait;
+      margin: 26mm 18mm 22mm 18mm;
+
+      @top-left {
+        content: {{ meta.titulo | truncate(90) | css_string }};
+        font-family: {{ fuente_texto }};
+        font-size: 7.5pt; font-weight: 600; color: {{ paleta.titulo }};
+        vertical-align: bottom; padding-bottom: 3.5mm;
+        border-bottom: 0.75pt solid {{ paleta.acento }};
+      }
+      @top-right {
+        content: {{ ("Versión " ~ meta.version ~ "   ·   " ~ meta.fecha) | css_string }};
+        font-family: {{ fuente_texto }};
+        font-size: 7.5pt; color: {{ paleta.tinta_suave }}; text-align: right;
+        vertical-align: bottom; padding-bottom: 3.5mm;
+        border-bottom: 0.75pt solid {{ paleta.acento }};
+      }
+      @bottom-left {
+        content: {{ meta.pie_izquierdo | css_string }};
+        font-family: {{ fuente_texto }};
+        font-size: 7pt; color: {{ paleta.tinta_suave }};
+        vertical-align: top; padding-top: 3mm; border-top: 0.5pt solid {{ paleta.linea }};
+      }
+      @bottom-center {
+        content: {{ meta.clasificacion | upper | css_string }};
+        font-family: {{ fuente_texto }};
+        font-size: 6.5pt; letter-spacing: 0.8pt; color: {{ paleta.acento }};
+        vertical-align: top; padding-top: 3mm; border-top: 0.5pt solid {{ paleta.linea }};
+      }
+      @bottom-right {
+        content: "Página " counter(page) " de " counter(pages);
+        font-family: {{ fuente_texto }};
+        font-size: 7pt; color: {{ paleta.tinta_suave }}; text-align: right;
+        vertical-align: top; padding-top: 3mm; border-top: 0.5pt solid {{ paleta.linea }};
+      }
+    }
+    /* La primera página ya muestra el encabezado del documento: sin cabecera corrida */
+    @page :first {
+      @top-left  { content: none; border: none; }
+      @top-right { content: none; border: none; }
+    }
+    {% endif %}
+
+    /* ═════════════════════ Base tipográfica ═════════════════════ */
+    html {
+      font-family: {{ fuente_texto }};
+      font-size: 9.6pt;
+      line-height: 1.55;
+      color: {{ paleta.tinta }};
+    }
+    body { margin: 0; }
+    h1, h2, h3 {
+      color: {{ paleta.titulo }};
+      line-height: 1.25;
+      page-break-after: avoid; break-after: avoid;
+    }
+    p { margin: 0 0 3.2mm; text-align: justify; hyphens: auto; orphans: 3; widows: 3; }
+    strong { font-weight: 700; color: {{ paleta.titulo }}; }
+    code {
+      font-family: {{ fuente_mono }};
+      font-size: 0.86em;
+      background: {{ paleta.zebra }};
+      border: 0.5pt solid {{ paleta.linea }};
+      border-radius: 2pt;
+      padding: 0 2.5pt;
+    }
+    a { color: {{ paleta.acento }}; text-decoration: none; }
+    .num { color: {{ paleta.acento_2 }}; margin-right: 3mm; font-variant-numeric: tabular-nums; }
+
+    /* ═════════════════════ Encabezado del documento ═════════════════════ */
+    .portada { margin-bottom: 8mm; }
+    .portada__franja {
+      display: flex; justify-content: space-between;
+      font-size: 7.5pt; letter-spacing: 1pt; text-transform: uppercase;
+      color: {{ paleta.tinta_suave }};
+      border-top: 3pt solid {{ paleta.acento }};
+      padding-top: 2.5mm; margin-bottom: 14mm;
+    }
+    .portada__tipo {
+      font-size: 8.5pt; font-weight: 600; letter-spacing: 1.2pt; text-transform: uppercase;
+      color: {{ paleta.acento_2 }}; margin: 0 0 2mm;
+    }
+    .portada__titulo { font-size: 24pt; font-weight: 700; margin: 0 0 2.5mm; bookmark-level: 1; }
+    .portada__subtitulo { font-size: 12pt; color: {{ paleta.tinta_suave }}; margin: 0 0 8mm; text-align: left; }
+
+    .ficha { width: 100%; border-collapse: collapse; margin-bottom: 8mm; font-size: 8.6pt; page-break-inside: avoid; }
+    .ficha th, .ficha td { padding: 2mm 3mm; border-bottom: 0.5pt solid {{ paleta.linea }}; text-align: left; vertical-align: top; }
+    .ficha th {
+      width: 17%; font-weight: 600; color: {{ paleta.tinta_suave }};
+      text-transform: uppercase; font-size: 7pt; letter-spacing: 0.6pt;
+    }
+    .ficha td { width: 33%; color: {{ paleta.titulo }}; font-weight: 500; }
+
+    .resumen {
+      background: {{ paleta.fondo_suave }};
+      border-left: 3pt solid {{ paleta.acento }};
+      padding: 4mm 5mm 1.5mm;
+      page-break-inside: avoid;
+    }
+    .resumen__titulo {
+      font-size: 8pt; letter-spacing: 1.2pt; text-transform: uppercase;
+      color: {{ paleta.acento }}; margin: 0 0 2mm;
+    }
+
+    /* ═════════════════════ Índice ═════════════════════ */
+    .indice { page-break-after: always; break-after: page; margin-top: 8mm; }
+    .indice__titulo {
+      font-size: 8pt; letter-spacing: 1.2pt; text-transform: uppercase;
+      color: {{ paleta.acento }}; margin: 0 0 3mm; bookmark-level: none;
+    }
+    .indice ol { list-style: none; margin: 0; padding: 0; }
+    .indice li { border-bottom: 0.5pt dotted {{ paleta.linea }}; padding: 1.6mm 0; }
+    .indice a { color: {{ paleta.tinta }}; display: block; }
+    @media print {
+      .indice a::after { content: leader(" ") target-counter(attr(href), page); color: {{ paleta.tinta_suave }}; }
+    }
+
+    /* ═════════════════════ Secciones ═════════════════════ */
+    .seccion { margin-bottom: 6mm; }
+    .seccion--nueva-pagina { page-break-before: always; break-before: page; }
+    .seccion__titulo {
+      font-size: 14.5pt; margin: 9mm 0 4mm; padding-bottom: 2mm;
+      border-bottom: 0.75pt solid {{ paleta.linea }};
+    }
+    .seccion:first-child .seccion__titulo { margin-top: 0; }
+    .subtitulo { font-size: 11pt; margin: 6mm 0 2.5mm; }
+
+    /* ═════════════════════ Viñetas jerárquicas ═════════════════════ */
+    .lista { margin: 0 0 3.5mm; padding-left: 0; }
+    .lista .lista { margin: 1.2mm 0 0.8mm; }
+    .lista li { margin-bottom: 1.2mm; }
+    .lista--vinetas { list-style: none; }
+    .lista--vinetas li { position: relative; padding-left: 5.5mm; }
+    .lista--vinetas li::before { content: ""; position: absolute; }
+    /* Nivel 1: cuadrado sólido de acento */
+    .lista--vinetas.lista--n1 > li::before {
+      left: 1mm; top: 0.62em; width: 1.6mm; height: 1.6mm; background: {{ paleta.acento }};
+    }
+    /* Nivel 2: círculo hueco */
+    .lista--vinetas.lista--n2 > li { color: {{ paleta.tinta }}; }
+    .lista--vinetas.lista--n2 > li::before {
+      left: 1mm; top: 0.58em; width: 1.3mm; height: 1.3mm;
+      border: 0.7pt solid {{ paleta.acento_2 }}; border-radius: 50%;
+    }
+    /* Nivel 3+: guion fino */
+    .lista--vinetas.lista--n3 { font-size: 0.95em; }
+    .lista--vinetas.lista--n3 > li { color: {{ paleta.tinta_suave }}; }
+    .lista--vinetas.lista--n3 > li::before {
+      left: 1mm; top: 0.78em; width: 2mm; height: 0; border-top: 0.7pt solid {{ paleta.tinta_suave }};
+    }
+    /* Listas ordenadas: 1. → a. → i. */
+    .lista--ordenada { padding-left: 6mm; }
+    .lista--ordenada.lista--n1 { list-style-type: decimal; }
+    .lista--ordenada.lista--n2 { list-style-type: lower-alpha; }
+    .lista--ordenada.lista--n3 { list-style-type: lower-roman; }
+    .lista--ordenada li::marker { color: {{ paleta.acento }}; font-weight: 600; }
+
+    /* ═════════════════════ Tablas técnicas ═════════════════════ */
+    .bloque-tabla { margin: 4mm 0 5mm; page-break-inside: avoid; break-inside: avoid; }
+    .bloque-tabla--dividir { page-break-inside: auto; break-inside: auto; }
+    .tabla {
+      width: 100%; border-collapse: collapse; font-size: 8.3pt; line-height: 1.4;
+      page-break-inside: avoid; break-inside: avoid;
+    }
+    .bloque-tabla--dividir .tabla { page-break-inside: auto; break-inside: auto; }
+    .tabla caption {
+      caption-side: top; text-align: left; font-size: 8.3pt; color: {{ paleta.tinta_suave }};
+      padding-bottom: 2mm;
+    }
+    .etiqueta { font-weight: 700; color: {{ paleta.titulo }}; }
+    /* Repetición del encabezado en cada página */
+    .tabla thead { display: table-header-group; }
+    .tabla tfoot { display: table-footer-group; }
+    .tabla tr, .tabla th, .tabla td { page-break-inside: avoid; break-inside: avoid; }
+    .tabla th {
+      background: {{ paleta.titulo }}; color: #ffffff; font-weight: 600;
+      font-size: 7.6pt; letter-spacing: 0.4pt; text-transform: uppercase;
+      padding: 2.2mm 2.6mm; border: 0.5pt solid {{ paleta.titulo }};
+    }
+    .tabla td { padding: 1.9mm 2.6mm; border-bottom: 0.5pt solid {{ paleta.linea }}; vertical-align: top; }
+    .tabla tbody tr:nth-child(even) td { background: {{ paleta.zebra }}; }
+    .tabla tbody tr:last-child td { border-bottom: 1pt solid {{ paleta.titulo }}; }
+    .al-left { text-align: left; } .al-center { text-align: center; } .al-right { text-align: right; }
+    .tabla__nota { font-size: 7.6pt; color: {{ paleta.tinta_suave }}; margin-top: 1.8mm; text-align: left; }
+
+    /* ═════════════════════ Bloques de código ═════════════════════ */
+    .codigo {
+      margin: 4mm 0 5mm; border-radius: 3pt; overflow: hidden;
+      background: {{ paleta.codigo_bg }};
+      page-break-inside: avoid; break-inside: avoid;
+    }
+    .codigo__barra {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1.6mm 3.5mm; background: #1a2733; border-bottom: 0.5pt solid #2a3b4c;
+      font-size: 7pt; color: #9fb3c8;
+    }
+    .codigo__lenguaje { font-weight: 700; letter-spacing: 1pt; color: #7cc4e4; }
+    .codigo__titulo { font-family: {{ fuente_mono }}; }
+    .codigo__cuerpo {
+      margin: 0; padding: 3mm 3.5mm;
+      font-family: {{ fuente_mono }}; font-size: 7.8pt; line-height: 1.55;
+      color: {{ paleta.codigo_fg }};
+      white-space: pre-wrap; word-wrap: break-word; overflow-wrap: anywhere;
+      counter-reset: ln;
+    }
+    .codigo__cuerpo code { font: inherit; background: none; border: none; padding: 0; color: inherit; }
+    .codigo__cuerpo .ln { display: block; min-height: 1.55em; }
+    .codigo__cuerpo--numerado .ln { padding-left: 9mm; text-indent: -9mm; }
+    .codigo__cuerpo--numerado .ln::before {
+      counter-increment: ln; content: counter(ln);
+      display: inline-block; width: 6mm; margin-right: 3mm; text-indent: 0;
+      text-align: right; color: {{ paleta.codigo_ln }};
+    }
+
+    /* ═════════════════════ Figuras ═════════════════════ */
+    .figura { margin: 5mm 0 6mm; text-align: center; page-break-inside: avoid; break-inside: avoid; }
+    .figura img { max-width: 100%; height: auto; border: 0.5pt solid {{ paleta.linea }}; }
+    .figura--pagina img { width: auto; max-height: 212mm; }
+    .figura figcaption {
+      margin-top: 2.5mm; font-size: 8pt; color: {{ paleta.tinta_suave }};
+      max-width: 85%; margin-left: auto; margin-right: auto;
+    }
+    .figura__fuente { display: block; font-size: 7pt; margin-top: 0.8mm; font-style: italic; }
+    .figura__faltante {
+      margin: 0 auto; width: 70%; padding: 10mm 4mm; font-size: 8.5pt;
+      border: 1pt dashed #c0392b; color: #c0392b; background: #fdf2f1;
+    }
+
+    /* ═════════════════════ Notas / callouts ═════════════════════ */
+    .nota {
+      margin: 4mm 0; padding: 3mm 4mm 1mm; border-left: 3pt solid; border-radius: 0 2pt 2pt 0;
+      page-break-inside: avoid; break-inside: avoid;
+    }
+    .nota__titulo { font-size: 7.5pt; font-weight: 700; letter-spacing: 1pt; text-transform: uppercase; margin: 0 0 1mm; }
+    .nota--info        { background: #eef5fb; border-color: {{ paleta.acento_2 }}; } .nota--info .nota__titulo { color: {{ paleta.acento_2 }}; }
+    .nota--exito       { background: #edf7f1; border-color: #2e8b57; }  .nota--exito .nota__titulo { color: #2e7d4f; }
+    .nota--advertencia { background: #fdf6e9; border-color: #d48806; }  .nota--advertencia .nota__titulo { color: #ad6c00; }
+    .nota--critico     { background: #fbefee; border-color: #c0392b; }  .nota--critico .nota__titulo { color: #a93226; }
+
+    /* ═════════════════════ Cierre ═════════════════════ */
+    .cierre {
+      margin-top: 10mm; padding-top: 3mm; border-top: 0.5pt solid {{ paleta.linea }};
+      font-size: 7pt; color: {{ paleta.tinta_suave }}; page-break-inside: avoid;
+    }
+
+    /* ═════════════════════ Vista previa en navegador (no afecta al PDF) ═════════════════════ */
+    .preview-aviso { display: none; }
+    @media screen {
+      html { background: #dfe5ec; }
+      body {
+        max-width: 210mm; min-height: 297mm; box-sizing: border-box;
+        margin: 0 auto 12mm; padding: 20mm 18mm;
+        background: #ffffff; box-shadow: 0 6px 30px rgba(16, 42, 67, 0.18);
+      }
+      body.body--documento {
+        max-width: none; min-height: none; margin: 0; padding: 24px 0;
+        background: #dfe5ec; box-shadow: none;
+      }
+      body.body--documento .doc-page {
+        margin: 30px auto;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+      }
+      .preview-aviso {
+        display: block; position: sticky; top: 0; z-index: 10;
+        margin: -20mm -18mm 12mm; padding: 2.5mm 18mm;
+        background: {{ paleta.titulo }}; color: #d9e2ec; font-size: 8pt;
+      }
+      .preview-aviso strong { color: #ffffff; }
+      .indice { border-bottom: 1px dashed {{ paleta.linea }}; padding-bottom: 8mm; }
+      .codigo__cuerpo { overflow-x: auto; }
+    }
+
+    /* ═════════════════════ Modo Documento Reconstruido (Páginas Carta 8.5" x 11") ═════════════════════ */
+    body.body--documento {
+      background: #4a4d50;
+      padding: 30px 0;
+      margin: 0;
+    }
+    .doc-page {
+      width: 8.5in;
+      height: 11in;
+      position: relative;
+      background: #ffffff;
+      padding: 18mm 20mm 15mm 20mm;
+      box-sizing: border-box;
+      page-break-after: always;
+      break-after: page;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      margin: 0 auto 30px auto;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+    }
+    @media print {
+      body.body--documento {
+        background: none;
+        padding: 0;
+        margin: 0;
+      }
+      body.body--documento .doc-page {
+        margin: 0;
+        box-shadow: none;
+        width: 8.5in;
+        height: 11in;
+        page-break-after: always;
+        break-after: page;
+      }
+    }
+
+    /* Página 1: Cover (Imagen a sangrado completo en hoja carta) */
+    .doc-page--cover {
+      padding: 0 !important;
+      overflow: hidden;
+    }
+    .cover-image-full {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* Página 2: Legal / Copyright */
+    .doc-page--legal {
+      padding-top: 22mm;
+      justify-content: flex-start;
+    }
+    .legal-header {
+      margin-bottom: 20px;
+    }
+    .legal-title {
+      font-family: Arial, "Helvetica Neue", sans-serif;
+      font-size: 13pt;
+      font-weight: 700;
+      color: #000000;
+      margin: 0 0 6px 0;
+      letter-spacing: -0.2px;
+    }
+    .legal-rule {
+      border: none;
+      border-top: 1.2pt solid #222222;
+      margin: 0;
+      width: 100%;
+    }
+    .legal-p {
+      font-family: Arial, "Helvetica Neue", sans-serif;
+      font-size: 9.2pt;
+      line-height: 1.5;
+      color: #1a1a1a;
+      text-align: justify;
+      margin: 0 0 16px 0;
+    }
+    .legal-build {
+      font-family: Arial, "Helvetica Neue", sans-serif;
+      font-size: 9.2pt;
+      color: #1a1a1a;
+      margin-top: 24px;
+    }
+
+    /* Páginas 3 a 38: Table of Contents */
+    .doc-page--toc {
+      justify-content: space-between;
+    }
+    .toc-title-first {
+      font-family: Arial, "Helvetica Neue", sans-serif;
+      font-size: 22pt;
+      font-weight: 700;
+      color: #000000;
+      margin: 0 0 24px 0;
+    }
+    .toc-top-running {
+      margin-bottom: 20px;
+    }
+    .toc-top-running--left {
+      text-align: left;
+    }
+    .toc-top-running--right {
+      text-align: right;
+    }
+    .running-toc-title {
+      font-family: Arial, "Helvetica Neue", sans-serif;
+      font-size: 10pt;
+      font-weight: 700;
+      color: #000000;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .running-toc-rule {
+      border: none;
+      border-top: 1.2pt solid #222222;
+      margin: 0;
+      width: 100%;
+    }
+    .toc-grid {
+      display: flex;
+      justify-content: space-between;
+      gap: 12mm;
+      flex: 1;
+    }
+    .toc-column {
+      flex: 1;
+      width: 48%;
+      display: flex;
+      flex-direction: column;
+    }
+    .toc-row {
+      display: flex;
+      align-items: baseline;
+      font-family: Arial, "Helvetica Neue", sans-serif;
+      font-size: 8.2pt;
+      line-height: 1.45;
+      color: #1a1a1a;
+      margin-bottom: 4.8px;
+    }
+    .toc-row--main {
+      font-weight: 700;
+      color: #000000;
+      margin-top: 4px;
+    }
+    .toc-item-title {
+      flex-shrink: 0;
+      max-width: 82%;
+    }
+    .toc-item-leader {
+      flex-grow: 1;
+      border-bottom: 1.2pt dotted #888888;
+      margin: 0 4px 3px 4px;
+      height: 1px;
+    }
+    .toc-item-page {
+      flex-shrink: 0;
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+      text-align: right;
+    }
+
+    /* Páginas 39 a 100+: Contenido Técnico */
+    .doc-page--content {
+      justify-content: space-between;
+    }
+    .doc-content-header {
+      margin-bottom: 16px;
+    }
+    .doc-content-header--left {
+      text-align: left;
+    }
+    .doc-content-header--right {
+      text-align: right;
+    }
+    .running-header-text {
+      font-family: Arial, "Helvetica Neue", sans-serif;
+      font-size: 9.5pt;
+      font-weight: 700;
+      color: #333333;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .running-header-rule {
+      border: none;
+      border-top: 1.2pt solid #222222;
+      margin: 0;
+      width: 100%;
+    }
+    .doc-content-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .content-h1 {
+      font-family: Arial, "Helvetica Neue", sans-serif;
+      font-size: 20pt;
+      font-weight: 700;
+      color: #000000;
+      margin: 0 0 14px 0;
+      letter-spacing: -0.3px;
+    }
+    .content-h2 {
+      font-family: Arial, "Helvetica Neue", sans-serif;
+      font-size: 13pt;
+      font-weight: 700;
+      color: #000000;
+      margin: 12px 0 8px 0;
+    }
+    .content-p {
+      font-family: Arial, "Helvetica Neue", sans-serif;
+      font-size: 9.2pt;
+      line-height: 1.5;
+      color: #1a1a1a;
+      margin: 0 0 10px 0;
+      text-align: justify;
+    }
+    .content-bullet {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin: 0 0 6px 14px;
+      font-family: Arial, "Helvetica Neue", sans-serif;
+      font-size: 9.2pt;
+      line-height: 1.45;
+      color: #1a1a1a;
+    }
+    .bullet-bullet {
+      font-size: 11pt;
+      color: #000000;
+      line-height: 1;
+    }
+    .bullet-text {
+      flex: 1;
+      text-align: justify;
+    }
+    .content-step {
+      font-family: Arial, "Helvetica Neue", sans-serif;
+      font-size: 9.2pt;
+      line-height: 1.45;
+      color: #1a1a1a;
+      margin: 0 0 7px 10px;
+    }
+    .content-tip {
+      background-color: #f7f9fa;
+      border-left: 3.5pt solid #005f73;
+      padding: 8px 12px;
+      margin: 10px 0 12px 0;
+      font-family: Arial, "Helvetica Neue", sans-serif;
+      font-size: 8.8pt;
+      line-height: 1.45;
+      color: #222222;
+    }
+    .tip-label {
+      font-weight: 700;
+      color: #005f73;
+      margin-right: 4px;
+    }
+
+    /* Pie de página institucional común */
+    .doc-page-footer {
+      margin-top: auto;
+      padding-top: 12px;
+      display: flex;
+      justify-content: space-between;
+      font-family: Arial, "Helvetica Neue", sans-serif;
+      font-size: 8.2pt;
+      color: #333333;
+    }
+    .doc-page-footer .doc-f-left,
+    .doc-page-footer .doc-f-right {
+      width: 40%;
+    }
+    .doc-page-footer .doc-f-center {
+      width: 20%;
+      text-align: center;
+    }
+    .doc-page-footer .doc-f-right {
+      text-align: right;
+    }
+  </style>
+</head>
+<body{% if modo_documento %} class="body--documento"{% endif %}>
+
+{% if modo_documento %}
+  {# ═════════════════════════════════════════════════════════════════════════
+     MODO DOCUMENTO RECONSTRUIDO: PÁGINAS A4 FIELES AL DOCUMENTO ORIGINAL
+     ═════════════════════════════════════════════════════════════════════════ #}
+  {% for pag in paginas_documento %}
+    {% if pag.tipo == "portada" %}
+    <div class="doc-page doc-page--cover" id="page-1">
+      <img src="{{ pag.imagen }}" alt="GoAnywhere MFT User Guide" class="cover-image-full">
+    </div>
+
+    {% elif pag.tipo == "legal" %}
+    <div class="doc-page doc-page--legal" id="page-2">
+      <div class="legal-header">
+        <h2 class="legal-title">{{ pag.titulo }}</h2>
+        <hr class="legal-rule">
+      </div>
+      <div class="legal-body">
+        {% for p in pag.parrafos %}
+        <p class="legal-p">{{ p }}</p>
+        {% endfor %}
+        <p class="legal-build">{{ pag.build }}</p>
+      </div>
+    </div>
+
+    {% elif pag.tipo == "toc" %}
+    <div class="doc-page doc-page--toc" id="page-{{ pag.numero }}">
+      {% if pag.numero == 3 %}
+      <div class="toc-top-first">
+        <h1 class="toc-title-first">Table of Contents</h1>
+      </div>
+      {% else %}
+      <div class="toc-top-running toc-top-running--{{ 'left' if pag.numero % 2 == 0 else 'right' }}">
+        <span class="running-toc-title">Table of Contents</span>
+        <hr class="running-toc-rule">
+      </div>
+      {% endif %}
+
+      <div class="toc-grid">
+        <div class="toc-column">
+          {% for item in pag.columna_izq %}
+          <div class="toc-row{% if item.es_principal %} toc-row--main{% endif %}">
+            <span class="toc-item-title">{{ item.titulo }}</span>
+            <span class="toc-item-leader"></span>
+            <span class="toc-item-page">{{ item.pagina }}</span>
+          </div>
+          {% endfor %}
+        </div>
+        <div class="toc-column">
+          {% for item in pag.columna_der %}
+          <div class="toc-row{% if item.es_principal %} toc-row--main{% endif %}">
+            <span class="toc-item-title">{{ item.titulo }}</span>
+            <span class="toc-item-leader"></span>
+            <span class="toc-item-page">{{ item.pagina }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <footer class="doc-page-footer">
+        {% if pag.numero % 2 != 0 %}
+        <span class="doc-f-left">GoAnywhere MFT User Guide</span>
+        <span class="doc-f-center">www.goanywhere.com</span>
+        <span class="doc-f-right">page: {{ pag.numero }}</span>
+        {% else %}
+        <span class="doc-f-left">page: {{ pag.numero }}</span>
+        <span class="doc-f-center">www.goanywhere.com</span>
+        <span class="doc-f-right">GoAnywhere MFT User Guide</span>
+        {% endif %}
+      </footer>
+    </div>
+
+    {% elif pag.tipo == "contenido" %}
+    <div class="doc-page doc-page--content" id="page-{{ pag.numero }}">
+      <header class="doc-content-header doc-content-header--{{ 'left' if pag.numero % 2 == 0 else 'right' }}">
+        {% if pag.running_header %}
+        <span class="running-header-text">{{ pag.running_header }}</span>
+        <hr class="running-header-rule">
+        {% endif %}
+      </header>
+
+      <main class="doc-content-body">
+        {% for elem in pag.elementos %}
+          {% if elem.tipo == "h1" %}
+            <h1 class="content-h1">{{ elem.texto }}</h1>
+          {% elif elem.tipo == "h2" %}
+            <h2 class="content-h2">{{ elem.texto }}</h2>
+          {% elif elem.tipo == "p" %}
+            <p class="content-p">{{ elem.texto }}</p>
+          {% elif elem.tipo == "bullet" %}
+            <div class="content-bullet">
+              <span class="bullet-bullet">&bull;</span>
+              <span class="bullet-text">{{ elem.texto }}</span>
+            </div>
+          {% elif elem.tipo == "numero" %}
+            <p class="content-step">{{ elem.texto }}</p>
+          {% elif elem.tipo == "tip" %}
+            <div class="content-tip">
+              <strong class="tip-label">TIP:</strong>
+              <span class="tip-text">{{ elem.texto | replace("TIP:", "") | trim }}</span>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </main>
+
+      <footer class="doc-page-footer">
+        {% if pag.numero % 2 != 0 %}
+        <span class="doc-f-left">GoAnywhere MFT User Guide</span>
+        <span class="doc-f-center">www.goanywhere.com</span>
+        <span class="doc-f-right">page: {{ pag.numero }}</span>
+        {% else %}
+        <span class="doc-f-left">page: {{ pag.numero }}</span>
+        <span class="doc-f-center">www.goanywhere.com</span>
+        <span class="doc-f-right">GoAnywhere MFT User Guide</span>
+        {% endif %}
+      </footer>
+    </div>
+    {% endif %}
+  {% endfor %}
+
+{% else %}
+  {# ═════════════════════════════════════════════════════════════════════════
+     MODO REPORTE TÉCNICO TRADICIONAL
+     ═════════════════════════════════════════════════════════════════════════ #}
+  <div class="preview-aviso" role="note">
+    <strong>Vista previa HTML</strong> · El encabezado, el pie y la numeración «Página X de Y» se materializan en la Fase 2 (PDF).
+  </div>
+
+  <header class="portada" id="inicio">
+    <div class="portada__franja">
+      <span>{{ meta.organizacion or meta.tipo_documento }}</span>
+      <span>{{ meta.codigo }}</span>
+    </div>
+    <p class="portada__tipo">{{ meta.tipo_documento }}</p>
+    <h1 class="portada__titulo">{{ meta.titulo }}</h1>
+    {% if meta.subtitulo %}<p class="portada__subtitulo">{{ meta.subtitulo }}</p>{% endif %}
+
+    {% if meta.ficha %}
+    <table class="ficha" aria-label="Metadatos del documento">
+      {% for par in meta.ficha | batch(2, ("", "")) %}
+      <tr>
+        {% for etiqueta, valor in par %}<th scope="row">{{ etiqueta }}</th><td>{{ valor }}</td>{% endfor %}
+      </tr>
+      {% endfor %}
+    </table>
+    {% endif %}
+
+    {% if resumen %}
+    <section class="resumen" aria-labelledby="resumen-titulo">
+      <h2 class="resumen__titulo" id="resumen-titulo">Resumen</h2>
+      {% for parrafo in resumen %}<p>{{ parrafo | inline }}</p>{% endfor %}
+    </section>
+    {% endif %}
+  </header>
+
+  {% if secciones %}
+  <nav class="indice" aria-labelledby="indice-titulo">
+    <h2 class="indice__titulo" id="indice-titulo">Contenido</h2>
+    <ol>
+      {% for s in secciones %}
+      <li><a href="#{{ s.id }}"><span class="num">{{ s.numero }}</span>{{ s.titulo }}</a></li>
+      {% endfor %}
+    </ol>
+  </nav>
+  {% endif %}
+
+  <main>
+    {% for s in secciones %}
+    <section class="seccion{% if s.nueva_pagina %} seccion--nueva-pagina{% endif %}" id="{{ s.id }}">
+      <h2 class="seccion__titulo"><span class="num">{{ s.numero }}</span>{{ s.titulo }}</h2>
+      {% for b in s.bloques %}
+      {{ render_bloque(b) }}
+      {% endfor %}
+    </section>
+    {% endfor %}
+  </main>
+
+  <footer class="cierre">
+    Generado el {{ generacion.fecha }} por {{ generacion.generador }} a partir de
+    <code>{{ generacion.archivo_datos }}</code> (esquema «{{ generacion.esquema }}») ·
+    {{ estadisticas.secciones }} secciones, {{ estadisticas.tablas }} tablas,
+    {{ estadisticas.figuras }} figuras, {{ estadisticas.codigos }} bloques de código.
+  </footer>
+{% endif %}
+
+</body>
+</html>
+

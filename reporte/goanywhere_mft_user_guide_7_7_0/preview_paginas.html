@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GoAnywhere MFT User Guide 7.7.0 · v7.7.0</title>
+  <meta name="description" content="Este reporte consolida la reconstrucción textual estructurada de 10 de 10 páginas extraídas del documento «GoAnywhere MFT User Guide 7.7.0». El texto ha sido normalizado y maquetado en tipografía nativa vectorial, acompañando las capturas originales como puntos de apoyo para...">
+  <meta name="generator" content="compilador.py (Jinja2 3.1.6 + WeasyPrint)">
+  <meta name="dcterms.created" content="2026-10-16T10:38:47">
+  <style>
+    /* ═════════════════════ Fuentes locales (rutas relativas al HTML) ═════════════════════ */
+
+    /* ═════════════════════ Paginación (WeasyPrint / CSS Paged Media) ═════════════════════ */
+    @page {
+      size: A4 portrait;
+      margin: 26mm 18mm 22mm 18mm;
+
+      @top-left {
+        content: "GoAnywhere MFT User Guide 7.7.0";
+        font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, "Liberation Sans", "DejaVu Sans", sans-serif;
+        font-size: 7.5pt; font-weight: 600; color: #102a43;
+        vertical-align: bottom; padding-bottom: 3.5mm;
+        border-bottom: 0.75pt solid #1d4e89;
+      }
+      @top-right {
+        content: "Versión 7.7.0   ·   2026-10-15";
+        font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, "Liberation Sans", "DejaVu Sans", sans-serif;
+        font-size: 7.5pt; color: #52606d; text-align: right;
+        vertical-align: bottom; padding-bottom: 3.5mm;
+        border-bottom: 0.75pt solid #1d4e89;
+      }
+      @bottom-left {
+        content: "goanywhere_mft_user_guide_7_7_0";
+        font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, "Liberation Sans", "DejaVu Sans", sans-serif;
+        font-size: 7pt; color: #52606d;
+        vertical-align: top; padding-top: 3mm; border-top: 0.5pt solid #d9e2ec;
+      }
+      @bottom-center {
+        content: "USO INTERNO";
+        font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, "Liberation Sans", "DejaVu Sans", sans-serif;
+        font-size: 6.5pt; letter-spacing: 0.8pt; color: #1d4e89;
+        vertical-align: top; padding-top: 3mm; border-top: 0.5pt solid #d9e2ec;
+      }
+      @bottom-right {
+        content: "Página " counter(page) " de " counter(pages);
+        font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, "Liberation Sans", "DejaVu Sans", sans-serif;
+        font-size: 7pt; color: #52606d; text-align: right;
+        vertical-align: top; padding-top: 3mm; border-top: 0.5pt solid #d9e2ec;
+      }
+    }
+    /* La primera página ya muestra el encabezado del documento: sin cabecera corrida */
+    @page :first {
+      @top-left  { content: none; border: none; }
+      @top-right { content: none; border: none; }
+    }
+
+    /* ═════════════════════ Base tipográfica ═════════════════════ */
+    html {
+      font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, "Liberation Sans", "DejaVu Sans", sans-serif;
+      font-size: 9.6pt;
+      line-height: 1.55;
+      color: #1f2933;
+    }
+    body { margin: 0; }
+    h1, h2, h3 {
+      color: #102a43;
+      line-height: 1.25;
+      page-break-after: avoid; break-after: avoid;
+    }
+    p { margin: 0 0 3.2mm; text-align: justify; hyphens: auto; orphans: 3; widows: 3; }
+    strong { font-weight: 700; color: #102a43; }
+    code {
+      font-family: "JetBrains Mono", "Cascadia Code", "Fira Code", Consolas, "Liberation Mono", "DejaVu Sans Mono", monospace;
+      font-size: 0.86em;
+      background: #f3f6f9;
+      border: 0.5pt solid #d9e2ec;
+      border-radius: 2pt;
+      padding: 0 2.5pt;
+    }
+    a { color: #1d4e89; text-decoration: none; }
+    .num { color: #2f80a8; margin-right: 3mm; font-variant-numeric: tabular-nums; }
+
+    /* ═════════════════════ Encabezado del documento ═════════════════════ */
+    .portada { margin-bottom: 8mm; }
+    .portada__franja {
+      display: flex; justify-content: space-between;
+      font-size: 7.5pt; letter-spacing: 1pt; text-transform: uppercase;
+      color: #52606d;
+      border-top: 3pt solid #1d4e89;
+      padding-top: 2.5mm; margin-bottom: 14mm;
+    }
+    .portada__tipo {
+      font-size: 8.5pt; font-weight: 600; letter-spacing: 1.2pt; text-transform: uppercase;
+      color: #2f80a8; margin: 0 0 2mm;
+    }
+    .portada__titulo { font-size: 24pt; font-weight: 700; margin: 0 0 2.5mm; bookmark-level: 1; }
+    .portada__subtitulo { font-size: 12pt; color: #52606d; margin: 0 0 8mm; text-align: left; }
+
+    .ficha { width: 100%; border-collapse: collapse; margin-bottom: 8mm; font-size: 8.6pt; page-break-inside: avoid; }
+    .ficha th, .ficha td { padding: 2mm 3mm; border-bottom: 0.5pt solid #d9e2ec; text-align: left; vertical-align: top; }
+    .ficha th {
+      width: 17%; font-weight: 600; color: #52606d;
+      text-transform: uppercase; font-size: 7pt; letter-spacing: 0.6pt;
+    }
+    .ficha td { width: 33%; color: #102a43; font-weight: 500; }
+
+    .resumen {
+      background: #f7f9fb;
+      border-left: 3pt solid #1d4e89;
+      padding: 4mm 5mm 1.5mm;
+      page-break-inside: avoid;
+    }
+    .resumen__titulo {
+      font-size: 8pt; letter-spacing: 1.2pt; text-transform: uppercase;
+      color: #1d4e89; margin: 0 0 2mm;
+    }
+
+    /* ═════════════════════ Índice ═════════════════════ */
+    .indice { page-break-after: always; break-after: page; margin-top: 8mm; }
+    .indice__titulo {
+      font-size: 8pt; letter-spacing: 1.2pt; text-transform: uppercase;
+      color: #1d4e89; margin: 0 0 3mm; bookmark-level: none;
+    }
+    .indice ol { list-style: none; margin: 0; padding: 0; }
+    .indice li { border-bottom: 0.5pt dotted #d9e2ec; padding: 1.6mm 0; }
+    .indice a { color: #1f2933; display: block; }
+    @media print {
+      .indice a::after { content: leader(" ") target-counter(attr(href), page); color: #52606d; }
+    }
+
+    /* ═════════════════════ Secciones ═════════════════════ */
+    .seccion { margin-bottom: 6mm; }
+    .seccion--nueva-pagina { page-break-before: always; break-before: page; }
+    .seccion__titulo {
+      font-size: 14.5pt; margin: 9mm 0 4mm; padding-bottom: 2mm;
+      border-bottom: 0.75pt solid #d9e2ec;
+    }
+    .seccion:first-child .seccion__titulo { margin-top: 0; }
+    .subtitulo { font-size: 11pt; margin: 6mm 0 2.5mm; }
+
+    /* ═════════════════════ Viñetas jerárquicas ═════════════════════ */
+    .lista { margin: 0 0 3.5mm; padding-left: 0; }
+    .lista .lista { margin: 1.2mm 0 0.8mm; }
+    .lista li { margin-bottom: 1.2mm; }
+    .lista--vinetas { list-style: none; }
+    .lista--vinetas li { position: relative; padding-left: 5.5mm; }
+    .lista--vinetas li::before { content: ""; position: absolute; }
+    /* Nivel 1: cuadrado sólido de acento */
+    .lista--vinetas.lista--n1 > li::before {
+      left: 1mm; top: 0.62em; width: 1.6mm; height: 1.6mm; background: #1d4e89;
+    }
+    /* Nivel 2: círculo hueco */
+    .lista--vinetas.lista--n2 > li { color: #1f2933; }
+    .lista--vinetas.lista--n2 > li::before {
+      left: 1mm; top: 0.58em; width: 1.3mm; height: 1.3mm;
+      border: 0.7pt solid #2f80a8; border-radius: 50%;
+    }
+    /* Nivel 3+: guion fino */
+    .lista--vinetas.lista--n3 { font-size: 0.95em; }
+    .lista--vinetas.lista--n3 > li { color: #52606d; }
+    .lista--vinetas.lista--n3 > li::before {
+      left: 1mm; top: 0.78em; width: 2mm; height: 0; border-top: 0.7pt solid #52606d;
+    }
+    /* Listas ordenadas: 1. → a. → i. */
+    .lista--ordenada { padding-left: 6mm; }
+    .lista--ordenada.lista--n1 { list-style-type: decimal; }
+    .lista--ordenada.lista--n2 { list-style-type: lower-alpha; }
+    .lista--ordenada.lista--n3 { list-style-type: lower-roman; }
+    .lista--ordenada li::marker { color: #1d4e89; font-weight: 600; }
+
+    /* ═════════════════════ Tablas técnicas ═════════════════════ */
+    .bloque-tabla { margin: 4mm 0 5mm; page-break-inside: avoid; break-inside: avoid; }
+    .bloque-tabla--dividir { page-break-inside: auto; break-inside: auto; }
+    .tabla {
+      width: 100%; border-collapse: collapse; font-size: 8.3pt; line-height: 1.4;
+      page-break-inside: avoid; break-inside: avoid;
+    }
+    .bloque-tabla--dividir .tabla { page-break-inside: auto; break-inside: auto; }
+    .tabla caption {
+      caption-side: top; text-align: left; font-size: 8.3pt; color: #52606d;
+      padding-bottom: 2mm;
+    }
+    .etiqueta { font-weight: 700; color: #102a43; }
+    /* Repetición del encabezado en cada página */
+    .tabla thead { display: table-header-group; }
+    .tabla tfoot { display: table-footer-group; }
+    .tabla tr, .tabla th, .tabla td { page-break-inside: avoid; break-inside: avoid; }
+    .tabla th {
+      background: #102a43; color: #ffffff; font-weight: 600;
+      font-size: 7.6pt; letter-spacing: 0.4pt; text-transform: uppercase;
+      padding: 2.2mm 2.6mm; border: 0.5pt solid #102a43;
+    }
+    .tabla td { padding: 1.9mm 2.6mm; border-bottom: 0.5pt solid #d9e2ec; vertical-align: top; }
+    .tabla tbody tr:nth-child(even) td { background: #f3f6f9; }
+    .tabla tbody tr:last-child td { border-bottom: 1pt solid #102a43; }
+    .al-left { text-align: left; } .al-center { text-align: center; } .al-right { text-align: right; }
+    .tabla__nota { font-size: 7.6pt; color: #52606d; margin-top: 1.8mm; text-align: left; }
+
+    /* ═════════════════════ Bloques de código ═════════════════════ */
+    .codigo {
+      margin: 4mm 0 5mm; border-radius: 3pt; overflow: hidden;
+      background: #0f1923;
+      page-break-inside: avoid; break-inside: avoid;
+    }
+    .codigo__barra {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1.6mm 3.5mm; background: #1a2733; border-bottom: 0.5pt solid #2a3b4c;
+      font-size: 7pt; color: #9fb3c8;
+    }
+    .codigo__lenguaje { font-weight: 700; letter-spacing: 1pt; color: #7cc4e4; }
+    .codigo__titulo { font-family: "JetBrains Mono", "Cascadia Code", "Fira Code", Consolas, "Liberation Mono", "DejaVu Sans Mono", monospace; }
+    .codigo__cuerpo {
+      margin: 0; padding: 3mm 3.5mm;
+      font-family: "JetBrains Mono", "Cascadia Code", "Fira Code", Consolas, "Liberation Mono", "DejaVu Sans Mono", monospace; font-size: 7.8pt; line-height: 1.55;
+      color: #dbe4ee;
+      white-space: pre-wrap; word-wrap: break-word; overflow-wrap: anywhere;
+      counter-reset: ln;
+    }
+    .codigo__cuerpo code { font: inherit; background: none; border: none; padding: 0; color: inherit; }
+    .codigo__cuerpo .ln { display: block; min-height: 1.55em; }
+    .codigo__cuerpo--numerado .ln { padding-left: 9mm; text-indent: -9mm; }
+    .codigo__cuerpo--numerado .ln::before {
+      counter-increment: ln; content: counter(ln);
+      display: inline-block; width: 6mm; margin-right: 3mm; text-indent: 0;
+      text-align: right; color: #5c6f82;
+    }
+
+    /* ═════════════════════ Figuras ═════════════════════ */
+    .figura { margin: 5mm 0 6mm; text-align: center; page-break-inside: avoid; break-inside: avoid; }
+    .figura img { max-width: 100%; height: auto; border: 0.5pt solid #d9e2ec; }
+    .figura--pagina img { width: auto; max-height: 212mm; }
+    .figura figcaption {
+      margin-top: 2.5mm; font-size: 8pt; color: #52606d;
+      max-width: 85%; margin-left: auto; margin-right: auto;
+    }
+    .figura__fuente { display: block; font-size: 7pt; margin-top: 0.8mm; font-style: italic; }
+    .figura__faltante {
+      margin: 0 auto; width: 70%; padding: 10mm 4mm; font-size: 8.5pt;
+      border: 1pt dashed #c0392b; color: #c0392b; background: #fdf2f1;
+    }
+
+    /* ═════════════════════ Notas / callouts ═════════════════════ */
+    .nota {
+      margin: 4mm 0; padding: 3mm 4mm 1mm; border-left: 3pt solid; border-radius: 0 2pt 2pt 0;
+      page-break-inside: avoid; break-inside: avoid;
+    }
+    .nota__titulo { font-size: 7.5pt; font-weight: 700; letter-spacing: 1pt; text-transform: uppercase; margin: 0 0 1mm; }
+    .nota--info        { background: #eef5fb; border-color: #2f80a8; } .nota--info .nota__titulo { color: #2f80a8; }
+    .nota--exito       { background: #edf7f1; border-color: #2e8b57; }  .nota--exito .nota__titulo { color: #2e7d4f; }
+    .nota--advertencia { background: #fdf6e9; border-color: #d48806; }  .nota--advertencia .nota__titulo { color: #ad6c00; }
+    .nota--critico     { background: #fbefee; border-color: #c0392b; }  .nota--critico .nota__titulo { color: #a93226; }
+
+    /* ═════════════════════ Cierre ═════════════════════ */
+    .cierre {
+      margin-top: 10mm; padding-top: 3mm; border-top: 0.5pt solid #d9e2ec;
+      font-size: 7pt; color: #52606d; page-break-inside: avoid;
+    }
+
+    /* ═════════════════════ Vista previa en navegador (no afecta al PDF) ═════════════════════ */
+    .preview-aviso { display: none; }
+    @media screen {
+      html { background: #dfe5ec; }
+      body {
+        max-width: 210mm; min-height: 297mm; box-sizing: border-box;
+        margin: 0 auto 12mm; padding: 20mm 18mm;
+        background: #ffffff; box-shadow: 0 6px 30px rgba(16, 42, 67, 0.18);
+      }
+      .preview-aviso {
+        display: block; position: sticky; top: 0; z-index: 10;
+        margin: -20mm -18mm 12mm; padding: 2.5mm 18mm;
+        background: #102a43; color: #d9e2ec; font-size: 8pt;
+      }
+      .preview-aviso strong { color: #ffffff; }
+      .indice { border-bottom: 1px dashed #d9e2ec; padding-bottom: 8mm; }
+      .codigo__cuerpo { overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="preview-aviso" role="note">
+    <strong>Vista previa HTML</strong> · El encabezado, el pie y la numeración «Página X de Y» se materializan en la Fase 2 (PDF).
+  </div>
+
+  <header class="portada" id="inicio">
+    <div class="portada__franja">
+      <span>Documento técnico reconstruido</span>
+      <span>goanywhere_mft_user_guide_7_7_0</span>
+    </div>
+    <p class="portada__tipo">Documento técnico reconstruido</p>
+    <h1 class="portada__titulo">GoAnywhere MFT User Guide 7.7.0</h1>
+<p class="portada__subtitulo">Reconstrucción textual a partir de extracción offline</p>
+    <table class="ficha" aria-label="Metadatos del documento">
+      <tr>
+<th scope="row">Versión</th><td>7.7.0</td><th scope="row">Fecha</th><td>2026-10-15</td>      </tr>
+      <tr>
+<th scope="row">Estado</th><td>primera_corrida_piloto_10_paginas</td><th scope="row">Código</th><td>goanywhere_mft_user_guide_7_7_0</td>      </tr>
+      <tr>
+<th scope="row">Clasificación</th><td>Uso interno</td><th scope="row"></th><td></td>      </tr>
+    </table>
+
+    <section class="resumen" aria-labelledby="resumen-titulo">
+      <h2 class="resumen__titulo" id="resumen-titulo">Resumen</h2>
+<p>Este reporte consolida la <strong>reconstrucción textual estructurada</strong> de <strong>10</strong> de <strong>10</strong> páginas extraídas del documento «GoAnywhere MFT User Guide 7.7.0». El texto ha sido normalizado y maquetado en tipografía nativa vectorial, acompañando las capturas originales como puntos de apoyo para control de fidelidad visual.</p>    </section>
+  </header>
+
+  <nav class="indice" aria-labelledby="indice-titulo">
+    <h2 class="indice__titulo" id="indice-titulo">Contenido</h2>
+    <ol>
+      <li><a href="#sec-1"><span class="num">1</span>Ficha del documento</a></li>
+      <li><a href="#sec-2"><span class="num">2</span>Inventario de páginas y densidad de texto</a></li>
+      <li><a href="#sec-3"><span class="num">3</span>Texto reconstruido del documento</a></li>
+      <li><a href="#sec-4"><span class="num">4</span>Puntos de apoyo y control de fidelidad visual</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <section class="seccion" id="sec-1">
+      <h2 class="seccion__titulo"><span class="num">1</span>Ficha del documento</h2>
+      <div class="bloque-tabla">
+  <table class="tabla">
+    <caption><span class="etiqueta">Tabla 1.</span> Metadatos de procesamiento</caption>
+    <colgroup>
+<col style="width: 35%"><col>    </colgroup>
+    <thead>
+      <tr><th class="al-left" scope="col">Atributo</th><th class="al-left" scope="col">Valor</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="al-left">Título</td><td class="al-left">GoAnywhere MFT User Guide 7.7.0</td></tr>
+      <tr><td class="al-left">Identificador (slug)</td><td class="al-left"><code>goanywhere_mft_user_guide_7_7_0</code></td></tr>
+      <tr><td class="al-left">Páginas del documento</td><td class="al-left">3712</td></tr>
+      <tr><td class="al-left">Páginas procesadas</td><td class="al-left">10</td></tr>
+      <tr><td class="al-left">Páginas incluidas en este reporte</td><td class="al-left">10</td></tr>
+      <tr><td class="al-left">Fecha de procesamiento</td><td class="al-left">2026-10-15T23:36:49.305236</td></tr>
+      <tr><td class="al-left">Modo de extracción</td><td class="al-left">primera_corrida_piloto_10_paginas</td></tr>
+    </tbody>
+  </table>
+</div>
+    </section>
+    <section class="seccion" id="sec-2">
+      <h2 class="seccion__titulo"><span class="num">2</span>Inventario de páginas y densidad de texto</h2>
+      <div class="bloque-tabla bloque-tabla--dividir">
+  <table class="tabla">
+    <caption><span class="etiqueta">Tabla 2.</span> Inventario técnico por página</caption>
+    <colgroup>
+<col style="width: 12%"><col style="width: 44%"><col style="width: 24%"><col style="width: 20%">    </colgroup>
+    <thead>
+      <tr><th class="al-right" scope="col">Página</th><th class="al-left" scope="col">Imagen de soporte</th><th class="al-center" scope="col">Dimensiones (px)</th><th class="al-right" scope="col">Líneas de texto</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="al-right">1</td><td class="al-left"><code>imagenes/pagina_0001.png</code></td><td class="al-center">1804 × 2334</td><td class="al-right">3</td></tr>
+      <tr><td class="al-right">2</td><td class="al-left"><code>imagenes/pagina_0002.png</code></td><td class="al-center">1804 × 2334</td><td class="al-right">8</td></tr>
+      <tr><td class="al-right">3</td><td class="al-left"><code>imagenes/pagina_0003.png</code></td><td class="al-center">1804 × 2334</td><td class="al-right">3</td></tr>
+      <tr><td class="al-right">4</td><td class="al-left"><code>imagenes/pagina_0004.png</code></td><td class="al-center">1804 × 2334</td><td class="al-right">5</td></tr>
+      <tr><td class="al-right">5</td><td class="al-left"><code>imagenes/pagina_0005.png</code></td><td class="al-center">1804 × 2334</td><td class="al-right">3</td></tr>
+      <tr><td class="al-right">6</td><td class="al-left"><code>imagenes/pagina_0006.png</code></td><td class="al-center">1804 × 2334</td><td class="al-right">5</td></tr>
+      <tr><td class="al-right">7</td><td class="al-left"><code>imagenes/pagina_0007.png</code></td><td class="al-center">1804 × 2334</td><td class="al-right">3</td></tr>
+      <tr><td class="al-right">8</td><td class="al-left"><code>imagenes/pagina_0008.png</code></td><td class="al-center">1804 × 2334</td><td class="al-right">3</td></tr>
+      <tr><td class="al-right">9</td><td class="al-left"><code>imagenes/pagina_0009.png</code></td><td class="al-center">1804 × 2334</td><td class="al-right">3</td></tr>
+      <tr><td class="al-right">10</td><td class="al-left"><code>imagenes/pagina_0010.png</code></td><td class="al-center">1804 × 2334</td><td class="al-right">4</td></tr>
+    </tbody>
+  </table>
+</div>
+    </section>
+    <section class="seccion seccion--nueva-pagina" id="sec-3">
+      <h2 class="seccion__titulo"><span class="num">3</span>Texto reconstruido del documento</h2>
+      <p>A continuación se presenta la <strong>reconstrucción del texto nativo</strong> extraído de las <strong>10 páginas</strong> procesadas, depurando las redundancias del visor web y estructurando títulos, párrafos y tablas de contenido:</p>
+      <h3 class="subtitulo" id="sec-3-1"><span class="num">3.1</span>Contenido Reconstruido · Página 1</h3>
+      <p>&#39;G&#39;o&#39;A&#39;n&#39;y&#39;w&#39;h&#39;e&#39;r&#39;e&#39;M&#39;F&#39;T&#39;U&#39;s&#39;e&#39;r&#39; &#39;G&#39;u&#39;i&#39;d&#39;e&#39; &#39;V&#39;e&#39;r&#39;s&#39;i&#39;o&#39;n&#39;7&#39;.&#39;7&#39;.&#39;0&#39;</p>
+      <h3 class="subtitulo" id="sec-3-2"><span class="num">3.2</span>Contenido Reconstruido · Página 2</h3>
+      <p>&#39;C&#39;o&#39;p&#39;y&#39;r&#39;i&#39;g&#39;h&#39;t&#39;T&#39;e&#39;r&#39;m&#39;s&#39;a&#39;n&#39;d&#39;C&#39;o&#39;n&#39;d&#39;i&#39;t&#39;i&#39;o&#39;n&#39;s&#39; &#39;C&#39;o&#39;p&#39;y&#39;r&#39;i&#39;g&#39;h&#39;t&#39; &#39;©&#39; &#39;F&#39;o&#39;r&#39;t&#39;r&#39;a&#39;,&#39; &#39;L&#39;L&#39;C&#39; &#39;a&#39;n&#39;d&#39; &#39;i&#39;t&#39;s&#39; &#39;g&#39;r&#39;o&#39;u&#39;p&#39; &#39;o&#39;f&#39; &#39;c&#39;o&#39;m&#39;p&#39;a&#39;n&#39;i&#39;e&#39;s&#39;.&#39; &#39;A&#39;l&#39;l&#39; &#39;t&#39;r&#39;a&#39;d&#39;e&#39;m&#39;a&#39;r&#39;k&#39;s&#39; &#39;a&#39;n&#39;d&#39; &#39;r&#39;e&#39;g&#39;i&#39;s&#39;t&#39;e&#39;r&#39;e&#39;d&#39; &#39;t&#39;r&#39;a&#39;d&#39;e&#39;m&#39;a&#39;r&#39;k&#39;s&#39; &#39;a&#39;r&#39;e&#39; &#39;t&#39;h&#39;e&#39; &#39;p&#39;r&#39;o&#39;p&#39;e&#39;r&#39;t&#39;y&#39; &#39;o&#39;f&#39; &#39;t&#39;h&#39;e&#39;i&#39;r&#39; &#39;r&#39;e&#39;s&#39;p&#39;e&#39;c&#39;t&#39;i&#39;v&#39;e&#39; &#39;o&#39;w&#39;n&#39;e&#39;r&#39;s&#39;.&#39; &#39;T&#39;h&#39;e&#39; &#39;c&#39;o&#39;n&#39;t&#39;e&#39;n&#39;t&#39; &#39;i&#39;n&#39; &#39;t&#39;h&#39;i&#39;s&#39; &#39;d&#39;o&#39;c&#39;u&#39;m&#39;e&#39;n&#39;t&#39; &#39;i&#39;s&#39; &#39;p&#39;r&#39;o&#39;t&#39;e&#39;c&#39;t&#39;e&#39;d&#39; &#39;b&#39;y&#39; &#39;t&#39;h&#39;e&#39; &#39;C&#39;o&#39;p&#39;y&#39;r&#39;i&#39;g&#39;h&#39;t&#39; &#39;L&#39;a&#39;w&#39;s&#39; &#39;o&#39;f&#39; &#39;t&#39;h&#39;e&#39; &#39;U&#39;n&#39;i&#39;t&#39;e&#39;d&#39; &#39;S&#39;t&#39;a&#39;t&#39;e&#39;s&#39; &#39;o&#39;f&#39; &#39;A&#39;m&#39;e&#39;r&#39;i&#39;c&#39;a&#39; &#39;a&#39;n&#39;d&#39; &#39;o&#39;t&#39;h&#39;e&#39;r&#39; &#39;c&#39;o&#39;u&#39;n&#39;t&#39;r&#39;i&#39;e&#39;s&#39; &#39;w&#39;o&#39;r&#39;l&#39;d&#39;w&#39;i&#39;d&#39;e&#39;.&#39; &#39;T&#39;h&#39;e&#39; &#39;u&#39;n&#39;a&#39;u&#39;t&#39;h&#39;o&#39;r&#39;i&#39;z&#39;e&#39;d&#39; &#39;u&#39;s&#39;e&#39; &#39;a&#39;n&#39;d&#39;/&#39;o&#39;r&#39; &#39;d&#39;u&#39;p&#39;l&#39;i&#39;c&#39;a&#39;t&#39;i&#39;o&#39;n&#39; &#39;o&#39;f&#39; &#39;t&#39;h&#39;i&#39;s&#39; &#39;m&#39;a&#39;t&#39;e&#39;r&#39;i&#39;a&#39;l&#39; &#39;w&#39;i&#39;t&#39;h&#39;o&#39;u&#39;t&#39; &#39;e&#39;x&#39;p&#39;r&#39;e&#39;s&#39;s&#39; &#39;a&#39;n&#39;d&#39; &#39;w&#39;r&#39;i&#39;t&#39;t&#39;e&#39;n&#39; &#39;p&#39;e&#39;r&#39;m&#39;i&#39;s&#39;s&#39;i&#39;o&#39;n&#39; &#39;f&#39;r&#39;o&#39;m&#39; &#39;F&#39;o&#39;r&#39;t&#39;r&#39;a&#39; &#39;i&#39;s&#39; &#39;s&#39;t&#39;r&#39;i&#39;c&#39;t&#39;l&#39;y&#39; &#39;p&#39;r&#39;o&#39;h&#39;i&#39;b&#39;i&#39;t&#39;e&#39;d&#39;.&#39; &#39;E&#39;x&#39;c&#39;e&#39;r&#39;p&#39;t&#39;s&#39; &#39;a&#39;n&#39;d&#39; &#39;l&#39;i&#39;n&#39;k&#39;s&#39; &#39;m&#39;a&#39;y&#39; &#39;b&#39;e&#39; &#39;u&#39;s&#39;e&#39;d&#39;,&#39; &#39;p&#39;r&#39;o&#39;v&#39;i&#39;d&#39;e&#39;d&#39; &#39;t&#39;h&#39;a&#39;t&#39; &#39;f&#39;u&#39;l&#39;l&#39; &#39;a&#39;n&#39;d&#39; &#39;c&#39;l&#39;e&#39;a&#39;r&#39; &#39;c&#39;r&#39;e&#39;d&#39;i&#39;t&#39; &#39;i&#39;s&#39; &#39;g&#39;i&#39;v&#39;e&#39;n&#39; &#39;t&#39;o&#39; &#39;F&#39;o&#39;r&#39;t&#39;r&#39;a&#39; &#39;w&#39;i&#39;t&#39;h&#39; &#39;a&#39;p&#39;p&#39;r&#39;o&#39;p&#39;r&#39;i&#39;a&#39;t&#39;e&#39; &#39;a&#39;n&#39;d&#39; &#39;s&#39;p&#39;e&#39;c&#39;i&#39;f&#39;i&#39;c&#39; &#39;d&#39;i&#39;r&#39;e&#39;c&#39;t&#39;i&#39;o&#39;n&#39; &#39;t&#39;o&#39; &#39;t&#39;h&#39;e&#39; &#39;o&#39;r&#39;i&#39;g&#39;i&#39;n&#39;a&#39;l&#39; &#39;c&#39;o&#39;n&#39;t&#39;e&#39;n&#39;t&#39;.&#39; &#39;2&#39;0&#39;2&#39;4&#39;1&#39;2&#39;1&#39;2&#39;0&#39;1&#39;1&#39;3&#39;</p>
+      <h3 class="subtitulo" id="sec-3-3"><span class="num">3.3</span>Contenido Reconstruido · Página 3</h3>
+      <p>&#39;G&#39;e&#39;t&#39;t&#39;i&#39;n&#39;g&#39;S&#39;t&#39;a&#39;r&#39;t&#39;e&#39;d&#39;3&#39;9&#39; &#39;A&#39;c&#39;t&#39;i&#39;v&#39;a&#39;t&#39;e&#39; &#39;a&#39; &#39;L&#39;i&#39;c&#39;e&#39;n&#39;s&#39;e&#39; &#39;4&#39;3&#39; &#39;M&#39;a&#39;n&#39;u&#39;a&#39;l&#39;l&#39;y&#39; &#39;A&#39;c&#39;t&#39;i&#39;v&#39;a&#39;t&#39;e&#39; &#39;a&#39; &#39;L&#39;i&#39;c&#39;e&#39;n&#39;s&#39;e&#39; &#39;4&#39;4&#39;</p>
+      <h3 class="subtitulo" id="sec-3-4"><span class="num">3.4</span>Contenido Reconstruido · Página 4</h3>
+      <p>&#39;L&#39;o&#39;g&#39;g&#39;i&#39;n&#39;g&#39; &#39;i&#39;n&#39;t&#39;o&#39; &#39;t&#39;h&#39;e&#39; &#39;G&#39;o&#39;A&#39;n&#39;y&#39;w&#39;h&#39;e&#39;r&#39;e&#39; &#39;A&#39;d&#39;m&#39;i&#39;n&#39; &#39;C&#39;l&#39;i&#39;e&#39;n&#39;t&#39; &#39;7&#39;7&#39; &#39;S&#39;t&#39;a&#39;r&#39;t&#39;i&#39;n&#39;g&#39; &#39;t&#39;h&#39;e&#39; &#39;H&#39;T&#39;T&#39;P&#39;S&#39; &#39;S&#39;e&#39;r&#39;v&#39;i&#39;c&#39;e&#39; &#39;7&#39;7&#39; &#39;C&#39;o&#39;n&#39;f&#39;i&#39;g&#39;u&#39;r&#39;i&#39;n&#39;g&#39; &#39;a&#39; &#39;N&#39;e&#39;w&#39; &#39;W&#39;e&#39;b&#39; &#39;U&#39;s&#39;e&#39;r&#39; &#39;7&#39;8&#39; &#39;L&#39;o&#39;g&#39;g&#39;i&#39;n&#39;g&#39; &#39;i&#39;n&#39;t&#39;o&#39; &#39;t&#39;h&#39;e&#39; &#39;G&#39;o&#39;A&#39;n&#39;y&#39;w&#39;h&#39;e&#39;r&#39;e&#39;</p>
+      <h3 class="subtitulo" id="sec-3-5"><span class="num">3.5</span>Contenido Reconstruido · Página 5</h3>
+      <p>&#39;A&#39;u&#39;t&#39;h&#39;o&#39;r&#39;i&#39;z&#39;a&#39;t&#39;i&#39;o&#39;n&#39; &#39;F&#39;a&#39;i&#39;l&#39;e&#39;d&#39; &#39;1&#39;5&#39;3&#39; &#39;P&#39;e&#39;r&#39;m&#39;i&#39;s&#39;s&#39;i&#39;o&#39;n&#39; &#39;D&#39;e&#39;n&#39;i&#39;e&#39;d&#39; &#39;1&#39;5&#39;3&#39; &#39;F&#39;i&#39;l&#39;e&#39; &#39;S&#39;i&#39;z&#39;e&#39; &#39;L&#39;i&#39;m&#39;i&#39;t&#39; &#39;1&#39;5&#39;3&#39;</p>
+      <h3 class="subtitulo" id="sec-3-6"><span class="num">3.6</span>Contenido Reconstruido · Página 6</h3>
+      <p>&#39;D&#39;o&#39;m&#39;a&#39;i&#39;n&#39;s&#39; &#39;3&#39;8&#39;7&#39; &#39;C&#39;o&#39;n&#39;f&#39;i&#39;g&#39;u&#39;r&#39;i&#39;n&#39;g&#39; &#39;a&#39; &#39;P&#39;r&#39;o&#39;j&#39;e&#39;c&#39;t&#39; &#39;F&#39;o&#39;l&#39;d&#39;e&#39;r&#39; &#39;3&#39;8&#39;8&#39; &#39;D&#39;e&#39;l&#39;e&#39;t&#39;i&#39;n&#39;g&#39; &#39;a&#39; &#39;F&#39;o&#39;l&#39;d&#39;e&#39;r&#39; &#39;3&#39;9&#39;0&#39; &#39;P&#39;r&#39;o&#39;j&#39;e&#39;c&#39;t&#39; &#39;a&#39;n&#39;d&#39; &#39;F&#39;o&#39;l&#39;d&#39;e&#39;r&#39; &#39;P&#39;e&#39;r&#39;m&#39;i&#39;s&#39;s&#39;i&#39;o&#39;n&#39;s&#39; &#39;3&#39;9&#39;1&#39;</p>
+      <h3 class="subtitulo" id="sec-3-7"><span class="num">3.7</span>Contenido Reconstruido · Página 7</h3>
+      <p>&#39;P&#39;r&#39;o&#39;j&#39;e&#39;c&#39;t&#39; &#39;E&#39;x&#39;e&#39;c&#39;u&#39;t&#39;i&#39;o&#39;n&#39; &#39;H&#39;i&#39;s&#39;t&#39;o&#39;r&#39;y&#39; &#39;4&#39;4&#39;6&#39; &#39;J&#39;o&#39;b&#39; &#39;L&#39;o&#39;g&#39; &#39;a&#39;n&#39;d&#39; &#39;D&#39;e&#39;t&#39;a&#39;i&#39;l&#39;s&#39; &#39;4&#39;5&#39;2&#39; &#39;S&#39;c&#39;h&#39;e&#39;d&#39;u&#39;l&#39;i&#39;n&#39;g&#39; &#39;P&#39;r&#39;o&#39;j&#39;e&#39;c&#39;t&#39;s&#39; &#39;4&#39;5&#39;4&#39;</p>
+      <h3 class="subtitulo" id="sec-3-8"><span class="num">3.8</span>Contenido Reconstruido · Página 8</h3>
+      <p>&#39;A&#39;d&#39;d&#39;/&#39;E&#39;d&#39;i&#39;t&#39; &#39;J&#39;o&#39;b&#39; &#39;Q&#39;u&#39;e&#39;u&#39;e&#39; &#39;5&#39;5&#39;4&#39; &#39;J&#39;o&#39;b&#39; &#39;Q&#39;u&#39;e&#39;u&#39;e&#39; &#39;D&#39;e&#39;t&#39;a&#39;i&#39;l&#39;s&#39; &#39;5&#39;5&#39;6&#39; &#39;W&#39;o&#39;r&#39;k&#39; &#39;w&#39;i&#39;t&#39;h&#39; &#39;Q&#39;u&#39;e&#39;u&#39;e&#39;d&#39; &#39;J&#39;o&#39;b&#39;s&#39; &#39;5&#39;5&#39;7&#39;</p>
+      <h3 class="subtitulo" id="sec-3-9"><span class="num">3.9</span>Contenido Reconstruido · Página 9</h3>
+      <p>&#39;L&#39;o&#39;c&#39;a&#39;l&#39; &#39;F&#39;i&#39;l&#39;e&#39;s&#39; &#39;a&#39;n&#39;d&#39; &#39;F&#39;o&#39;l&#39;d&#39;e&#39;r&#39;s&#39; &#39;6&#39;9&#39;6&#39; &#39;R&#39;e&#39;m&#39;o&#39;t&#39;e&#39; &#39;F&#39;i&#39;l&#39;e&#39;s&#39; &#39;6&#39;9&#39;8&#39; &#39;R&#39;o&#39;w&#39;S&#39;e&#39;t&#39; &#39;7&#39;0&#39;0&#39;</p>
+      <h3 class="subtitulo" id="sec-3-10"><span class="num">3.10</span>Contenido Reconstruido · Página 10</h3>
+      <p>&#39;G&#39;U&#39;n&#39;z&#39;i&#39;p&#39; &#39;T&#39;a&#39;s&#39;k&#39; &#39;7&#39;7&#39;2&#39; &#39;D&#39;a&#39;t&#39;a&#39;b&#39;a&#39;s&#39;e&#39; &#39;T&#39;a&#39;s&#39;k&#39;s&#39; &#39;7&#39;7&#39;6&#39; &#39;S&#39;Q&#39;L&#39; &#39;T&#39;a&#39;s&#39;k&#39; &#39;7&#39;7&#39;7&#39; &#39;D&#39;a&#39;t&#39;a&#39; &#39;T&#39;r&#39;a&#39;n&#39;s&#39;l&#39;a&#39;t&#39;i&#39;o&#39;n&#39; &#39;T&#39;a&#39;s&#39;k&#39;s&#39; &#39;7&#39;9&#39;1&#39;</p>
+    </section>
+    <section class="seccion seccion--nueva-pagina" id="sec-4">
+      <h2 class="seccion__titulo"><span class="num">4</span>Puntos de apoyo y control de fidelidad visual</h2>
+      <p>Las siguientes capturas de alta resolución se incorporan como <strong>puntos de apoyo y referencia visual</strong> para auditar y confirmar que la reconstrucción del texto coincide fielmente con la disposición del documento original en Scribd:</p>
+      <h3 class="subtitulo" id="sec-4-1"><span class="num">4.1</span>Punto de Apoyo · Página 1</h3>
+      <figure class="figura">
+  <img src="imagenes/pagina_0001.png" alt="Captura de referencia Página 1" style="width: 75%">
+  <figcaption>
+    <span class="etiqueta">Figura 1.</span> Captura de apoyo para verificación de fidelidad (Página 1 · 1804 × 2334 px).
+<span class="figura__fuente">Fuente: Visor Scribd (Punto de control de calidad)</span>  </figcaption>
+</figure>
+      <h3 class="subtitulo" id="sec-4-2"><span class="num">4.2</span>Punto de Apoyo · Página 2</h3>
+      <figure class="figura">
+  <img src="imagenes/pagina_0002.png" alt="Captura de referencia Página 2" style="width: 75%">
+  <figcaption>
+    <span class="etiqueta">Figura 2.</span> Captura de apoyo para verificación de fidelidad (Página 2 · 1804 × 2334 px).
+<span class="figura__fuente">Fuente: Visor Scribd (Punto de control de calidad)</span>  </figcaption>
+</figure>
+      <h3 class="subtitulo" id="sec-4-3"><span class="num">4.3</span>Punto de Apoyo · Página 3</h3>
+      <figure class="figura">
+  <img src="imagenes/pagina_0003.png" alt="Captura de referencia Página 3" style="width: 75%">
+  <figcaption>
+    <span class="etiqueta">Figura 3.</span> Captura de apoyo para verificación de fidelidad (Página 3 · 1804 × 2334 px).
+<span class="figura__fuente">Fuente: Visor Scribd (Punto de control de calidad)</span>  </figcaption>
+</figure>
+      <h3 class="subtitulo" id="sec-4-4"><span class="num">4.4</span>Punto de Apoyo · Página 4</h3>
+      <figure class="figura">
+  <img src="imagenes/pagina_0004.png" alt="Captura de referencia Página 4" style="width: 75%">
+  <figcaption>
+    <span class="etiqueta">Figura 4.</span> Captura de apoyo para verificación de fidelidad (Página 4 · 1804 × 2334 px).
+<span class="figura__fuente">Fuente: Visor Scribd (Punto de control de calidad)</span>  </figcaption>
+</figure>
+      <h3 class="subtitulo" id="sec-4-5"><span class="num">4.5</span>Punto de Apoyo · Página 5</h3>
+      <figure class="figura">
+  <img src="imagenes/pagina_0005.png" alt="Captura de referencia Página 5" style="width: 75%">
+  <figcaption>
+    <span class="etiqueta">Figura 5.</span> Captura de apoyo para verificación de fidelidad (Página 5 · 1804 × 2334 px).
+<span class="figura__fuente">Fuente: Visor Scribd (Punto de control de calidad)</span>  </figcaption>
+</figure>
+      <h3 class="subtitulo" id="sec-4-6"><span class="num">4.6</span>Punto de Apoyo · Página 6</h3>
+      <figure class="figura">
+  <img src="imagenes/pagina_0006.png" alt="Captura de referencia Página 6" style="width: 75%">
+  <figcaption>
+    <span class="etiqueta">Figura 6.</span> Captura de apoyo para verificación de fidelidad (Página 6 · 1804 × 2334 px).
+<span class="figura__fuente">Fuente: Visor Scribd (Punto de control de calidad)</span>  </figcaption>
+</figure>
+      <h3 class="subtitulo" id="sec-4-7"><span class="num">4.7</span>Punto de Apoyo · Página 7</h3>
+      <figure class="figura">
+  <img src="imagenes/pagina_0007.png" alt="Captura de referencia Página 7" style="width: 75%">
+  <figcaption>
+    <span class="etiqueta">Figura 7.</span> Captura de apoyo para verificación de fidelidad (Página 7 · 1804 × 2334 px).
+<span class="figura__fuente">Fuente: Visor Scribd (Punto de control de calidad)</span>  </figcaption>
+</figure>
+      <h3 class="subtitulo" id="sec-4-8"><span class="num">4.8</span>Punto de Apoyo · Página 8</h3>
+      <figure class="figura">
+  <img src="imagenes/pagina_0008.png" alt="Captura de referencia Página 8" style="width: 75%">
+  <figcaption>
+    <span class="etiqueta">Figura 8.</span> Captura de apoyo para verificación de fidelidad (Página 8 · 1804 × 2334 px).
+<span class="figura__fuente">Fuente: Visor Scribd (Punto de control de calidad)</span>  </figcaption>
+</figure>
+      <h3 class="subtitulo" id="sec-4-9"><span class="num">4.9</span>Punto de Apoyo · Página 9</h3>
+      <figure class="figura">
+  <img src="imagenes/pagina_0009.png" alt="Captura de referencia Página 9" style="width: 75%">
+  <figcaption>
+    <span class="etiqueta">Figura 9.</span> Captura de apoyo para verificación de fidelidad (Página 9 · 1804 × 2334 px).
+<span class="figura__fuente">Fuente: Visor Scribd (Punto de control de calidad)</span>  </figcaption>
+</figure>
+      <h3 class="subtitulo" id="sec-4-10"><span class="num">4.10</span>Punto de Apoyo · Página 10</h3>
+      <figure class="figura">
+  <img src="imagenes/pagina_0010.png" alt="Captura de referencia Página 10" style="width: 75%">
+  <figcaption>
+    <span class="etiqueta">Figura 10.</span> Captura de apoyo para verificación de fidelidad (Página 10 · 1804 × 2334 px).
+<span class="figura__fuente">Fuente: Visor Scribd (Punto de control de calidad)</span>  </figcaption>
+</figure>
+    </section>
+  </main>
+
+  <footer class="cierre">
+    Generado el 2026-10-16 10:38 por compilador.py (Jinja2 3.1.6 + WeasyPrint) a partir de
+    <code>paginas.json</code> (esquema «paginas») ·
+    4 secciones, 2 tablas,
+    10 figuras, 0 bloques de código.
+  </footer>
+
+</body>
+</html>
