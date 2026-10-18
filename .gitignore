@@ -21,6 +21,7 @@ insumo/
 scratch/
 downloads/
 *.tmp
+**/preview_pagina_*.html
 
 # Navegadores y artefactos de Playwright
 .playwright/

@@ -182,7 +182,12 @@ def _resolver_salida(salida: str | None, origen: Path) -> Path:
 
 def resolver_rutas(args: argparse.Namespace) -> Rutas:
     origen = Path(args.origen).expanduser().resolve()
-    html = Path(args.html).expanduser().resolve() if args.html else origen / NOMBRE_HTML_PREVIEW
+    if args.html:
+        html = Path(args.html).expanduser().resolve()
+    elif getattr(args, "pagina", None):
+        html = origen / f"preview_pagina_{args.pagina:04d}.html"
+    else:
+        html = origen / NOMBRE_HTML_PREVIEW
     return Rutas(
         origen=origen,
         html=html,
@@ -1130,10 +1135,11 @@ def _reconstruir_paginas_documento(paginas: list[dict], doc_meta: dict) -> list[
     return paginas_doc
 
 
-def adaptar_paginas_json(datos: dict, limite: int | None) -> dict:
+def adaptar_paginas_json(datos: dict, limite: int | None, pagina_objetivo: int | None = None) -> dict:
     """
     Convierte el esquema de extracción botScribd (paginas.json) en una reconstrucción
     textual directa y fiel del documento original, sin metadatos ni secciones artificiales.
+    Permite filtrar por una sola página puntual si se indica pagina_objetivo.
     """
     doc = datos.get("documento") or {}
     paginas = datos.get("paginas")
@@ -1141,13 +1147,19 @@ def adaptar_paginas_json(datos: dict, limite: int | None) -> dict:
         raise PrecondicionError("paginas.json no contiene una lista 'paginas' con elementos.")
 
     total = len(paginas)
-    seleccion = paginas[:limite] if limite else paginas
-    if not limite and total > UMBRAL_PAGINAS_AVISO:
-        log.warning(
-            "El documento tiene %d páginas: la Fase 2 puede tardar y consumir mucha memoria. "
-            "Considere --limite-paginas N para pruebas.", total
-        )
-    log.info("Adaptando paginas.json: %d de %d páginas seleccionadas (reconstrucción textual pura)", len(seleccion), total)
+    if pagina_objetivo:
+        seleccion = [p for p in paginas if p.get("numero_pagina") == pagina_objetivo]
+        if not seleccion:
+            raise PrecondicionError(f"La página {pagina_objetivo} no se encuentra en paginas.json (total registradas: {total}).")
+        log.info("Adaptando paginas.json para página puntual %d (de %d páginas totales)", pagina_objetivo, total)
+    else:
+        seleccion = paginas[:limite] if limite else paginas
+        if not limite and total > UMBRAL_PAGINAS_AVISO:
+            log.warning(
+                "El documento tiene %d páginas: la Fase 2 puede tardar y consumir mucha memoria. "
+                "Considere --limite-paginas N para pruebas.", total
+            )
+        log.info("Adaptando paginas.json: %d de %d páginas seleccionadas (reconstrucción textual pura)", len(seleccion), total)
 
     titulo = _txt(doc.get("titulo")) or _txt(doc.get("slug")) or "Documento reconstruido"
     version = _txt(doc.get("version")) or (RE_VERSION.search(titulo).group(0) if RE_VERSION.search(titulo) else "7.7.0")
@@ -1464,7 +1476,7 @@ def fase_1_html(rutas: Rutas, args: argparse.Namespace) -> None:
         esquema = detectar_esquema(datos)
         log.info("[2/4] Esquema detectado: '%s'", esquema)
         if esquema == "paginas":
-            datos = adaptar_paginas_json(datos, args.limite_paginas)
+            datos = adaptar_paginas_json(datos, args.limite_paginas, getattr(args, "pagina", None))
         elif args.limite_paginas:
             log.warning("--limite-paginas solo aplica al esquema paginas.json (se ignora).")
 
@@ -1662,6 +1674,8 @@ def construir_parser() -> argparse.ArgumentParser:
                         help=f"Archivo JSON dentro de --origen (defecto: autodetecta {' -> '.join(ARCHIVOS_DATOS)})")
     parser.add_argument("--limite-paginas", type=_entero_positivo, default=None,
                         help="Solo paginas.json: incluye únicamente las primeras N páginas")
+    parser.add_argument("--pagina", type=_entero_positivo, default=None,
+                        help="Compila únicamente la página especificada (ej: --pagina 43). Genera preview_pagina_XXXX.html")
     parser.add_argument("--estricto", action="store_true",
                         help="Aborta si hay imágenes/fuentes referenciadas que no existen")
     parser.add_argument("-v", "--verbose", action="store_true", help="Logs de depuración")

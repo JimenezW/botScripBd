@@ -91,6 +91,21 @@ graph TD
 
 ---
 
+### Fase 7: Sub-sistema de Auditoría y Re-proceso Unipágina (`gestor_pagina.py`)
+- **Objetivo:** Permitir el diagnóstico, re-extracción, corrección tipográfica y previsualización HTML aislada de páginas específicas sin requerir el re-procesamiento masivo del catálogo (crucial para escala 100+ páginas).
+- **Acciones:**
+  1. Extracción multi-capa (`find_all("text_layer")`) para callouts flotantes (`WARNING`, `TIP`, `NOTE`) y viñetas técnicas.
+  2. Implementación de `gestor_pagina.py` con modos:
+     - `--extraer`: descarga y actualización quirúrgica en `paginas.json`.
+     - `--preview`: compilación instantánea de página individual a `preview_pagina_XXXX.html` (<0.5 s).
+     - `--ver-texto`: volcado en consola de renglones ordenados para inspección léxica.
+     - `--integrar`: recompilación y sincronización con el documento consolidado `preview.html`.
+  3. Soporte del parámetro `--pagina` nativo en `compilador.py`.
+  4. Motor de enriquecimiento automático de hipervínculos corporativos (`a.doc-link`).
+- **Entregables:** `gestor_pagina.py`, actualizaciones en `compilador.py`, `core/extractor.py`, `core/insumo_parser.py`, `plantilla.html`.
+
+---
+
 ## 3. Matriz de Control de Versiones (Git)
 
 Cada fase se versionará de manera individual con Git siguiendo la convención acordada:
@@ -103,3 +118,4 @@ Cada fase se versionará de manera individual con Git siguiendo la convención a
 | **3** | `feat` | `feat(renderer): implementar renderizador local Playwright a 2x Retina` |
 | **4** | `feat` | `feat(cli): integrar CLI y pipeline principal en main.py para procesamiento offline` |
 | **5** | `test` | `test: validar extraccion completa de imagenes y metadatos desde insumo` |
+| **6** | `feat` | `feat(gestor): implementar gestor_pagina.py y compilacion unipage para documentos 100+` |

@@ -255,9 +255,9 @@ class InsumoParser:
 
             soup = BeautifulSoup(raw_html, "html.parser")
             text_lines = []
-            text_layer_elem = soup.find(class_=re.compile(r"text_layer"))
-            if text_layer_elem:
-                for span in text_layer_elem.find_all("span"):
+            text_layers = soup.find_all(class_=re.compile(r"text_layer"))
+            for text_layer in text_layers:
+                for span in text_layer.find_all("span"):
                     text = span.get_text().strip()
                     if text:
                         text_lines.append(text)
