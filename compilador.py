@@ -361,9 +361,9 @@ def _limpiar_lineas_scribd(lineas: list[str]) -> list[str]:
 
 
 def _parsear_items_toc(lineas_limpias: list[str]) -> list[dict]:
-    """Extrae las entradas de Tabla de Contenidos agrupando títulos con sus páginas de destino."""
-    raw_items = []
-    buffer_text = []
+    """Extrae las entradas de Tabla de Contenidos agrupando títulos con sus páginas de destino de forma robusta."""
+    raw_items: list[tuple[str, str]] = []
+    buffer_text: list[str] = []
     ignored = {
         'Table of Contents', 'TableofContents', 'GoAnywhere MFT User Guide',
         'GoAnywhere MFTUser Guide', 'www.goanywhere.com'
@@ -379,52 +379,117 @@ def _parsear_items_toc(lineas_limpias: list[str]) -> list[dict]:
         if 'www.goanywhere.com' in line or 'GoAnywhere MFT' in line:
             continue
 
-        # Si la línea es puramente numérica y el buffer de texto está vacío,
-        # es el sufijo de página del elemento inmediatamente anterior en TOC
+        # Si la línea es puramente numérica y el buffer está vacío, puede ser sufijo del ítem previo
         if line.isdigit() and not buffer_text and raw_items:
             prev_t, prev_p = raw_items[-1]
-            raw_items[-1] = (prev_t, prev_p + line)
+            if len(prev_p) < 4:
+                raw_items[-1] = (prev_t, prev_p + line)
             continue
 
         m_space = re.search(r'^(.*?)\s+(\d{1,4})$', line)
         m_attached = re.search(r'^(.*?[a-zA-Z\)])(\d{1,4})$', line)
 
-        if m_space and len(m_space.group(1).strip()) > 1:
-            title = " ".join(buffer_text + [m_space.group(1).strip()]).strip()
-            pg = m_space.group(2)
-            # Si el número extraído es corto (ej. '4') y la siguiente línea son dígitos (ej. '08', '11'), concatenar
-            if k < n and lineas_limpias[k].strip().isdigit() and len(pg) <= 2:
-                pg = pg + lineas_limpias[k].strip()
-                k += 1
-            raw_items.append((title, pg))
-            buffer_text = []
-        elif m_attached and len(m_attached.group(1).strip()) > 1:
+        match_cand = None
+        if m_space and (len(m_space.group(1).strip()) > 1 or buffer_text):
+            match_cand = (m_space.group(1).strip(), m_space.group(2))
+        elif m_attached and (len(m_attached.group(1).strip()) > 1 or buffer_text):
             raw_title = m_attached.group(1).strip()
             split_title = re.sub(r'([a-z])([A-Z])', r'\1 \2', raw_title)
-            title = " ".join(buffer_text + [split_title]).strip()
-            pg = m_attached.group(2)
-            if k < n and lineas_limpias[k].strip().isdigit() and len(pg) <= 2:
-                pg = pg + lineas_limpias[k].strip()
+            match_cand = (split_title, m_attached.group(2))
+
+        if match_cand:
+            t_cand, p_cand = match_cand
+
+            # Versiones de software en títulos (ej. Internet Explorer 11)
+            if buffer_text and any(w in " ".join(buffer_text) for w in ("Explorer", "IPv", "SHA")) and (t_cand in ("11", "1", "6", "4") or p_cand in ("11", "1", "6", "4")):
+                buffer_text.append(f"{t_cand}{p_cand}")
+                continue
+
+            # Mirar si la siguiente línea son dígitos que completan la página
+            if k < n and lineas_limpias[k].strip().isdigit() and len(p_cand) <= 2:
+                p_cand = p_cand + lineas_limpias[k].strip()
                 k += 1
-            raw_items.append((title, pg))
+
+            # En este manual, las páginas del TOC comienzan en la página 39
+            if int(p_cand) < 39:
+                buffer_text.append(f"{t_cand}{p_cand}")
+                continue
+
+            full_title = " ".join(buffer_text + [t_cand]).strip()
+
+            # Corrección de OCR en "Monitoring Files on an Agent 227" -> 2277
+            if p_cand == "227" and "Monitoring" in full_title:
+                p_cand = "2277"
+
+            raw_items.append((full_title, p_cand))
             buffer_text = []
+
         elif line.isdigit():
+            if buffer_text and any(w in " ".join(buffer_text) for w in ("Explorer", "IPv", "SHA")) and line in ("11", "1", "6", "4"):
+                buffer_text.append(line)
+                continue
+
             pg = line
-            # Si la siguiente línea también son dígitos, unirlos (ej. "4" seguido de "03" -> "403")
             if k < n and lineas_limpias[k].strip().isdigit():
                 pg = pg + lineas_limpias[k].strip()
                 k += 1
+
+            if int(pg) < 39:
+                buffer_text.append(pg)
+                continue
+
             if buffer_text:
                 raw_items.append((" ".join(buffer_text).strip(), pg))
                 buffer_text = []
             elif raw_items:
                 prev_t, prev_p = raw_items[-1]
-                raw_items[-1] = (prev_t, prev_p + pg)
+                if len(prev_p) < 4:
+                    raw_items[-1] = (prev_t, prev_p + pg)
         else:
             if buffer_text and line in buffer_text[-1]:
                 continue
             buffer_text.append(line)
 
+    # Post-procesamiento: resolver fusiones y números desplazados al título
+    items_procesados: list[tuple[str, str]] = []
+    for title, pg in raw_items:
+        clean_title = re.sub(r'\s+', ' ', title).strip()
+        clean_pg = str(pg).strip()
+
+        # Prefijo de página atrapado al final del título (ej. "Google Chrome 29" -> 51 => "Google Chrome" -> 2951)
+        m_sufijo_tit = re.search(r'^(.*?)(?<!IPv)(?<!SHA)(?<!EDI)(?<!Section)\s+(\d{1,3})$', clean_title)
+        if m_sufijo_tit:
+            posible_tit = m_sufijo_tit.group(1).strip()
+            num_tit = m_sufijo_tit.group(2)
+            candidato_pg = num_tit + clean_pg
+            try:
+                c_val = int(candidato_pg)
+                if 39 <= c_val <= 3720 and len(candidato_pg) >= 3 and len(clean_pg) <= 3:
+                    clean_title = posible_tit
+                    clean_pg = candidato_pg
+            except ValueError:
+                pass
+
+        # Títulos fusionados con un número en medio (ej. "Import XML 413 Import ZIP" -> 415)
+        m_fusion = re.match(r'^(.*?[a-zA-Z\)])\s+(\d{2,4})\s+([A-Z].*)$', clean_title)
+        if m_fusion:
+            tit1 = m_fusion.group(1).strip()
+            pg1_str = m_fusion.group(2)
+            tit2 = m_fusion.group(3).strip()
+            pg2_str = clean_pg
+            try:
+                p1 = int(pg1_str)
+                p2 = int(pg2_str)
+                if 0 <= (p2 - p1) <= 50 and 39 <= p1 <= 3720:
+                    items_procesados.append((tit1, pg1_str))
+                    clean_title = tit2
+                    clean_pg = pg2_str
+            except ValueError:
+                pass
+
+        items_procesados.append((clean_title, clean_pg))
+
+    # Deduplicación y correcciones tipográficas
     deduped: list[dict] = []
     temas_principales = {
         'getting started', 'dashboard', 'resources', 'workflows',
@@ -432,7 +497,7 @@ def _parsear_items_toc(lineas_limpias: list[str]) -> list[dict]:
         'data translation tasks'
     }
 
-    for title, pg in raw_items:
+    for title, pg in items_procesados:
         clean_title = re.sub(r'\s+', ' ', title).strip()
         words = clean_title.split()
         if len(words) >= 6:
@@ -469,9 +534,16 @@ def _parsear_items_toc(lineas_limpias: list[str]) -> list[dict]:
             ("A ctions", "Actions"),
             ("Transact ion", "Transaction"),
             ("In for mation", "Information"),
+            ("Base 64", "Base64"),
+            ("IPv 6", "IPv6"),
+            ("SHA 1", "SHA1"),
         ):
             if orig in clean_title:
                 clean_title = clean_title.replace(orig, corr)
+
+        # Descartar fragmento residual "Base" -> 64
+        if clean_title == "Base" and pg == "64":
+            continue
 
         norm = re.sub(r'[^a-zA-Z0-9]', '', clean_title).lower()
         if not norm:
@@ -480,9 +552,14 @@ def _parsear_items_toc(lineas_limpias: list[str]) -> list[dict]:
         if deduped:
             prev = deduped[-1]
             prev_norm = re.sub(r'[^a-zA-Z0-9]', '', prev["titulo"]).lower()
-            if prev["pagina"] == pg and (norm == prev_norm or norm in prev_norm or prev_norm in norm):
+            mismo_titulo = (norm == prev_norm or (len(norm) > 6 and (norm in prev_norm or prev_norm in norm)))
+            misma_pagina = (prev["pagina"] == pg or prev["pagina"].startswith(pg) or pg.startswith(prev["pagina"]))
+
+            if mismo_titulo and misma_pagina:
+                if len(pg) > len(prev["pagina"]):
+                    prev["pagina"] = pg
                 if len(clean_title) < len(prev["titulo"]):
-                    deduped[-1]["titulo"] = clean_title
+                    prev["titulo"] = clean_title
                 continue
 
         es_principal = clean_title.lower() in temas_principales
