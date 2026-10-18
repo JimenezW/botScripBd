@@ -431,7 +431,101 @@ RE_PATRONES_DESFRAGMENTACION: list[tuple[re.Pattern, str]] = [
     (re.compile(r'\bT\s+ools\b', re.I), 'Tools'),
     (re.compile(r'\bU\s+ser\b', re.I), 'User'),
     (re.compile(r'\bU\s+sers\b', re.I), 'Users'),
+    (re.compile(r'\bUs\s+er\b', re.I), 'User'),
+    (re.compile(r'\bUs\s+ers\b', re.I), 'Users'),
     (re.compile(r'\bW\s+izard\b', re.I), 'Wizard'),
+    (re.compile(r'\bW\s+eb\b', re.I), 'Web'),
+    (re.compile(r'\bL\s+og\b', re.I), 'Log'),
+
+    # Desprendimiento de letra inicial / flotante entre palabras
+    (re.compile(r'\bCreate\s+t\s+he\b', re.I), 'Create the'),
+    (re.compile(r'\bUser\s+p\s+asswords\b', re.I), 'User passwords'),
+    (re.compile(r'\bthe\s+y\s+have\b', re.I), 'they have'),
+    (re.compile(r'\bthe\s+f\s+eatures\b', re.I), 'the features'),
+    (re.compile(r'\bthe\s+f\s+eat\s*ures\b', re.I), 'the features'),
+    (re.compile(r'\bthe\s+f\s+eat\s*ure\b', re.I), 'the feature'),
+    (re.compile(r'\btrading\s+p\s+artners\b', re.I), 'trading partners'),
+    (re.compile(r'\bHow\s+t\s+o\b', re.I), 'How to'),
+    (re.compile(r'\bth\s+e\s+Cluster\b', re.I), 'the Cluster'),
+    (re.compile(r'\bfo\s+r\s+GoAnywhere\b', re.I), 'for GoAnywhere'),
+    (re.compile(r'\bKe\s+y\s+Preferences\b', re.I), 'Key Preferences'),
+    (re.compile(r'\bGrou\s+ps\s+t\s+o\b', re.I), 'Groups to'),
+    (re.compile(r'\bProm\s*te\s+W\s+eb\b', re.I), 'Promote Web'),
+
+    # Palabras de 3 partes adicionales
+    (re.compile(r'\bH\s+isto\s*ry\b', re.I), 'History'),
+    (re.compile(r'\bM\s+ast\s*er\b', re.I), 'Master'),
+    (re.compile(r'\bM\s+anag\s+em\s*ent\b', re.I), 'Management'),
+    (re.compile(r'\bM\s+anag\s+em\b', re.I), 'Managem'),
+    (re.compile(r'\bR\s+eso\s*urce\b', re.I), 'Resource'),
+    (re.compile(r'\bRe\s+sou\s*rce\b', re.I), 'Resource'),
+    (re.compile(r'\bReso\s+urc\s*e\b', re.I), 'Resource'),
+    (re.compile(r'\bS\s+erve\s*r\b', re.I), 'Server'),
+    (re.compile(r'\bS\s+ub\s+mitted\b', re.I), 'Submitted'),
+    (re.compile(r'\bSy\s+ste\s*m\b', re.I), 'System'),
+    (re.compile(r'\bT\s+rig\s*ger\b', re.I), 'Trigger'),
+    (re.compile(r'\bTra\s+nsf\s*er\b', re.I), 'Transfer'),
+    (re.compile(r'\bW\s+iza\s*rd\b', re.I), 'Wizard'),
+    (re.compile(r'\bU\s+na\s+uthorized\b', re.I), 'Unauthorized'),
+    (re.compile(r'\bOr\s+ganiz\s*e\b', re.I), 'Organize'),
+    (re.compile(r'\bf\s+eat\s*ures\b', re.I), 'features'),
+    (re.compile(r'\bf\s+eat\s*ure\b', re.I), 'feature'),
+
+    # Palabras de 2 partes adicionales
+    (re.compile(r'\bActio\s+ns\b', re.I), 'Actions'),
+    (re.compile(r'\bAge\s+nt\b', re.I), 'Agent'),
+    (re.compile(r'\bAge\s+nts\b', re.I), 'Agents'),
+    (re.compile(r'\bAgen\s+t\b', re.I), 'Agent'),
+    (re.compile(r'\bAlgorit\s+hms\b', re.I), 'Algorithms'),
+    (re.compile(r'\bCon\s+siderations\b', re.I), 'Considerations'),
+    (re.compile(r'\bDatab\s+ase\b', re.I), 'Database'),
+    (re.compile(r'\bDet\s+ails\b', re.I), 'Details'),
+    (re.compile(r'\bDis\s+aster\b', re.I), 'Disaster'),
+    (re.compile(r'\bErr\s+ors\b', re.I), 'Errors'),
+    (re.compile(r'\bEx\s+ecution\b', re.I), 'Execution'),
+    (re.compile(r'\bEx\s+emptions\b', re.I), 'Exemptions'),
+    (re.compile(r'\bExec\s+ute\b', re.I), 'Execute'),
+    (re.compile(r'\bExecuti\s+ng\b', re.I), 'Executing'),
+    (re.compile(r'\bGlo\s+bal\b', re.I), 'Global'),
+    (re.compile(r'\bGrou\s+ps\b', re.I), 'Groups'),
+    (re.compile(r'\bIm\s+port\b', re.I), 'Import'),
+    (re.compile(r'\bImp\s+ort\b', re.I), 'Import'),
+    (re.compile(r'\bLic\s+ense\b', re.I), 'License'),
+    (re.compile(r'\bLo\s+gin\b', re.I), 'Login'),
+    (re.compile(r'\bMan\s+age\b', re.I), 'Manage'),
+    (re.compile(r'\bMana\s+ger\b', re.I), 'Manager'),
+    (re.compile(r'\bPart\s+ners\b', re.I), 'Partners'),
+    (re.compile(r'\bPa\s+rtners\b', re.I), 'Partners'),
+    (re.compile(r'\bPass\s+word\b', re.I), 'Password'),
+    (re.compile(r'\bPass\s+words\b', re.I), 'Passwords'),
+    (re.compile(r'\bPermis\s+sions\b', re.I), 'Permissions'),
+    (re.compile(r'\bPrefer\s+ences\b', re.I), 'Preferences'),
+    (re.compile(r'\bServ\s+er\b', re.I), 'Server'),
+    (re.compile(r'\bServi\s+ce\b', re.I), 'Service'),
+    (re.compile(r'\bSyst\s+em\b', re.I), 'System'),
+    (re.compile(r'\bTransf\s+er\b', re.I), 'Transfer'),
+    (re.compile(r'\busin\s+g\b', re.I), 'using'),
+    (re.compile(r'\bexecut\s+e\b', re.I), 'execute'),
+    (re.compile(r'\bCertificate\s+\(s\)\b', re.I), 'Certificate(s)'),
+    (re.compile(r'\bCertificate\s+s\b', re.I), 'Certificates'),
+    (re.compile(r'\bConfig\s+uring\b', re.I), 'Configuring'),
+    (re.compile(r'\bConfig\s+urin\s*g\b', re.I), 'Configuring'),
+    (re.compile(r'\bFil\s+eCatalyst\b', re.I), 'FileCatalyst'),
+    (re.compile(r'\bDeplo\s+yment\b', re.I), 'Deployment'),
+    (re.compile(r'\bPe\s+rmis\s*sions\b', re.I), 'Permissions'),
+    (re.compile(r'\bTe\s+mplate\b', re.I), 'Template'),
+    (re.compile(r'\bLicensin\s+g\b', re.I), 'Licensing'),
+    (re.compile(r'\bProj\s+ects\b', re.I), 'Projects'),
+    (re.compile(r'\bGoAnywhe\s*re\b', re.I), 'GoAnywhere'),
+    (re.compile(r'\bM\s+FT\b', re.I), 'MFT'),
+    (re.compile(r'\bManagem\s+ent\b', re.I), 'Management'),
+    (re.compile(r'\bPa\s+rtne\s*r\b', re.I), 'Partner'),
+    (re.compile(r'\bSetti\s+ng\b', re.I), 'Setting'),
+    (re.compile(r'\bMA\s+IL\b', re.I), 'MAIL'),
+    (re.compile(r'\bcon\s+nections\b', re.I), 'connections'),
+    (re.compile(r'\baPr\s+oject\b', re.I), 'a Project'),
+    (re.compile(r'\bAuthentica\s+tion\b', re.I), 'Authentication'),
+    (re.compile(r'\bComm\s+unication\b', re.I), 'Communication'),
 
     # Letra final partida por espaciado de margen/kerning
     (re.compile(r'\bCas\s+e\b', re.I), 'Case'),
@@ -477,7 +571,35 @@ RE_PATRONES_DESFRAGMENTACION: list[tuple[re.Pattern, str]] = [
     # Casos de marca y nombres compuestos
     (re.compile(r'\bGo\s+A\s+nywhere\b', re.I), 'GoAnywhere'),
     (re.compile(r'\bGo\s+Anywhere\b', re.I), 'GoAnywhere'),
+    (re.compile(r'\bOA\s+uth\b', re.I), 'OAuth'),
 ]
+
+# Palabras objetivo para la heurística de letras desprendidas
+_PALABRAS_HEURISTICA = {
+    'the', 'to', 'passwords', 'password', 'features', 'feature', 'partners', 'partner',
+    'have', 'that', 'this', 'with', 'from', 'agent', 'agents', 'execute', 'executed',
+    'executing', 'create', 'created', 'delete', 'update', 'start', 'history', 'system',
+    'resource', 'server', 'service', 'submitted', 'unauthorized', 'organize', 'wizard'
+}
+
+
+def _desfragmentar_letras_sueltas(texto: str) -> str:
+    """Heurística generalizada: reubica letras sueltas intermedias entre palabras para páginas 100+."""
+    if not texto:
+        return ""
+
+    def _reubicar(m: re.Match) -> str:
+        w1, l, w2 = m.group(1), m.group(2), m.group(3)
+        cand_derecha = (l + w2).lower()
+        if cand_derecha in _PALABRAS_HEURISTICA:
+            nueva_w2 = (l + w2) if not w2[0].isupper() else (l.upper() + w2)
+            return f"{w1} {nueva_w2}"
+        cand_izquierda = (w1 + l).lower()
+        if cand_izquierda in _PALABRAS_HEURISTICA:
+            return f"{w1 + l} {w2}"
+        return m.group(0)
+
+    return re.sub(r'\b([A-Za-z]{2,})\s+([b-hj-z])\s+([a-z]{1,})\b', _reubicar, texto)
 
 
 def _reparar_palabras_rotas(texto: str) -> str:
@@ -485,11 +607,14 @@ def _reparar_palabras_rotas(texto: str) -> str:
     if not texto:
         return ""
     res = texto
+    # 1. Aplicar patrones compilados del dominio
     for pat, rep in RE_PATRONES_DESFRAGMENTACION:
         def _rep_func(m: re.Match) -> str:
             t = m.group(0)
             return rep.lower() if t.islower() else rep
         res = pat.sub(_rep_func, res)
+    # 2. Aplicar heurística dinámica de desfragmentación
+    res = _desfragmentar_letras_sueltas(res)
     return res
 
 

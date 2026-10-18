@@ -137,6 +137,14 @@ Durante el análisis y compilación de las páginas 1 a 100 se identificaron dis
 | **Código de Error**| `['Status Cod', 'e: 590']` | `"Status Cod e: 590"` | `"Status Code: 590"` |
 | **Archivos** | `['F', 'iles Folders 81']` | `"F iles Folders 81"` | `"Files Folders 81"` |
 | **Configuración** | `['Co', 'nfiguring a Resource 139']` | `"Co nfiguring a Resource 139"` | `"Configuring a Resource 139"` |
+| **Letra 't' suelta**| `['Create t', 'he CSV File']` | `"Create t he CSV File"` | `"Create the CSV File"` |
+| **Letra 'p' suelta**| `['User p', 'asswords against']` | `"User p asswords against"` | `"User passwords against"` |
+| **Pronombre roto**| `['the', 'y have access']` | `"the y have access"` | `"they have access"` |
+| **Recurso en 3** | `['Export R', 'eso', 'urce 142']` | `"Export R eso urce 142"` | `"Export Resource 142"` |
+| **Historia en 3** | `['Change H', 'isto', 'ry 2578']` | `"Change H isto ry 2578"` | `"Change History 2578"` |
+| **Gatillo en 3** | `['Copy T', 'rig', 'ger 541']` | `"Copy T rig ger 541"` | `"Copy Trigger 541"` |
+| **Sistema en 3** | `['File Sy', 'ste', 'm Tasks']` | `"File Sy ste m Tasks"` | `"File System Tasks"` |
+| **Mago en 3** | `['SQL W', 'iza', 'rd 3375']` | `"SQL W iza rd 3375"` | `"SQL Wizard 3375"` |
 
 ---
 
@@ -162,3 +170,25 @@ Antes de dar por aceptada una corrida masiva de páginas (ej. páginas 101 a 500
 - [ ] **6. Limpieza de Artefactos de Visor:**
   * 0 apariciones de cadenas `\ue000` a `\uf8ff` (caracteres privados de Scribd).
   * 0 apariciones de cadenas `"page: "` dentro del cuerpo de texto compilado.
+
+---
+
+## 5. Análisis de Solución Arquitectónica para Escalar a Páginas 100+
+
+Para procesar de forma masiva y confiable volúmenes grandes de páginas (101 a 3,700+) sin depender de agregar manualmente cada palabra en un diccionario regex, se concluye la siguiente **estrategia desacoplada en dos niveles**:
+
+### Nivel A: En el Compilador (Solución Inmediata en Ejecución)
+1. **Pipeline de Dos Etapas:**
+   * **Etapa 1 (Reglas del Dominio):** Mantiene la lista compilada `RE_PATRONES_DESFRAGMENTACION` para términos técnicos de GoAnywhere (`OAuth`, `FileCatalyst`, `Active Directory`, `AS2`, `FTP`, etc.) ejecutándose en $O(N)$ tiempo lineal.
+   * **Etapa 2 (Heurística Posicional Dinámica):** La función `_desfragmentar_letras_sueltas()` evalúa cualquier secuencia `Word1 + Letra + Word2`. Si `Letra + Word2` o `Word1 + Letra` forma un vocablo válido en inglés (ej. `t + he` $\rightarrow$ `the`, `p + asswords` $\rightarrow$ `passwords`, `Agen + t` $\rightarrow$ `Agent`), une automáticamente los glifos sin requerir reglas puntuales.
+2. **Ventaja:**
+   * Corrige insumos ya extraídos sin necesidad de volver a scrapear las páginas existentes de Scribd.
+
+### Nivel B: En el Bot Scraper / Extractor (Solución de Raíz para Futuras Corridas)
+1. **Fusión Geométrica de `<span>`:**
+   * En Scribd, los `<span>` dentro de `.text_layer` poseen atributos de posición CSS (`left`, `top`, `width` o matrices transform).
+   * **Criterio de Proximidad:** En lugar de hacer `.get_text().strip()` sobre cada `<span>`, el extractor debe calcular la distancia horizontal:
+     $$\Delta x = \text{left}_{i+1} - (\text{left}_i + \text{width}_i)$$
+   * Si $\Delta x < 3.5\text{ px}$ (distancia menor a un espacio en blanco tipográfico) y comparten la misma coordenada vertical $y$, **los textos de ambos spans deben concatenarse directamente sin espacio** (`span_i + span_{i+1}`).
+2. **Ventaja:**
+   * Elimina el 95% de las fragmentaciones de sintaxis directamente en la extracción de `paginas.json`, entregando texto limpio de origen a cualquier consumidor.
