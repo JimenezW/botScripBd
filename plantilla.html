@@ -660,6 +660,40 @@
       color: #005f73;
       margin-right: 4px;
     }
+    .content-warning {
+      background-color: #fdf2f2;
+      border-left: 3.5pt solid #ce6363;
+      border-radius: 0 4px 4px 0;
+      padding: 10px 14px;
+      margin: 12px 0 14px 0;
+      font-family: Arial, "Helvetica Neue", sans-serif;
+      font-size: 8.8pt;
+      line-height: 1.45;
+      color: #222222;
+    }
+    .warning-label {
+      font-weight: 700;
+      color: #ce6363;
+      display: block;
+      margin-bottom: 5px;
+      font-size: 8.8pt;
+      letter-spacing: 0.5px;
+    }
+    .warning-text {
+      color: #222222;
+    }
+    a.doc-link, .doc-link {
+      color: #006a56;
+      text-decoration: underline;
+      text-underline-offset: 2.5px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: color 0.15s ease;
+    }
+    a.doc-link:hover, .doc-link:hover {
+      color: #00483a;
+      text-decoration: underline;
+    }
 
     /* Pie de página institucional común */
     .doc-page-footer {
@@ -769,22 +803,27 @@
       <main class="doc-content-body">
         {% for elem in pag.elementos %}
           {% if elem.tipo == "h1" %}
-            <h1 class="content-h1">{{ elem.texto }}</h1>
+            <h1 class="content-h1">{{ elem.texto | safe }}</h1>
           {% elif elem.tipo == "h2" %}
-            <h2 class="content-h2">{{ elem.texto }}</h2>
+            <h2 class="content-h2">{{ elem.texto | safe }}</h2>
           {% elif elem.tipo == "p" %}
-            <p class="content-p">{{ elem.texto }}</p>
+            <p class="content-p">{{ elem.texto | safe }}</p>
           {% elif elem.tipo == "bullet" %}
             <div class="content-bullet">
               <span class="bullet-bullet">&bull;</span>
-              <span class="bullet-text">{{ elem.texto }}</span>
+              <span class="bullet-text">{{ elem.texto | safe }}</span>
             </div>
           {% elif elem.tipo == "numero" %}
-            <p class="content-step">{{ elem.texto }}</p>
+            <p class="content-step">{{ elem.texto | safe }}</p>
           {% elif elem.tipo == "tip" %}
             <div class="content-tip">
               <strong class="tip-label">TIP:</strong>
-              <span class="tip-text">{{ elem.texto | replace("TIP:", "") | trim }}</span>
+              <span class="tip-text">{{ elem.texto | replace("TIP:", "") | trim | safe }}</span>
+            </div>
+          {% elif elem.tipo == "warning" %}
+            <div class="content-warning">
+              <strong class="warning-label">WARNING:</strong>
+              <div class="warning-text">{{ elem.texto | replace("WARNING:", "") | trim | safe }}</div>
             </div>
           {% endif %}
         {% endfor %}

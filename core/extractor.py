@@ -230,21 +230,21 @@ class DocumentExtractor:
                         src = "https:" + src
                     img["src"] = src
 
-            # Extraer líneas de texto legibles sin duplicidad recursiva
+            # Extraer líneas de texto legibles sin duplicidad recursiva (soportando múltiples text_layers)
             lines: List[str] = []
-            text_layer = soup.find(class_=re.compile(r"text_layer"))
-            if text_layer:
+            text_layers = soup.find_all(class_=re.compile(r"text_layer"))
+            for text_layer in text_layers:
                 # Los spans con clase 'a' representan los renglones principales
                 row_spans = text_layer.find_all("span", class_="a")
                 if row_spans:
                     for sp in row_spans:
                         txt = " ".join(sp.get_text().split())
-                        if txt and txt not in lines:
+                        if txt:
                             lines.append(txt)
                 else:
                     for block in text_layer.find_all(["div", "span"]):
                         txt = " ".join(block.get_text().split())
-                        if txt and len(txt) > 2 and txt not in lines:
+                        if txt and len(txt) > 2:
                             lines.append(txt)
 
             text_content = "\n".join(lines).strip()

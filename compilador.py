@@ -572,6 +572,12 @@ RE_PATRONES_DESFRAGMENTACION: list[tuple[re.Pattern, str]] = [
     (re.compile(r'\bGo\s+A\s+nywhere\b', re.I), 'GoAnywhere'),
     (re.compile(r'\bGo\s+Anywhere\b', re.I), 'GoAnywhere'),
     (re.compile(r'\bOA\s+uth\b', re.I), 'OAuth'),
+    (re.compile(r'\bActivatea\s*License\b', re.I), 'Activate a License'),
+    (re.compile(r'\bActivateaLicense\b', re.I), 'Activate a License'),
+    (re.compile(r'\bServerID\b', re.I), 'Server ID'),
+    (re.compile(r'\bGetLicense\b', re.I), 'Get License'),
+    (re.compile(r'\bf\s+ormat\s+f\s+ormat\b', re.I), 'format'),
+    (re.compile(r'\bf\s+ormat\b', re.I), 'format'),
 ]
 
 # Palabras objetivo para la heurística de letras desprendidas
@@ -615,6 +621,35 @@ def _reparar_palabras_rotas(texto: str) -> str:
         res = pat.sub(_rep_func, res)
     # 2. Aplicar heurística dinámica de desfragmentación
     res = _desfragmentar_letras_sueltas(res)
+    # 3. Normalizar casos de protocolos y puntuación espaciada
+    res = re.sub(r'\[protocol\]:\s*//', '[protocol]://', res)
+    res = re.sub(r'\s+([.,;:!?])', r'\1', res)
+    return res
+
+
+def _enriquecer_links(texto: str) -> str:
+    """Convierte URLs y enlaces textuales conocidos en etiquetas <a> con clase estilizada 'doc-link'."""
+    if not texto:
+        return ""
+    # URLs directas (http o https), excluyendo puntuación final
+    def _rep_url(m: re.Match) -> str:
+        raw = m.group(1)
+        url = raw.rstrip('.,;:!?')
+        punct = raw[len(url):]
+        return f'<a href="{url}" class="doc-link" target="_blank" rel="noopener">{url}</a>{punct}'
+
+    res = re.sub(r'\b(https?://[^\s<>"\'\)]+)', _rep_url, texto)
+    # Enlaces oficiales del portal GoAnywhere
+    res = re.sub(
+        r'\bCustomer\s+Operations\b',
+        r'<a href="https://my.goanywhere.com/" class="doc-link" target="_blank" rel="noopener">Customer Operations</a>',
+        res
+    )
+    res = re.sub(
+        r'\bCustomer\s+Support\b',
+        r'<a href="https://my.goanywhere.com/" class="doc-link" target="_blank" rel="noopener">Customer Support</a>',
+        res
+    )
     return res
 
 
@@ -943,7 +978,7 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str]) -> dict:
         if l == 'l':
             i += 1
             buf_bullet = []
-            while i < n and lineas[i].strip() != 'l' and not re.match(r'^\d+\.\s', lineas[i].strip()) and not lineas[i].strip().startswith('TIP:'):
+            while i < n and lineas[i].strip() != 'l' and not re.match(r'^\d+\.\s', lineas[i].strip()) and not lineas[i].strip().startswith(('TIP:', 'WARNING:', 'NOTE:')):
                 item = lineas[i].strip()
                 buf_bullet.append(item)
                 if item.endswith('.'):
@@ -951,7 +986,7 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str]) -> dict:
                     break
                 i += 1
             if buf_bullet:
-                txt = _reparar_palabras_rotas(re.sub(r'\s+', ' ', " ".join(buf_bullet)))
+                txt = _enriquecer_links(_reparar_palabras_rotas(re.sub(r'\s+', ' ', " ".join(buf_bullet))))
                 elementos.append({"tipo": "bullet", "texto": txt})
             continue
 
@@ -959,58 +994,72 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str]) -> dict:
         if re.match(r'^\d+\.\s', l):
             buf_num = [l]
             i += 1
-            while i < n and not re.match(r'^\d+\.\s', lineas[i].strip()) and lineas[i].strip() != 'l' and not lineas[i].strip().startswith('TIP:'):
+            while i < n and not re.match(r'^\d+\.\s', lineas[i].strip()) and lineas[i].strip() != 'l' and not lineas[i].strip().startswith(('TIP:', 'WARNING:', 'NOTE:')):
                 item = lineas[i].strip()
                 buf_num.append(item)
                 if item.endswith('.'):
                     i += 1
                     break
                 i += 1
-            txt = _reparar_palabras_rotas(re.sub(r'\s+', ' ', " ".join(buf_num)))
+            txt = _enriquecer_links(_reparar_palabras_rotas(re.sub(r'\s+', ' ', " ".join(buf_num))))
             elementos.append({"tipo": "numero", "texto": txt})
             continue
 
-        # Bloques TIP / Tips
-        if l.startswith('TIP:') or l == 'TIP:':
-            buf_tip = [l]
+        # Bloques WARNING / TIP / NOTE
+        if l.startswith(('WARNING:', 'TIP:', 'NOTE:')) or l in ('WARNING:', 'TIP:', 'NOTE:'):
+            es_warning = l.startswith('WARNING:') or l == 'WARNING:'
+            buf_callout = [l]
             i += 1
-            while i < n and not re.match(r'^\d+\.\s', lineas[i].strip()) and lineas[i].strip() != 'l':
+            while i < n and not re.match(r'^\d+\.\s', lineas[i].strip()) and lineas[i].strip() != 'l' and not lineas[i].strip().startswith(('TIP:', 'WARNING:', 'NOTE:')):
                 item = lineas[i].strip()
-                buf_tip.append(item)
-                if item.endswith('.'):
-                    i += 1
-                    break
+                buf_callout.append(item)
                 i += 1
-            txt = _reparar_palabras_rotas(re.sub(r'\s+', ' ', " ".join(buf_tip)))
-            elementos.append({"tipo": "tip", "texto": txt})
+            txt = _reparar_palabras_rotas(re.sub(r'\s+', ' ', " ".join(buf_callout)))
+            txt = _enriquecer_links(txt)
+            tipo_bloque = "warning" if es_warning else "tip"
+            elementos.append({"tipo": tipo_bloque, "texto": txt})
             continue
 
-        # Posibles encabezados (h1 o h2)
-        es_posible_titulo = (len(l) < 55 and not l.endswith('.') and not l.endswith(',') and not l.endswith(';'))
-        if es_posible_titulo:
+        # Título principal de página (primer elemento de contenido)
+        if not elementos:
+            t = _reparar_palabras_rotas(re.sub(r'([a-z])([A-Z])', r'\1 \2', l).strip())
+            elementos.append({"tipo": "h1", "texto": t})
+            i += 1
+            continue
+
+        # Subtítulo (h2) real: debe venir precedido de fin de oración, no ser URL ni preposición subordinada
+        prev_texto = elementos[-1].get("texto", "") if elementos else ""
+        es_cierre_previo = not prev_texto or prev_texto.endswith(('.', '!', '?', ':', '</div>', '</p>'))
+        es_url = l.startswith(('http://', 'https://')) or '//' in l
+        es_prep = bool(re.match(r'^(for|where|and|or|with|to|in|of|on|at|by|from|the|a|an)\b', l, re.I))
+
+        if es_cierre_previo and not es_url and not es_prep and len(l) < 55 and not l.endswith(('.', ',', ';')):
             t = _reparar_palabras_rotas(re.sub(r'([a-z])([A-Z])', r'\1 \2', l).strip())
             if elementos and elementos[-1].get("texto") == t:
                 i += 1
                 continue
-            tipo_tit = "h1" if (num in (39, 86) and i <= 2) else "h2"
-            elementos.append({"tipo": tipo_tit, "texto": t})
+            elementos.append({"tipo": "h2", "texto": t})
             i += 1
             continue
 
         # Párrafos de texto continuo
         buf_p = [l]
         i += 1
-        while i < n and lineas[i].strip() != 'l' and not re.match(r'^\d+\.\s', lineas[i].strip()) and not lineas[i].strip().startswith('TIP:'):
+        while i < n and lineas[i].strip() != 'l' and not re.match(r'^\d+\.\s', lineas[i].strip()) and not lineas[i].strip().startswith(('TIP:', 'WARNING:', 'NOTE:')):
             sig = lineas[i].strip()
-            if len(sig) < 45 and not sig.endswith('.') and not sig.endswith(',') and not sig.endswith(';'):
-                break
+            buf_str = " ".join(buf_p).strip()
+            if buf_str.endswith(('.', '!', '?')):
+                sig_es_url = sig.startswith(('http://', 'https://')) or '//' in sig
+                sig_es_prep = bool(re.match(r'^(for|where|and|or|with|to|in|of|on|at|by|from|the|a|an)\b', sig, re.I))
+                if not sig_es_url and not sig_es_prep and len(sig) < 55 and not sig.endswith(('.', ',', ';')):
+                    break
             buf_p.append(sig)
             if sig.endswith('.'):
                 i += 1
                 break
             i += 1
 
-        txt = _reparar_palabras_rotas(re.sub(r'\s+', ' ', " ".join(buf_p)))
+        txt = _enriquecer_links(_reparar_palabras_rotas(re.sub(r'\s+', ' ', " ".join(buf_p))))
         if not elementos or elementos[-1].get("texto") != txt:
             elementos.append({"tipo": "p", "texto": txt})
 

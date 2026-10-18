@@ -146,17 +146,17 @@ class InsumoParser:
             page_num = int(match.group(1))
 
             newpage_elem = p_elem.find(class_="newpage")
-            text_layer_elem = p_elem.find(class_="text_layer")
+            text_layers = p_elem.find_all(class_=re.compile(r"text_layer"))
             img_elems = p_elem.find_all("img")
 
             # Descartar contenedores vacíos no cargados en el DOM guardado
-            if not newpage_elem and not text_layer_elem and not img_elems:
+            if not newpage_elem and not text_layers and not img_elems:
                 continue
 
             # Extraer líneas de texto ordenadas
             text_lines = []
-            if text_layer_elem:
-                for span in text_layer_elem.find_all("span"):
+            for text_layer in text_layers:
+                for span in text_layer.find_all("span"):
                     text = span.get_text().strip()
                     if text:
                         text_lines.append(text)
