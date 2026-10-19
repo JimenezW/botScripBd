@@ -1,0 +1,743 @@
+{
+  "total_figuras": 65,
+  "paginas": {
+    "44": [
+      {
+        "id": "fig_0044_1",
+        "archivo": "figuras/fig_p0044_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0044_1.png",
+        "ancho": 644,
+        "alto": 197,
+        "posicion_top_px": 170,
+        "posicion_left_px": 166,
+        "calidad": "hd_2x"
+      }
+    ],
+    "39": [
+      {
+        "id": "fig_0039_1",
+        "archivo": "figuras/fig_p0039_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0039_1.png",
+        "ancho": 690,
+        "alto": 467,
+        "posicion_top_px": 431,
+        "posicion_left_px": 119,
+        "calidad": "hd_2x"
+      }
+    ],
+    "43": [
+      {
+        "id": "fig_0043_1",
+        "archivo": "figuras/fig_p0043_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0043_1.png",
+        "ancho": 692,
+        "alto": 387,
+        "posicion_top_px": 463,
+        "posicion_left_px": 120,
+        "calidad": "hd_2x"
+      }
+    ],
+    "45": [
+      {
+        "id": "fig_0045_1",
+        "archivo": "figuras/fig_p0045_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0045_1.png",
+        "ancho": 149,
+        "alto": 55,
+        "posicion_top_px": 259,
+        "posicion_left_px": 209,
+        "calidad": "hd_2x"
+      },
+      {
+        "id": "fig_0045_2",
+        "archivo": "figuras/fig_p0045_2.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0045_2.png",
+        "ancho": 559,
+        "alto": 433,
+        "posicion_top_px": 514,
+        "posicion_left_px": 165,
+        "calidad": "hd_2x"
+      }
+    ],
+    "46": [
+      {
+        "id": "fig_0046_1",
+        "archivo": "figuras/fig_p0046_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0046_1.png",
+        "ancho": 469,
+        "alto": 245,
+        "posicion_top_px": 317,
+        "posicion_left_px": 122,
+        "calidad": "hd_2x"
+      },
+      {
+        "id": "fig_0046_2",
+        "archivo": "figuras/fig_p0046_2.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0046_2.png",
+        "ancho": 416,
+        "alto": 139,
+        "posicion_top_px": 663,
+        "posicion_left_px": 122,
+        "calidad": "hd_2x"
+      }
+    ],
+    "47": [
+      {
+        "id": "fig_0047_1",
+        "archivo": "figuras/fig_p0047_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0047_1.png",
+        "ancho": 423,
+        "alto": 268,
+        "posicion_top_px": 574,
+        "posicion_left_px": 121,
+        "calidad": "hd_2x"
+      }
+    ],
+    "48": [
+      {
+        "id": "fig_0048_1",
+        "archivo": "figuras/fig_p0048_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0048_1.png",
+        "ancho": 385,
+        "alto": 508,
+        "posicion_top_px": 207,
+        "posicion_left_px": 122,
+        "calidad": "hd_2x"
+      }
+    ],
+    "49": [
+      {
+        "id": "fig_0049_1",
+        "archivo": "figuras/fig_p0049_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0049_1.png",
+        "ancho": 389,
+        "alto": 289,
+        "posicion_top_px": 651,
+        "posicion_left_px": 121,
+        "calidad": "hd_2x"
+      }
+    ],
+    "50": [
+      {
+        "id": "fig_0050_1",
+        "archivo": "figuras/fig_p0050_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0050_1.png",
+        "ancho": 688,
+        "alto": 92,
+        "posicion_top_px": 248,
+        "posicion_left_px": 121,
+        "calidad": "hd_2x"
+      }
+    ],
+    "52": [
+      {
+        "id": "fig_0052_1",
+        "archivo": "figuras/fig_p0052_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0052_1.png",
+        "ancho": 687,
+        "alto": 70,
+        "posicion_top_px": 900,
+        "posicion_left_px": 122,
+        "calidad": "hd_2x"
+      }
+    ],
+    "53": [
+      {
+        "id": "fig_0053_1",
+        "archivo": "figuras/fig_p0053_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0053_1.png",
+        "ancho": 191,
+        "alto": 60,
+        "posicion_top_px": 113,
+        "posicion_left_px": 584,
+        "calidad": "hd_2x"
+      }
+    ],
+    "54": [
+      {
+        "id": "fig_0054_1",
+        "archivo": "figuras/fig_p0054_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0054_1.png",
+        "ancho": 687,
+        "alto": 147,
+        "posicion_top_px": 359,
+        "posicion_left_px": 122,
+        "calidad": "hd_2x"
+      }
+    ],
+    "55": [
+      {
+        "id": "fig_0055_1",
+        "archivo": "figuras/fig_p0055_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0055_1.png",
+        "ancho": 605,
+        "alto": 300,
+        "posicion_top_px": 500,
+        "posicion_left_px": 209,
+        "calidad": "hd_2x"
+      }
+    ],
+    "56": [
+      {
+        "id": "fig_0056_1",
+        "archivo": "figuras/fig_p0056_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0056_1.png",
+        "ancho": 351,
+        "alto": 135,
+        "posicion_top_px": 433,
+        "posicion_left_px": 166,
+        "calidad": "hd_2x"
+      }
+    ],
+    "57": [
+      {
+        "id": "fig_0057_1",
+        "archivo": "figuras/fig_p0057_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0057_1.png",
+        "ancho": 489,
+        "alto": 418,
+        "posicion_top_px": 103,
+        "posicion_left_px": 165,
+        "calidad": "hd_2x"
+      },
+      {
+        "id": "fig_0057_2",
+        "archivo": "figuras/fig_p0057_2.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0057_2.png",
+        "ancho": 649,
+        "alto": 90,
+        "posicion_top_px": 579,
+        "posicion_left_px": 165,
+        "calidad": "hd_2x"
+      },
+      {
+        "id": "fig_0057_3",
+        "archivo": "figuras/fig_p0057_3.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0057_3.png",
+        "ancho": 294,
+        "alto": 185,
+        "posicion_top_px": 778,
+        "posicion_left_px": 121,
+        "calidad": "hd_2x"
+      }
+    ],
+    "58": [
+      {
+        "id": "fig_0058_1",
+        "archivo": "figuras/fig_p0058_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0058_1.png",
+        "ancho": 688,
+        "alto": 101,
+        "posicion_top_px": 179,
+        "posicion_left_px": 122,
+        "calidad": "hd_2x"
+      },
+      {
+        "id": "fig_0058_2",
+        "archivo": "figuras/fig_p0058_2.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0058_2.png",
+        "ancho": 688,
+        "alto": 285,
+        "posicion_top_px": 354,
+        "posicion_left_px": 122,
+        "calidad": "hd_2x"
+      },
+      {
+        "id": "fig_0058_3",
+        "archivo": "figuras/fig_p0058_3.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0058_3.png",
+        "ancho": 458,
+        "alto": 298,
+        "posicion_top_px": 672,
+        "posicion_left_px": 122,
+        "calidad": "hd_2x"
+      }
+    ],
+    "61": [
+      {
+        "id": "fig_0061_1",
+        "archivo": "figuras/fig_p0061_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0061_1.png",
+        "ancho": 693,
+        "alto": 264,
+        "posicion_top_px": 765,
+        "posicion_left_px": 121,
+        "calidad": "hd_2x"
+      }
+    ],
+    "62": [
+      {
+        "id": "fig_0062_1",
+        "archivo": "figuras/fig_p0062_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0062_1.png",
+        "ancho": 140,
+        "alto": 64,
+        "posicion_top_px": 163,
+        "posicion_left_px": 621,
+        "calidad": "hd_2x"
+      },
+      {
+        "id": "fig_0062_2",
+        "archivo": "figuras/fig_p0062_2.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0062_2.png",
+        "ancho": 688,
+        "alto": 161,
+        "posicion_top_px": 473,
+        "posicion_left_px": 121,
+        "calidad": "hd_2x"
+      }
+    ],
+    "63": [
+      {
+        "id": "fig_0063_1",
+        "archivo": "figuras/fig_p0063_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0063_1.png",
+        "ancho": 450,
+        "alto": 147,
+        "posicion_top_px": 881,
+        "posicion_left_px": 120,
+        "calidad": "hd_2x"
+      }
+    ],
+    "64": [
+      {
+        "id": "fig_0064_1",
+        "archivo": "figuras/fig_p0064_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0064_1.png",
+        "ancho": 689,
+        "alto": 86,
+        "posicion_top_px": 242,
+        "posicion_left_px": 121,
+        "calidad": "hd_2x"
+      },
+      {
+        "id": "fig_0064_2",
+        "archivo": "figuras/fig_p0064_2.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0064_2.png",
+        "ancho": 219,
+        "alto": 346,
+        "posicion_top_px": 448,
+        "posicion_left_px": 122,
+        "calidad": "hd_2x"
+      }
+    ],
+    "65": [
+      {
+        "id": "fig_0065_1",
+        "archivo": "figuras/fig_p0065_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0065_1.png",
+        "ancho": 173,
+        "alto": 51,
+        "posicion_top_px": 810,
+        "posicion_left_px": 349,
+        "calidad": "hd_2x"
+      }
+    ],
+    "66": [
+      {
+        "id": "fig_0066_1",
+        "archivo": "figuras/fig_p0066_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0066_1.png",
+        "ancho": 453,
+        "alto": 464,
+        "posicion_top_px": 87,
+        "posicion_left_px": 166,
+        "calidad": "hd_2x"
+      }
+    ],
+    "69": [
+      {
+        "id": "fig_0069_1",
+        "archivo": "figuras/fig_p0069_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0069_1.png",
+        "ancho": 614,
+        "alto": 429,
+        "posicion_top_px": 136,
+        "posicion_left_px": 120,
+        "calidad": "hd_2x"
+      }
+    ],
+    "70": [
+      {
+        "id": "fig_0070_1",
+        "archivo": "figuras/fig_p0070_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0070_1.png",
+        "ancho": 688,
+        "alto": 161,
+        "posicion_top_px": 727,
+        "posicion_left_px": 121,
+        "calidad": "hd_2x"
+      }
+    ],
+    "72": [
+      {
+        "id": "fig_0072_1",
+        "archivo": "figuras/fig_p0072_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0072_1.png",
+        "ancho": 451,
+        "alto": 148,
+        "posicion_top_px": 110,
+        "posicion_left_px": 121,
+        "calidad": "hd_2x"
+      },
+      {
+        "id": "fig_0072_2",
+        "archivo": "figuras/fig_p0072_2.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0072_2.png",
+        "ancho": 689,
+        "alto": 90,
+        "posicion_top_px": 457,
+        "posicion_left_px": 121,
+        "calidad": "hd_2x"
+      },
+      {
+        "id": "fig_0072_3",
+        "archivo": "figuras/fig_p0072_3.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0072_3.png",
+        "ancho": 219,
+        "alto": 347,
+        "posicion_top_px": 666,
+        "posicion_left_px": 122,
+        "calidad": "hd_2x"
+      }
+    ],
+    "73": [
+      {
+        "id": "fig_0073_1",
+        "archivo": "figuras/fig_p0073_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0073_1.png",
+        "ancho": 691,
+        "alto": 60,
+        "posicion_top_px": 924,
+        "posicion_left_px": 121,
+        "calidad": "hd_2x"
+      }
+    ],
+    "74": [
+      {
+        "id": "fig_0074_1",
+        "archivo": "figuras/fig_p0074_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0074_1.png",
+        "ancho": 578,
+        "alto": 207,
+        "posicion_top_px": 128,
+        "posicion_left_px": 199,
+        "calidad": "hd_2x"
+      }
+    ],
+    "76": [
+      {
+        "id": "fig_0076_1",
+        "archivo": "figuras/fig_p0076_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0076_1.png",
+        "ancho": 688,
+        "alto": 549,
+        "posicion_top_px": 396,
+        "posicion_left_px": 122,
+        "calidad": "hd_2x"
+      }
+    ],
+    "78": [
+      {
+        "id": "fig_0078_1",
+        "archivo": "figuras/fig_p0078_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0078_1.png",
+        "ancho": 584,
+        "alto": 368,
+        "posicion_top_px": 103,
+        "posicion_left_px": 122,
+        "calidad": "hd_2x"
+      },
+      {
+        "id": "fig_0078_2",
+        "archivo": "figuras/fig_p0078_2.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0078_2.png",
+        "ancho": 466,
+        "alto": 115,
+        "posicion_top_px": 708,
+        "posicion_left_px": 122,
+        "calidad": "hd_2x"
+      }
+    ],
+    "79": [
+      {
+        "id": "fig_0079_1",
+        "archivo": "figuras/fig_p0079_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0079_1.png",
+        "ancho": 450,
+        "alto": 148,
+        "posicion_top_px": 812,
+        "posicion_left_px": 120,
+        "calidad": "hd_2x"
+      }
+    ],
+    "80": [
+      {
+        "id": "fig_0080_1",
+        "archivo": "figuras/fig_p0080_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0080_1.png",
+        "ancho": 689,
+        "alto": 138,
+        "posicion_top_px": 242,
+        "posicion_left_px": 121,
+        "calidad": "hd_2x"
+      },
+      {
+        "id": "fig_0080_2",
+        "archivo": "figuras/fig_p0080_2.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0080_2.png",
+        "ancho": 216,
+        "alto": 346,
+        "posicion_top_px": 527,
+        "posicion_left_px": 122,
+        "calidad": "hd_2x"
+      }
+    ],
+    "81": [
+      {
+        "id": "fig_0081_1",
+        "archivo": "figuras/fig_p0081_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0081_1.png",
+        "ancho": 693,
+        "alto": 194,
+        "posicion_top_px": 606,
+        "posicion_left_px": 121,
+        "calidad": "hd_2x"
+      }
+    ],
+    "82": [
+      {
+        "id": "fig_0082_1",
+        "archivo": "figuras/fig_p0082_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0082_1.png",
+        "ancho": 285,
+        "alto": 74,
+        "posicion_top_px": 417,
+        "posicion_left_px": 424,
+        "calidad": "hd_2x"
+      }
+    ],
+    "89": [
+      {
+        "id": "fig_0089_1",
+        "archivo": "figuras/fig_p0089_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0089_1.png",
+        "ancho": 688,
+        "alto": 286,
+        "posicion_top_px": 332,
+        "posicion_left_px": 122,
+        "calidad": "hd_2x"
+      },
+      {
+        "id": "fig_0089_2",
+        "archivo": "figuras/fig_p0089_2.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0089_2.png",
+        "ancho": 181,
+        "alto": 157,
+        "posicion_top_px": 695,
+        "posicion_left_px": 210,
+        "calidad": "hd_2x"
+      }
+    ],
+    "91": [
+      {
+        "id": "fig_0091_1",
+        "archivo": "figuras/fig_p0091_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0091_1.png",
+        "ancho": 198,
+        "alto": 257,
+        "posicion_top_px": 748,
+        "posicion_left_px": 122,
+        "calidad": "hd_2x"
+      }
+    ],
+    "92": [
+      {
+        "id": "fig_0092_1",
+        "archivo": "figuras/fig_p0092_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0092_1.png",
+        "ancho": 691,
+        "alto": 466,
+        "posicion_top_px": 289,
+        "posicion_left_px": 121,
+        "calidad": "hd_2x"
+      }
+    ],
+    "93": [
+      {
+        "id": "fig_0093_1",
+        "archivo": "figuras/fig_p0093_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0093_1.png",
+        "ancho": 569,
+        "alto": 338,
+        "posicion_top_px": 246,
+        "posicion_left_px": 155,
+        "calidad": "hd_2x"
+      },
+      {
+        "id": "fig_0093_2",
+        "archivo": "figuras/fig_p0093_2.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0093_2.png",
+        "ancho": 173,
+        "alto": 91,
+        "posicion_top_px": 647,
+        "posicion_left_px": 155,
+        "calidad": "hd_2x"
+      }
+    ],
+    "94": [
+      {
+        "id": "fig_0094_1",
+        "archivo": "figuras/fig_p0094_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0094_1.png",
+        "ancho": 490,
+        "alto": 446,
+        "posicion_top_px": 246,
+        "posicion_left_px": 153,
+        "calidad": "hd_2x"
+      }
+    ],
+    "95": [
+      {
+        "id": "fig_0095_1",
+        "archivo": "figuras/fig_p0095_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0095_1.png",
+        "ancho": 538,
+        "alto": 331,
+        "posicion_top_px": 191,
+        "posicion_left_px": 155,
+        "calidad": "hd_2x"
+      },
+      {
+        "id": "fig_0095_2",
+        "archivo": "figuras/fig_p0095_2.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0095_2.png",
+        "ancho": 160,
+        "alto": 158,
+        "posicion_top_px": 586,
+        "posicion_left_px": 155,
+        "calidad": "hd_2x"
+      }
+    ],
+    "96": [
+      {
+        "id": "fig_0096_1",
+        "archivo": "figuras/fig_p0096_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0096_1.png",
+        "ancho": 548,
+        "alto": 505,
+        "posicion_top_px": 191,
+        "posicion_left_px": 154,
+        "calidad": "hd_2x"
+      },
+      {
+        "id": "fig_0096_2",
+        "archivo": "figuras/fig_p0096_2.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0096_2.png",
+        "ancho": 153,
+        "alto": 72,
+        "posicion_top_px": 705,
+        "posicion_left_px": 297,
+        "calidad": "hd_2x"
+      },
+      {
+        "id": "fig_0096_3",
+        "archivo": "figuras/fig_p0096_3.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0096_3.png",
+        "ancho": 141,
+        "alto": 91,
+        "posicion_top_px": 759,
+        "posicion_left_px": 154,
+        "calidad": "hd_2x"
+      }
+    ],
+    "97": [
+      {
+        "id": "fig_0097_1",
+        "archivo": "figuras/fig_p0097_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0097_1.png",
+        "ancho": 322,
+        "alto": 211,
+        "posicion_top_px": 246,
+        "posicion_left_px": 155,
+        "calidad": "hd_2x"
+      },
+      {
+        "id": "fig_0097_2",
+        "archivo": "figuras/fig_p0097_2.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0097_2.png",
+        "ancho": 173,
+        "alto": 91,
+        "posicion_top_px": 573,
+        "posicion_left_px": 155,
+        "calidad": "hd_2x"
+      }
+    ],
+    "98": [
+      {
+        "id": "fig_0098_1",
+        "archivo": "figuras/fig_p0098_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0098_1.png",
+        "ancho": 628,
+        "alto": 266,
+        "posicion_top_px": 191,
+        "posicion_left_px": 153,
+        "calidad": "hd_2x"
+      },
+      {
+        "id": "fig_0098_2",
+        "archivo": "figuras/fig_p0098_2.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0098_2.png",
+        "ancho": 296,
+        "alto": 184,
+        "posicion_top_px": 467,
+        "posicion_left_px": 154,
+        "calidad": "hd_2x"
+      }
+    ],
+    "99": [
+      {
+        "id": "fig_0099_1",
+        "archivo": "figuras/fig_p0099_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0099_1.png",
+        "ancho": 512,
+        "alto": 333,
+        "posicion_top_px": 219,
+        "posicion_left_px": 154,
+        "calidad": "hd_2x"
+      },
+      {
+        "id": "fig_0099_2",
+        "archivo": "figuras/fig_p0099_2.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0099_2.png",
+        "ancho": 173,
+        "alto": 95,
+        "posicion_top_px": 615,
+        "posicion_left_px": 155,
+        "calidad": "hd_2x"
+      }
+    ],
+    "100": [
+      {
+        "id": "fig_0100_1",
+        "archivo": "figuras/fig_p0100_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0100_1.png",
+        "ancho": 627,
+        "alto": 261,
+        "posicion_top_px": 191,
+        "posicion_left_px": 154,
+        "calidad": "hd_2x"
+      },
+      {
+        "id": "fig_0100_2",
+        "archivo": "figuras/fig_p0100_2.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\reporte\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0100_2.png",
+        "ancho": 212,
+        "alto": 108,
+        "posicion_top_px": 461,
+        "posicion_left_px": 154,
+        "calidad": "hd_2x"
+      }
+    ]
+  }
+}

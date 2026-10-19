@@ -106,6 +106,26 @@ graph TD
 
 ---
 
+### Fase 8: Sub-sistema Desacoplado de Extracción de Figuras y Diagramas (`extractor_figuras.py`)
+- **Objetivo:** Extraer de forma automática, precisa y en máxima calidad visual (2x Retina) todas las capturas de pantalla, diagramas arquitectónicos y tablas gráficas presentes en el documento sin requerir recorte manual.
+- **Decisión Arquitectónica de Desacoplamiento:**
+  1. Mantener `paginas.json` enfocado exclusivamente en la estructura textual y de lectura secuencial.
+  2. Almacenar el inventario y metadatos de imágenes en un archivo independiente: `figuras_paginas.json`.
+  3. Estructurar `figuras_paginas.json` como un diccionario indexado por página (`"44": [...]`) con coordenadas top/left, dimensiones, ruta del recorte y nivel de calidad.
+- **Algoritmo de Detección y Filtro de Ruido:**
+  1. **Análisis de `image_layer`:** Lectura de las directivas `clip: rect(top right bottom left)` en los JSONP de Scribd.
+  2. **Supresión de cabeceras:** Se ignoran recortes superiores repetitivos (`abs_top < 90` y `cw > 650`).
+  3. **Supresión de glifos/viñetas diminutas:** Umbral mínimo de recorte (`cw >= 140` y `ch >= 45`).
+  4. **Discriminación de Callouts vs Figuras Reales:** Análisis de desviación estándar cromática sobre el atlas; fondos sólidos uniformes (callouts de advertencia/tip) se descartan para no duplicar el renderizado nativo CSS (`.content-warning`).
+  5. **Recorte en Máxima Calidad (2x Retina):** Si existe la imagen de página renderizada (`pagina_XXXX.png`), el recorte se realiza a doble resolución multiplicando por 2; en caso contrario, se extrae del atlas original 1x de `_files`.
+- **Flujo de Ejecución:**
+  1. Extracción y validación inicial de prueba sobre la página 44 (`--pagina 44`).
+  2. Extracción y generación de catálogo de las primeras 100 páginas (`--desde 1 --hasta 100`).
+  3. Presentación de resumen cuantitativo para validación del usuario antes de extender al universo completo de 3,712 páginas o inyectar al HTML.
+- **Entregables:** `extractor_figuras.py`, directorio `figuras/`, catálogo `figuras_paginas.json`.
+
+---
+
 ## 3. Matriz de Control de Versiones (Git)
 
 Cada fase se versionará de manera individual con Git siguiendo la convención acordada:
@@ -119,3 +139,5 @@ Cada fase se versionará de manera individual con Git siguiendo la convención a
 | **4** | `feat` | `feat(cli): integrar CLI y pipeline principal en main.py para procesamiento offline` |
 | **5** | `test` | `test: validar extraccion completa de imagenes y metadatos desde insumo` |
 | **6** | `feat` | `feat(gestor): implementar gestor_pagina.py y compilacion unipage para documentos 100+` |
+| **7** | `feat` | `feat(figuras): implementar extractor_figuras.py y catalogo desacoplado figuras_paginas.json` |
+
