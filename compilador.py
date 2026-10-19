@@ -659,6 +659,10 @@ RE_PATRONES_DESFRAGMENTACION: list[tuple[re.Pattern, str]] = [
     (re.compile(r'SFTP\s*-\s*SSHFileTransferProtocol', re.I), 'SFTP - SSH File Transfer Protocol'),
     (re.compile(r'\bSFTP-SSHFileTransferProtocol\b', re.I), 'SFTP - SSH File Transfer Protocol'),
     (re.compile(r'\bSSHFileTransferProtocol\b', re.I), 'SSH File Transfer Protocol'),
+    (re.compile(r'\bShareWithEveryone\b', re.I), 'Share With Everyone'),
+    (re.compile(r'\bArticlestoDisplayperPage\b', re.I), 'Articles to Display per Page'),
+    (re.compile(r'\bRowstoDisplayperPage\b', re.I), 'Rows to Display per Page'),
+    (re.compile(r'\bAddDashboard\b', re.I), 'Add Dashboard'),
 ]
 
 # Palabras objetivo para la heurística de letras desprendidas
@@ -1213,16 +1217,18 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
                 i += 1
             if buf_bullet:
                 txt = _enriquecer_links(_reparar_palabras_rotas(re.sub(r'\s+', ' ', " ".join(buf_bullet))))
-                # Jerarquía de viñetas: si cuelga de un paso previo o dos puntos de paso, marcar subnivel (tab 2)
+                # Jerarquía de viñetas: si cuelga de un paso previo o dos puntos de viñeta previa, marcar subnivel (tab 2)
                 subnivel = False
                 if elementos:
                     ult_e = elementos[-1]
                     if ult_e.get("tipo") in ("numero", "subpaso"):
                         subnivel = True
+                    elif ult_e.get("tipo") == "bullet" and ult_e.get("texto", "").strip().endswith(":"):
+                        subnivel = True
                     elif ult_e.get("tipo") == "bullet" and ult_e.get("subnivel"):
-                        subnivel = True
-                    elif ult_e.get("texto", "").strip().endswith(":") and ult_e.get("tipo") not in ("h1", "h2"):
-                        subnivel = True
+                        es_accion_principal = bool(re.match(r'^(Click|Select|Choose|Navigate|Expand|Press|Check|Uncheck|To)\b', txt, re.I)) and not re.match(r'^[A-Z][a-zA-Z0-9\s]{1,30}\s*-\s*', txt)
+                        if not es_accion_principal:
+                            subnivel = True
                 else:
                     if re.match(r'^[A-Z][a-zA-Z0-9\s]{1,25}(\s*-\s*|\s*:\s*)', txt):
                         subnivel = True
@@ -1536,13 +1542,44 @@ def _intercalar_figuras(elementos: list[dict], page_figs: list[dict], dir_html: 
                 idx_fig += 1
                 y_actual += float(f_cand.get("alto") or 100) + 15.0
 
-        # 4. Regla tipográfica para H2: si el elemento anterior fue un H2 y hay una figura que le corresponde
+        # 4. Anclaje temático de figuras de Gadgets / Dashboard tras su párrafo descriptivo introductorio:
+        # En págs 89 y 92 a 100, la figura ilustra el Gadget o pantalla y va DESPUÉS del primer
+        # párrafo descriptivo y ANTES de instrucciones operativas (To customize...), parámetros o subtítulos.
+        if res and idx_fig < n_figs:
+            f_cand = figs_ordenadas[idx_fig]
+            top_cand = float(f_cand.get("posicion_top_px", 0))
+            ult_e = res[-1]
+            if ult_e.get("tipo") == "p" and 200 <= top_cand <= 450:
+                ult_txt = ult_e.get("texto", "")
+                es_descriptivo_gadget = bool(
+                    re.search(r'\b(Gadget\s+(displays|provides)|allows Admin Users to add, edit, or delete Dashboards)\b', ult_txt, re.I)
+                )
+                if es_descriptivo_gadget:
+                    ruta_rel = _sincronizar_figura(f_cand, dir_html)
+                    res.append({
+                        "tipo": "figura",
+                        "id": f_cand.get("id"),
+                        "archivo": ruta_rel,
+                        "ancho": f_cand.get("ancho"),
+                        "alto": f_cand.get("alto"),
+                        "posicion_top_px": top_cand,
+                        "caption": f_cand.get("caption", ""),
+                    })
+                    idx_fig += 1
+                    y_actual += float(f_cand.get("alto") or 100) + 15.0
+
+        # 5. Regla tipográfica para H2: si el elemento anterior fue un H2 y hay una figura que le corresponde
         if i > 0 and elementos[i - 1].get("tipo") == "h2" and idx_fig < n_figs:
             f_cand = figs_ordenadas[idx_fig]
             top_cand = float(f_cand.get("posicion_top_px", 0))
 
             asignar_a_este_h2 = True
             h2_actual_txt = elementos[i - 1].get("texto", "")
+
+            # No asignar si el elemento actual es un párrafo descriptivo que adoptará la figura en la regla 4
+            sig_txt = e.get("texto", "")
+            if e.get("tipo") == "p" and re.search(r'\b(Gadget\s+(displays|provides)|allows Admin Users to add)\b', sig_txt, re.I):
+                asignar_a_este_h2 = False
 
             # En pág 81: "Logging into..." vs "GoAnywhere Web Client Files Folders"
             for idx_otro, y_otro, txt_otro in pos_h2:
@@ -1612,15 +1649,15 @@ def _intercalar_figuras(elementos: list[dict], page_figs: list[dict], dir_html: 
         idx_fig += 1
 
     # Reglas tipográficas finales:
-    # Si un H2 al pie de página (ej. "Configuring a New Web User") quedó seguido por una figura que
-    # no le corresponde (top < 750 de la sección anterior), la figura debe preceder al H2.
+    # Si un H2 al pie de página (ej. "Configuring a New Web User", "Page Toolbar", "Optional Parameters")
+    # quedó seguido por una figura que ilustraba la sección previa, la figura debe preceder al H2.
     resultado_ordenado: list[dict] = []
     j = 0
     m = len(res)
     while j < m:
         if j < m - 1 and res[j]["tipo"] in ("h1", "h2") and res[j + 1]["tipo"] == "figura":
             tit = res[j].get("texto", "")
-            if "Configuring a New Web User" in tit or "What" in tit:
+            if "Configuring a New Web User" in tit or "What" in tit or "Page Toolbar" in tit or "Optional Parameters" in tit:
                 resultado_ordenado.append(res[j + 1])
                 resultado_ordenado.append(res[j])
                 j += 2
