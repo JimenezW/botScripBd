@@ -245,6 +245,33 @@ def ver_texto_pagina(num_pagina: int, origen_reporte: Path) -> None:
     print(f"{'='*70}\n")
 
 
+def extraer_figuras_pagina_gestor(num_pagina: int, origen: Path, insumo_dir: Path) -> None:
+    """Extrae quirúrgicamente las figuras de una página puntual y actualiza el catálogo."""
+    try:
+        from extractor_figuras import extraer_figuras_pagina
+        out_dir = Path("output/goanywhere_mft_user_guide_7_7_0")
+        log.info("Iniciando extracción quirúrgica de figuras para la página %d...", num_pagina)
+        figs = extraer_figuras_pagina(
+            p_num=num_pagina,
+            origen=out_dir,
+            insumo_arg=insumo_dir,
+            mirror_reporte=False
+        )
+        print(f"\n{'='*75}")
+        print(f" FIGURAS EXTRAÍDAS · PÁGINA {num_pagina} ({len(figs)} figuras detectadas)")
+        print(f"{'='*75}")
+        if figs:
+            for f in figs:
+                print(f" [OK] {f['id']}: {f['ancho']}x{f['alto']} px en top={f['posicion_top_px']}px, left={f['posicion_left_px']}px")
+                print(f"      Archivo: {f['archivo']}")
+                print(f"      Ruta:    {f['archivo_absoluto']}")
+        else:
+            print(" [INFO] No se detectaron figuras o tarjetas UI cerradas en esta página.")
+        print(f"{'='*75}\n")
+    except Exception as e:
+        log.error("Error al extraer figuras de la página %d: %s", num_pagina, e)
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Gestor y auditor de páginas individuales del Bot Scribd"
@@ -257,6 +284,8 @@ def main():
                         help="Directorio o archivo HTML de insumo local (defecto: insumo/)")
     parser.add_argument("--extraer", action="store_true",
                         help="Re-extrae la página puntual desde el JSONP oficial y actualiza paginas.json")
+    parser.add_argument("--figuras", "--extraer-figuras", dest="extraer_figuras", action="store_true",
+                        help="Extrae quirúrgicamente las figuras y diagramas de la página puntual y actualiza figuras_paginas.json")
     parser.add_argument("--preview", action="store_true",
                         help="Genera preview HTML aislado de la página puntual (preview_pagina_XXXX.html)")
     parser.add_argument("--ver-texto", action="store_true",
@@ -272,11 +301,14 @@ def main():
     pagina = args.pagina
 
     # Si no se pasó ninguna acción específica, activar --preview por defecto
-    if not any([args.extraer, args.preview, args.ver_texto, args.integrar, args.auto]):
+    if not any([args.extraer, args.extraer_figuras, args.preview, args.ver_texto, args.integrar, args.auto]):
         args.preview = True
 
     if args.extraer or args.auto:
         extraer_pagina_puntual(pagina, origen, insumo)
+
+    if args.extraer_figuras:
+        extraer_figuras_pagina_gestor(pagina, origen, insumo)
 
     if args.ver_texto:
         ver_texto_pagina(pagina, origen)

@@ -49,8 +49,8 @@ def parse_arguments():
     parser.add_argument(
         "--mirror-reporte",
         action="store_true",
-        default=True,
-        help="Sincronizar una copia espejo en reporte/goanywhere_mft_user_guide_7_7_0 (default: True)"
+        default=False,
+        help="Sincronizar una copia espejo en reporte/goanywhere_mft_user_guide_7_7_0 (default: False)"
     )
     parser.add_argument(
         "--insumo",
@@ -129,28 +129,35 @@ def detectar_tarjetas_ui(crop_im: Image.Image) -> List[Tuple[int, int, int, int]
     Inspecciona una rebanada gráfica del atlas.
     Aplica análisis de bordes horizontales y verticales para detectar cajas UI
     rectangulares cerradas (4 bordes), eliminando texto exterior o separando tarjetas compuestas.
-    Si es un diagrama complejo (ej: p39), lo mantiene íntegro.
+    Si es un diagrama mayor de arquitectura (ej: p39, p92), lo mantiene íntegro.
     """
     gray = crop_im.convert("L")
     w, h = gray.size
     pixels = gray.load()
-
-    # Si es un diagrama grande de arquitectura o proceso (ej: página 39)
     stat = ImageStat.Stat(crop_im)
-    if w >= 550 and h >= 350 and stat.stddev[0] > 30:
-        return [(0, 0, w, h)]
 
-    # Si más del 75% es un fondo monocromático no-blanco (Callouts de Warning/Tip), descartar
+    # 1. Diagramas mayores de arquitectura o dashboards de sistema (ej: p39, p92)
+    # Requieren gran dimensión y alto contenido gráfico o cromático
+    if w >= 550 and h >= 300:
+        rgb_colors = crop_im.convert("RGB").getcolors(maxcolors=200000) or []
+        chroma_pixels = sum(
+            cnt for cnt, (r, g, b) in rgb_colors
+            if max(r, g, b) - min(r, g, b) > 25
+        )
+        chroma_pct = chroma_pixels / (w * h)
+        if chroma_pct >= 0.05 or stat.stddev[0] > 70:
+            return [(0, 0, w, h)]
+
+    # 2. Descarte de callouts con fondo tintado (Warning, Tip, Note)
     colors = sorted(crop_im.getcolors(maxcolors=200000) or [], reverse=True)
     if colors:
         top_cnt, top_col = colors[0]
         pct = top_cnt / (w * h)
         is_pure_white = all(c >= 245 for c in top_col)
         if pct >= 0.70 and not is_pure_white:
-            # Fondo de callout tintado
             return []
 
-    # Detectar líneas horizontales con racha continua oscura
+    # 3. Detectar líneas horizontales con racha continua oscura
     min_line_len = max(60, int(w * 0.40))
     horizontal_lines = []
     for y in range(h):
@@ -166,10 +173,8 @@ def detectar_tarjetas_ui(crop_im: Image.Image) -> List[Tuple[int, int, int, int]
         if max_streak >= min_line_len:
             horizontal_lines.append((y, max_streak))
 
+    # Si no hay bordes horizontales continuos, descartar (elimina texto con formato rasterizado)
     if not horizontal_lines:
-        # Si no hay bordes horizontales pero tiene alta varianza y buen tamaño, podría ser gráfico libre
-        if stat.stddev[0] >= 32 and w >= 220 and h >= 90:
-            return [(0, 0, w, h)]
         return []
 
     # Agrupar líneas consecutivas en bordes discretos
@@ -224,33 +229,29 @@ def detectar_tarjetas_ui(crop_im: Image.Image) -> List[Tuple[int, int, int, int]
                     box_w = bx2 - bx1
 
                     if box_w >= min_line_len:
-                        # VALIDACIÓN DE CIERRE VERTICAL (Bordes izquierdo y derecho)
-                        # Una tarjeta real tiene bordes laterales oscuros (> 45% de altura)
+                        # VALIDACIÓN DE CIERRE VERTICAL ESTRICTO (Bordes izquierdo y derecho)
+                        # Una tarjeta real tiene ambos bordes laterales oscuros (> 60% de altura)
                         left_dark = [pixels[bx1, y] < 155 for y in range(top_y, bot_y)].count(True)
                         right_dark = [pixels[min(w - 1, bx2 - 1), y] < 155 for y in range(top_y, bot_y)].count(True)
 
                         ratio_left = left_dark / box_h
                         ratio_right = right_dark / box_h
 
-                        # Si ambos bordes laterales están presentes (caja cerrada)
-                        if ratio_left >= 0.40 and ratio_right >= 0.40:
+                        # Exigir que ambos bordes laterales estén cerrados
+                        if ratio_left >= 0.60 and ratio_right >= 0.60:
                             found_card = (bx1, top_y, bx2, bot_y + 1, j)
                             break
-                        # Si no hay borde derecho (como en callouts que solo tienen barra izquierda), se descarta
 
         if found_card:
             bx1, top_y, bx2, bot_y_p1, j_idx = found_card
             valid_cards.append((bx1, top_y, bx2, bot_y_p1))
-            i = j_idx  # Avanzar más allá de esta tarjeta
+            # Saltar más allá del borde inferior de esta tarjeta para no tomarlo como
+            # borde superior de la siguiente (evita arrastrar texto intermedio como en p57)
+            i = j_idx + 1
         else:
             i += 1
 
-    if not valid_cards:
-        # Si no hubo tarjetas cerradas, verificar si es un diagrama libre
-        if stat.stddev[0] >= 30 and w >= 200 and h >= 80:
-            return [(0, 0, w, h)]
-        return []
-
+    # Descartar cualquier fragmento sin caja cerrada de 4 bordes
     return valid_cards
 
 
@@ -260,36 +261,72 @@ def procesar_pagina_figuras(
     doc_hash: str,
     session: requests.Session,
     files_dir: Optional[Path],
-    figuras_out_dir: Path
+    figuras_out_dir: Path,
+    atlas_index: Optional[Dict[str, Path]] = None,
+    jsonp_cache_dir: Optional[Path] = None
 ) -> List[dict]:
     """Extrae las figuras de una página individual a partir del atlas local de Scribd."""
-    url = f"https://html.scribdassets.com/{doc_hash}/pages/{p_num}-{p_hash}.jsonp"
-    try:
-        r = session.get(url, timeout=5)
-        if r.status_code != 200:
-            return []
-        m = re.search(r'window\.page\d+_callback\(\[(.*)\]\);?', r.text, re.DOTALL)
-        if not m:
-            return []
-        html_content = json.loads("[" + m.group(1) + "]")[0]
-    except Exception:
+    # Limpiar archivos previos de esta página para no dejar huérfanos si la cantidad disminuyó
+    for old_f in figuras_out_dir.glob(f"fig_p{p_num:04d}_*.png"):
+        try:
+            old_f.unlink()
+        except Exception:
+            pass
+
+    # Localizar archivo atlas en _files usando índice O(1) o fallback glob
+    atlas_cand = None
+    if atlas_index:
+        atlas_cand = atlas_index.get(f"{p_num}-{p_hash}")
+    elif files_dir:
+        matches = list(files_dir.glob(f"{p_num}-{p_hash}.*"))
+        atlas_cand = matches[0] if matches else None
+
+    if not atlas_cand or not atlas_cand.is_file():
         return []
+
+    # Obtener contenido JSONP (con caché en disco para resiliencia y velocidad)
+    html_content = None
+    if jsonp_cache_dir:
+        cache_file = jsonp_cache_dir / f"{p_num}-{p_hash}.jsonp"
+        if cache_file.is_file():
+            try:
+                raw_text = cache_file.read_text(encoding="utf-8")
+                m = re.search(r'window\.page\d+_callback\(\[(.*)\]\);?', raw_text, re.DOTALL)
+                if m:
+                    html_content = json.loads("[" + m.group(1) + "]")[0]
+            except Exception:
+                pass
+
+    if html_content is None:
+        url = f"https://html.scribdassets.com/{doc_hash}/pages/{p_num}-{p_hash}.jsonp"
+        try:
+            r = session.get(url, timeout=7)
+            if r.status_code != 200:
+                return []
+            if jsonp_cache_dir:
+                try:
+                    (jsonp_cache_dir / f"{p_num}-{p_hash}.jsonp").write_text(r.text, encoding="utf-8")
+                except Exception:
+                    pass
+            m = re.search(r'window\.page\d+_callback\(\[(.*)\]\);?', r.text, re.DOTALL)
+            if not m:
+                return []
+            html_content = json.loads("[" + m.group(1) + "]")[0]
+        except Exception:
+            return []
 
     soup = BeautifulSoup(html_content, "html.parser")
-
-    # Localizar archivo atlas en _files
-    atlas_cand = list(files_dir.glob(f"{p_num}-{p_hash}.*")) if files_dir else []
-    if not atlas_cand:
+    imgs = soup.find_all("img")
+    if not imgs:
         return []
 
     try:
-        atlas_im = Image.open(atlas_cand[0])
+        atlas_im = Image.open(atlas_cand)
         atlas_white = composite_on_white(atlas_im)
     except Exception:
         return []
 
     page_figs = []
-    imgs = soup.find_all("img")
 
     for idx, img in enumerate(imgs):
         style = img.get("style", "")
@@ -354,6 +391,88 @@ def procesar_pagina_figuras(
     return page_figs
 
 
+def extraer_figuras_pagina(
+    p_num: int,
+    origen: Path = Path("output/goanywhere_mft_user_guide_7_7_0"),
+    insumo_arg: Optional[Path] = None,
+    mirror_reporte: bool = False
+) -> List[dict]:
+    """
+    Función modular para extraer las figuras de una página puntual manualmente.
+    Actualiza el directorio de salida y figuras_paginas.json.
+    """
+    html_file, files_dir = localizar_insumo(insumo_arg)
+    doc_hash, page_hashes = cargar_mapa_hashes(html_file)
+    p_hash = page_hashes.get(p_num)
+    if not p_hash:
+        console.print(f"[yellow]Advertencia: No se encontró hash para la página {p_num}[/yellow]")
+        return []
+
+    figuras_dir = origen / "figuras"
+    figuras_dir.mkdir(parents=True, exist_ok=True)
+    json_salida = origen / "figuras_paginas.json"
+
+    jsonp_cache_dir = origen / ".cache_jsonp"
+    jsonp_cache_dir.mkdir(parents=True, exist_ok=True)
+
+    reporte_dir = Path("reporte/goanywhere_mft_user_guide_7_7_0")
+    reporte_fig_dir = reporte_dir / "figuras"
+    if mirror_reporte and reporte_dir.is_dir():
+        reporte_fig_dir.mkdir(parents=True, exist_ok=True)
+
+    session = requests.Session()
+    session.headers.update({
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0",
+        "Referer": "https://www.scribd.com/"
+    })
+
+    # Limpiar espejo si existe
+    if mirror_reporte and reporte_fig_dir.is_dir():
+        for old_m in reporte_fig_dir.glob(f"fig_p{p_num:04d}_*.png"):
+            try:
+                old_m.unlink()
+            except Exception:
+                pass
+
+    figs = procesar_pagina_figuras(
+        p_num=p_num,
+        p_hash=p_hash,
+        doc_hash=doc_hash,
+        session=session,
+        files_dir=files_dir,
+        figuras_out_dir=figuras_dir,
+        jsonp_cache_dir=jsonp_cache_dir
+    )
+
+    catalogo = {"total_figuras": 0, "paginas": {}}
+    if json_salida.is_file():
+        try:
+            catalogo = json.loads(json_salida.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+
+    if figs:
+        catalogo["paginas"][str(p_num)] = figs
+        if mirror_reporte and reporte_fig_dir.is_dir():
+            for f_item in figs:
+                src_f = Path(f_item["archivo_absoluto"])
+                dst_f = reporte_fig_dir / src_f.name
+                dst_f.write_bytes(src_f.read_bytes())
+    elif str(p_num) in catalogo["paginas"]:
+        del catalogo["paginas"][str(p_num)]
+
+    catalogo["total_figuras"] = sum(len(v) for v in catalogo["paginas"].values())
+
+    with open(json_salida, "w", encoding="utf-8") as f:
+        json.dump(catalogo, f, ensure_ascii=False, indent=2)
+
+    if mirror_reporte and reporte_dir.is_dir():
+        with open(reporte_dir / "figuras_paginas.json", "w", encoding="utf-8") as f:
+            json.dump(catalogo, f, ensure_ascii=False, indent=2)
+
+    return figs
+
+
 def main():
     args = parse_arguments()
 
@@ -383,6 +502,17 @@ def main():
     figuras_dir = args.origen / "figuras"
     figuras_dir.mkdir(parents=True, exist_ok=True)
     json_salida = args.origen / "figuras_paginas.json"
+
+    jsonp_cache_dir = args.origen / ".cache_jsonp"
+    jsonp_cache_dir.mkdir(parents=True, exist_ok=True)
+
+    # Indexar atlas en memoria para acceso ultra-rápido O(1)
+    atlas_index = {}
+    if files_dir and files_dir.is_dir():
+        for f in files_dir.iterdir():
+            if f.is_file():
+                atlas_index[f.stem] = f
+    console.print(f"  [green][OK][/green] Archivos atlas indexados en memoria: [bold]{len(atlas_index)}[/bold]")
 
     # Preparar espejo en reporte/ si está activo
     reporte_dir = Path("reporte/goanywhere_mft_user_guide_7_7_0")
@@ -430,7 +560,7 @@ def main():
     ) as progress:
         task = progress.add_task("Procesando...", total=len(paginas_objetivo))
 
-        for p_num in paginas_objetivo:
+        for idx_count, p_num in enumerate(paginas_objetivo, start=1):
             p_hash = page_hashes.get(p_num)
             if not p_hash:
                 progress.advance(task)
@@ -442,7 +572,9 @@ def main():
                 doc_hash=doc_hash,
                 session=session,
                 files_dir=files_dir,
-                figuras_out_dir=figuras_dir
+                figuras_out_dir=figuras_dir,
+                atlas_index=atlas_index,
+                jsonp_cache_dir=jsonp_cache_dir
             )
 
             if figs:
@@ -457,6 +589,18 @@ def main():
             elif str(p_num) in catalogo["paginas"]:
                 # Si una página ya no contiene figuras válidas, eliminarla del catálogo
                 del catalogo["paginas"][str(p_num)]
+                if args.mirror_reporte and reporte_fig_dir.is_dir():
+                    for old_m in reporte_fig_dir.glob(f"fig_p{p_num:04d}_*.png"):
+                        try:
+                            old_m.unlink()
+                        except Exception:
+                            pass
+
+            # Guardado incremental de seguridad cada 50 páginas
+            if idx_count % 50 == 0:
+                catalogo["total_figuras"] = sum(len(v) for v in catalogo["paginas"].values())
+                with open(json_salida, "w", encoding="utf-8") as f:
+                    json.dump(catalogo, f, ensure_ascii=False, indent=2)
 
             progress.advance(task)
 
