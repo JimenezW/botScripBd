@@ -1,5 +1,5 @@
 {
-  "total_figuras": 1714,
+  "total_figuras": 1720,
   "paginas": {
     "39": [
       {
@@ -17949,6 +17949,72 @@
         "alto": 715,
         "posicion_top_px": 39,
         "posicion_left_px": 72
+      }
+    ],
+    "125": [
+      {
+        "id": "fig_0125_1",
+        "archivo": "figuras/fig_p0125_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\output\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0125_1.png",
+        "ancho": 688,
+        "alto": 240,
+        "posicion_top_px": 103,
+        "posicion_left_px": 122
+      }
+    ],
+    "133": [
+      {
+        "id": "fig_0133_1",
+        "archivo": "figuras/fig_p0133_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\output\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0133_1.png",
+        "ancho": 517,
+        "alto": 282,
+        "posicion_top_px": 103,
+        "posicion_left_px": 122
+      }
+    ],
+    "137": [
+      {
+        "id": "fig_0137_1",
+        "archivo": "figuras/fig_p0137_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\output\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0137_1.png",
+        "ancho": 622,
+        "alto": 504,
+        "posicion_top_px": 142,
+        "posicion_left_px": 155
+      }
+    ],
+    "138": [
+      {
+        "id": "fig_0138_1",
+        "archivo": "figuras/fig_p0138_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\output\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0138_1.png",
+        "ancho": 627,
+        "alto": 317,
+        "posicion_top_px": 105,
+        "posicion_left_px": 154
+      }
+    ],
+    "144": [
+      {
+        "id": "fig_0144_1",
+        "archivo": "figuras/fig_p0144_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\output\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0144_1.png",
+        "ancho": 693,
+        "alto": 522,
+        "posicion_top_px": 103,
+        "posicion_left_px": 121
+      }
+    ],
+    "155": [
+      {
+        "id": "fig_0155_1",
+        "archivo": "figuras/fig_p0155_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\output\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0155_1.png",
+        "ancho": 622,
+        "alto": 400,
+        "posicion_top_px": 105,
+        "posicion_left_px": 155
       }
     ]
   }

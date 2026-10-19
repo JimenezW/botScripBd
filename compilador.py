@@ -663,6 +663,40 @@ RE_PATRONES_DESFRAGMENTACION: list[tuple[re.Pattern, str]] = [
     (re.compile(r'\bArticlestoDisplayperPage\b', re.I), 'Articles to Display per Page'),
     (re.compile(r'\bRowstoDisplayperPage\b', re.I), 'Rows to Display per Page'),
     (re.compile(r'\bAddDashboard\b', re.I), 'Add Dashboard'),
+    (re.compile(r'\bRes\s+ources\b', re.I), 'Resources'),
+    (re.compile(r'\bAS4\s+S\s+ervers\b', re.I), 'AS4 Servers'),
+    (re.compile(r'\bResourceManager\b', re.I), 'Resource Manager'),
+    (re.compile(r'\bImportResources\b', re.I), 'Import Resources'),
+    (re.compile(r'\bImportFromZIP\b', re.I), 'Import from ZIP'),
+    (re.compile(r'\bImportfromZIP\b', re.I), 'Import from ZIP'),
+    (re.compile(r'\bImportFromXML\b', re.I), 'Import from XML'),
+    (re.compile(r'\bImportfromXML\b', re.I), 'Import from XML'),
+    (re.compile(r'\bImportResourceFromXML\b', re.I), 'Import Resource from XML'),
+    (re.compile(r'\bImportResourceFromZIP\b', re.I), 'Import Resource from ZIP'),
+    (re.compile(r'\bImportFrom\b', re.I), 'Import From'),
+    (re.compile(r'\bXMLFile\b', re.I), 'XML File'),
+    (re.compile(r'\bZIPFile\b', re.I), 'ZIP File'),
+    (re.compile(r'\bReplaceTargetResource\(s\)\?', re.I), 'Replace Target Resource(s)?'),
+    (re.compile(r'\bReplaceTargetResource\b', re.I), 'Replace Target Resource'),
+    (re.compile(r'\bTargetDomain\b', re.I), 'Target Domain'),
+    (re.compile(r'\bAllowViewingofResourcePasswords\b', re.I), 'Allow Viewing of Resource Passwords'),
+    (re.compile(r'\bAdminSecurity\b', re.I), 'Admin Security'),
+    (re.compile(r'\bot\s+her\s+Resourc\s*e\s+Managers\b', re.I), 'other Resource Managers'),
+    (re.compile(r'\bRemoveAllPermissions\b', re.I), 'Remove All Permissions'),
+    (re.compile(r'\bResourcePermissions\b', re.I), 'Resource Permissions'),
+    (re.compile(r'\bMoreInfo\b', re.I), 'More Info'),
+    (re.compile(r'\bKMSKey\b', re.I), 'KMS Key'),
+    (re.compile(r'\bUploadPartSize\(MB\)', re.I), 'Upload Part Size (MB)'),
+    (re.compile(r'\bUpload\s+Part\s+Size\(MB\)', re.I), 'Upload Part Size (MB)'),
+    (re.compile(r'\bPartSize\(MB\)', re.I), 'Part Size (MB)'),
+    (re.compile(r'\bPhoneNumber\b', re.I), 'Phone Number'),
+    (re.compile(r'\bUserName\b', re.I), 'User Name'),
+    (re.compile(r'\bBasicAuthentication\b', re.I), 'Basic Authentication'),
+    (re.compile(r'\bServer-SideEncryption\b', re.I), 'Server-Side Encryption'),
+    (re.compile(r'\bSSLContext\b', re.I), 'SSL Context'),
+    (re.compile(r'\bConnectionTimeout\b', re.I), 'Connection Timeout'),
+    (re.compile(r'\bGroupBy\b', re.I), 'Group By'),
+    (re.compile(r'\bfilt\s+ered\b', re.I), 'filtered'),
 ]
 
 # Palabras objetivo para la heurística de letras desprendidas
@@ -806,6 +840,19 @@ def _limpiar_lineas_scribd(lineas: list[str]) -> list[str]:
         s = re.sub(r"[\ue000-\uf8ff]", "", str(l)).replace("\u00a0", " ").replace("\u2019", "'").replace("\u2018", "'").strip()
         if s:
             raw.append(s)
+
+    # 1b. Normalizar líneas partidas específicas de encabezados/temas
+    norm_raw: list[str] = []
+    idx_r = 0
+    len_r = len(raw)
+    while idx_r < len_r:
+        if raw[idx_r] == 'AS4 S' and idx_r + 1 < len_r and raw[idx_r + 1] == 'ervers':
+            norm_raw.append('AS4 Servers')
+            idx_r += 2
+            continue
+        norm_raw.append(raw[idx_r])
+        idx_r += 1
+    raw = norm_raw
 
     # 2. Colapsar sufijos idénticos consecutivos
     etapa1: list[str] = []
@@ -1039,6 +1086,8 @@ def _parsear_items_toc(lineas_limpias: list[str]) -> list[dict]:
             ("QuickStartGuides", "Quick Start Guides"),
             ("MakingYourFirstSFTPFileTransfer", "Making Your First SFTP File Transfer"),
             ("MakingYourFirstWebFileTransfer", "Making Your First Web File Transfer"),
+            ("Res ources", "Resources"),
+            ("AS4 S ervers", "AS4 Servers"),
         ):
             if orig in clean_title:
                 clean_title = clean_title.replace(orig, corr)
@@ -1083,6 +1132,15 @@ CAPITULOS_CANONICOS = {
     "databasetasks": "Database Tasks",
     "datatranslationtasks": "Data Translation Tasks",
     "resources": "Resources",
+}
+
+CAMPOS_PARAMETROS = {
+    'Name', 'Description', 'URL', 'User', 'Password', 'Email', 'Host', 'Port',
+    'Domain', 'Timeout', 'Status', 'Phone Number', 'PhoneNumber', 'Basic Authentication',
+    'Root Directory', 'Endpoint URL', 'Upload Part Size (MB)', 'Upload Part Size(MB)',
+    'Transfer Encoding', 'KMS Key Alias', 'SSL Context Protocol', 'SSLContext Protocol',
+    'Authentication Type', 'AuthenticationType', 'Key Location', 'BasicAuthentication',
+    'Connection Timeout', 'ConnectionTimeout', 'Optional Parameters', 'OptionalParameters'
 }
 
 
@@ -1210,7 +1268,7 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
                 norm_item = re.sub(r'[^a-zA-Z0-9]', '', item).lower()
                 if norm_item in temas_esta_pag:
                     break
-                if buf_bullet and buf_bullet[-1].endswith(('.', '!', '?')) and 6 <= len(item) < 55 and not item.endswith(('.', ',', ';', ':')) and not item.startswith(('http:', 'https:')) and not re.match(r'^(for|where|and|or|with|to|in|of|on|at|by|from|the|a|an)\b', item, re.I):
+                if buf_bullet and buf_bullet[-1].endswith(('.', '!', '?')) and not item.startswith(('-', '–', '—', ':')) and 6 <= len(item) < 55 and not item.endswith(('.', ',', ';', ':')) and not item.startswith(('http:', 'https:')) and not re.match(r'^(for|where|and|or|with|to|in|of|on|at|by|from|the|a|an)\b', item, re.I):
                     if i + 1 < n and lineas[i + 1].strip() not in ('l',) and not re.match(r'^\d+\.\s', lineas[i + 1].strip()) and not re.match(r'^\d+\.$', lineas[i + 1].strip()):
                         break
                 buf_bullet.append(item)
@@ -1305,6 +1363,8 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
                 norm_item = re.sub(r'[^a-zA-Z0-9]', '', item).lower()
                 if norm_item in temas_esta_pag:
                     break
+                if buf_callout and buf_callout[-1].endswith(('.', '!', '?')) and (item.endswith('Tab') or item in CAMPOS_PARAMETROS or (len(item) < 35 and not item.endswith('.'))):
+                    break
                 buf_callout.append(item)
                 i += 1
             txt = _reparar_palabras_rotas(re.sub(r'\s+', ' ', " ".join(buf_callout)))
@@ -1322,7 +1382,7 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
         sig_es_continuacion = False
         if i + 1 < n:
             sig_raw = lineas[i+1].strip()
-            if sig_raw and sig_raw[0].islower():
+            if sig_raw and sig_raw[0].islower() and sig_raw != 'l' and not (len(sig_raw) == 2 and sig_raw[1] == '.'):
                 sig_es_continuacion = True
 
         if not elementos and not temas_esta_pag and not sig_es_continuacion and not es_frase and 6 <= len(l) < 55 and not l.endswith(('.', ',', ';', ':')):
@@ -1337,12 +1397,13 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
         es_cierre_previo = (
             not prev_texto
             or prev_texto.endswith(('.', '!', '?', ':', '</div>', '</p>'))
-            or (elementos and elementos[-1].get("tipo") in ("numero", "subpaso", "bullet", "figura"))
+            or (elementos and elementos[-1].get("tipo") in ("numero", "subpaso", "bullet", "figura", "h1", "h2"))
         )
         es_url = l.startswith(('http://', 'https://')) or '//' in l
         es_prep = bool(re.match(r'^(for|where|and|or|with|to|in|of|on|at|by|from|the|a|an)\b', l, re.I))
-
-        if not sig_es_continuacion and es_cierre_previo and not es_url and not es_prep and not es_frase and 6 <= len(l) < 55 and not l.endswith(('.', ',', ';', ':')):
+        ends_with_connector = bool(re.search(r'\b(the|a|an|of|to|in|for|from|with|by|and|or|on)\s*$', l, re.I))
+        es_campo_parametro = l.strip() in CAMPOS_PARAMETROS or l.strip().endswith('Tab')
+        if not sig_es_continuacion and es_cierre_previo and not es_url and not es_prep and not ends_with_connector and not es_frase and ((6 <= len(l) < 55) or es_campo_parametro) and not l.endswith(('.', ',', ';', ':')):
             t = _reparar_palabras_rotas(re.sub(r'([a-z])([A-Z])', r'\1 \2', l).strip())
             if elementos and elementos[-1].get("texto") == t:
                 i += 1
@@ -1361,13 +1422,16 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
                 break
             buf_str = " ".join(buf_p).strip()
             if buf_str.endswith(('.', '!', '?')):
+                if sig in CAMPOS_PARAMETROS or sig.endswith('Tab') or sig.startswith('To customize the'):
+                    break
                 sig_es_url = sig.startswith(('http://', 'https://')) or '//' in sig
                 sig_es_prep = bool(re.match(r'^(for|where|and|or|with|to|in|of|on|at|by|from|the|a|an)\b', sig, re.I))
                 sig_es_frase = bool(re.match(
                     r'^(click|the|to|if|when|from|select|in|for|and|expand|navigate|run|set|build|next|ensure|specify|use|now|on|under|before|after|you|as|at|once|there|it|this|note)\b',
                     sig, re.I
                 ))
-                if not sig_es_url and not sig_es_prep and not sig_es_frase and len(sig) < 55 and not sig.endswith(('.', ',', ';', ':')):
+                sig_termina_conector = bool(re.search(r'\b(the|a|an|of|to|in|for|from|with|by|and|or|on)\s*$', sig, re.I))
+                if not sig_es_url and not sig_es_prep and not sig_termina_conector and not sig_es_frase and len(sig) < 55 and not sig.endswith(('.', ',', ';', ':')):
                     break
             buf_p.append(sig)
             if sig.endswith('.'):
@@ -1549,11 +1613,11 @@ def _intercalar_figuras(elementos: list[dict], page_figs: list[dict], dir_html: 
             f_cand = figs_ordenadas[idx_fig]
             top_cand = float(f_cand.get("posicion_top_px", 0))
             ult_e = res[-1]
-            if ult_e.get("tipo") == "p" and 200 <= top_cand <= 450:
+            if ult_e.get("tipo") == "p" and 100 <= top_cand <= 450:
                 ult_txt = ult_e.get("texto", "")
                 es_descriptivo_gadget = bool(
                     re.search(r'\b(Gadget\s+(displays|provides)|allows Admin Users to add, edit, or delete Dashboards)\b', ult_txt, re.I)
-                )
+                ) or ("the selected status" in ult_txt)
                 if es_descriptivo_gadget:
                     ruta_rel = _sincronizar_figura(f_cand, dir_html)
                     res.append({
@@ -1581,13 +1645,19 @@ def _intercalar_figuras(elementos: list[dict], page_figs: list[dict], dir_html: 
             if e.get("tipo") == "p" and re.search(r'\b(Gadget\s+(displays|provides)|allows Admin Users to add)\b', sig_txt, re.I):
                 asignar_a_este_h2 = False
 
-            # En pág 81: "Logging into..." vs "GoAnywhere Web Client Files Folders"
+            # En páginas de configuración con pestañas (Tabs): no asignar la figura del Tab a un H2 de parámetro superior
             for idx_otro, y_otro, txt_otro in pos_h2:
                 if idx_otro > i - 1:
+                    if txt_otro.endswith("Tab") and not h2_actual_txt.endswith("Tab") and top_cand >= 400:
+                        asignar_a_este_h2 = False
+                        break
                     if "Files Folders" in txt_otro and "Files Folders" not in h2_actual_txt:
                         asignar_a_este_h2 = False
                         break
                     if "Configuring a New Web User" in h2_actual_txt and top_cand < 750:
+                        asignar_a_este_h2 = False
+                        break
+                    if "View Admin User" in txt_otro and top_cand < 500:
                         asignar_a_este_h2 = False
                         break
 
@@ -1657,7 +1727,7 @@ def _intercalar_figuras(elementos: list[dict], page_figs: list[dict], dir_html: 
     while j < m:
         if j < m - 1 and res[j]["tipo"] in ("h1", "h2") and res[j + 1]["tipo"] == "figura":
             tit = res[j].get("texto", "")
-            if "Configuring a New Web User" in tit or "What" in tit or "Page Toolbar" in tit or "Optional Parameters" in tit:
+            if "Configuring a New Web User" in tit or "What" in tit or "Page Toolbar" in tit or "Optional Parameters" in tit or "View Admin User" in tit:
                 resultado_ordenado.append(res[j + 1])
                 resultado_ordenado.append(res[j])
                 j += 2
@@ -1760,7 +1830,9 @@ def adaptar_paginas_json(
     limite: int | None,
     pagina_objetivo: int | None = None,
     origen: Path | None = None,
-    dir_html: Path | None = None
+    dir_html: Path | None = None,
+    desde: int | None = None,
+    hasta: int | None = None,
 ) -> dict:
     """
     Convierte el esquema de extracción botScribd (paginas.json) en una reconstrucción
@@ -1783,6 +1855,13 @@ def adaptar_paginas_json(
         if not seleccion:
             raise PrecondicionError(f"La página {pagina_objetivo} no se encuentra en paginas.json (total registradas: {total}).")
         log.info("Adaptando paginas.json para página puntual %d (de %d páginas totales)", pagina_objetivo, total)
+    elif desde is not None or hasta is not None:
+        p_min = desde or 1
+        p_max = hasta or total
+        seleccion = [p for p in paginas if p_min <= p.get("numero_pagina", 0) <= p_max]
+        if not seleccion:
+            raise PrecondicionError(f"No se encontraron páginas en el rango {p_min}-{p_max} (total registradas: {total}).")
+        log.info("Adaptando paginas.json: rango páginas %d a %d (%d de %d páginas seleccionadas)", p_min, p_max, len(seleccion), total)
     else:
         seleccion = paginas[:limite] if limite else paginas
         if not limite and total > UMBRAL_PAGINAS_AVISO:
@@ -2118,10 +2197,12 @@ def fase_1_html(rutas: Rutas, args: argparse.Namespace) -> None:
                 args.limite_paginas,
                 getattr(args, "pagina", None),
                 origen=rutas.origen,
-                dir_html=rutas.html.parent
+                dir_html=rutas.html.parent,
+                desde=getattr(args, "desde", None),
+                hasta=getattr(args, "hasta", None),
             )
-        elif args.limite_paginas:
-            log.warning("--limite-paginas solo aplica al esquema paginas.json (se ignora).")
+        elif args.limite_paginas or getattr(args, "desde", None) or getattr(args, "hasta", None):
+            log.warning("--limite-paginas, --desde y --hasta solo aplican al esquema paginas.json (se ignoran).")
 
         resolutor = ResolutorRecursos(rutas.origen, rutas.html.parent)
         contexto = ConstructorContexto(resolutor).construir(datos, archivo, esquema)
@@ -2319,6 +2400,10 @@ def construir_parser() -> argparse.ArgumentParser:
                         help="Solo paginas.json: incluye únicamente las primeras N páginas")
     parser.add_argument("--pagina", type=_entero_positivo, default=None,
                         help="Compila únicamente la página especificada (ej: --pagina 43). Genera preview_pagina_XXXX.html")
+    parser.add_argument("--desde", type=_entero_positivo, default=None,
+                        help="Página inicial para compilar un rango específico (ej: --desde 101)")
+    parser.add_argument("--hasta", type=_entero_positivo, default=None,
+                        help="Página final para compilar un rango específico (ej: --hasta 180)")
     parser.add_argument("--estricto", action="store_true",
                         help="Aborta si hay imágenes/fuentes referenciadas que no existen")
     parser.add_argument("-v", "--verbose", action="store_true", help="Logs de depuración")
