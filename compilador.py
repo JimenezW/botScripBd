@@ -600,6 +600,10 @@ RE_PATRONES_DESFRAGMENTACION: list[tuple[re.Pattern, str]] = [
     (re.compile(r'\bCreatea\s*Project\b', re.I), 'Create a Project'),
     (re.compile(r'\bProjectName\b', re.I), 'Project Name'),
     (re.compile(r'\bProjectDescription\b', re.I), 'Project Description'),
+    (re.compile(r'\bOutputFile\b', re.I), 'Output File'),
+    (re.compile(r'\bViewJobLog\b', re.I), 'View Job Log'),
+    (re.compile(r'\boutput\s*\.\s*txt\b', re.I), 'output .txt'),
+    (re.compile(r'\ba\s*\.\s*txt\b', re.I), 'a .txt'),
 ]
 
 # Palabras objetivo para la heurística de letras desprendidas
@@ -1110,7 +1114,7 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
         if norm_l in temas_esta_pag:
             tit = temas_esta_pag.pop(norm_l)
             ya_hay_h1 = any(e.get("tipo") == "h1" for e in elementos)
-            tipo_tit = "h2" if ya_hay_h1 else "h1"
+            tipo_tit = "h2" if (ya_hay_h1 or len(elementos) > 0) else "h1"
             elementos.append({"tipo": tipo_tit, "texto": tit})
             i += 1
             continue
@@ -1193,8 +1197,10 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
             elementos.append({"tipo": tipo_bloque, "texto": txt})
             continue
 
+        es_frase = bool(re.match(r'^(click|the|to|if|when|from|select|in|for|and|expand|navigate|run|set|build)\b', l, re.I))
+
         # Título principal de página (primer elemento de contenido si no fue establecido por TOC)
-        if not elementos:
+        if not elementos and not es_frase and 6 <= len(l) < 55 and not l.endswith(('.', ',', ';', ':')):
             t = _reparar_palabras_rotas(re.sub(r'([a-z])([A-Z])', r'\1 \2', l).strip())
             elementos.append({"tipo": "h1", "texto": t})
             i += 1
@@ -1206,7 +1212,7 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
         es_url = l.startswith(('http://', 'https://')) or '//' in l
         es_prep = bool(re.match(r'^(for|where|and|or|with|to|in|of|on|at|by|from|the|a|an)\b', l, re.I))
 
-        if es_cierre_previo and not es_url and not es_prep and 6 <= len(l) < 55 and not l.endswith(('.', ',', ';', ':')):
+        if es_cierre_previo and not es_url and not es_prep and not es_frase and 6 <= len(l) < 55 and not l.endswith(('.', ',', ';', ':')):
             t = _reparar_palabras_rotas(re.sub(r'([a-z])([A-Z])', r'\1 \2', l).strip())
             if elementos and elementos[-1].get("texto") == t:
                 i += 1
@@ -1227,7 +1233,8 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
             if buf_str.endswith(('.', '!', '?')):
                 sig_es_url = sig.startswith(('http://', 'https://')) or '//' in sig
                 sig_es_prep = bool(re.match(r'^(for|where|and|or|with|to|in|of|on|at|by|from|the|a|an)\b', sig, re.I))
-                if not sig_es_url and not sig_es_prep and len(sig) < 55 and not sig.endswith(('.', ',', ';', ':')):
+                sig_es_frase = bool(re.match(r'^(click|the|to|if|when|from|select|in|for|and|expand|navigate|run|set|build)\b', sig, re.I))
+                if not sig_es_url and not sig_es_prep and not sig_es_frase and len(sig) < 55 and not sig.endswith(('.', ',', ';', ':')):
                     break
             buf_p.append(sig)
             if sig.endswith('.'):
@@ -1338,14 +1345,14 @@ def _intercalar_figuras(elementos: list[dict], page_figs: list[dict], dir_html: 
 
     for i, e in enumerate(elementos):
         h_e = alturas[i]
-        y_medio = y_actual + (h_e * 0.5)
+        corte = y_actual + (h_e * 0.85)
 
         while idx_fig < n_figs:
             f = figs_ordenadas[idx_fig]
             top_px = float(f.get("posicion_top_px", 0))
             if i == 0 and e.get("tipo") == "h1" and top_px >= 90:
                 break
-            if top_px <= y_medio:
+            if top_px <= corte:
                 ruta_rel = _sincronizar_figura(f, dir_html)
                 res.append({
                     "tipo": "figura",
@@ -1357,6 +1364,7 @@ def _intercalar_figuras(elementos: list[dict], page_figs: list[dict], dir_html: 
                     "caption": f.get("caption", ""),
                 })
                 idx_fig += 1
+                y_actual += float(f.get("alto") or 100) + 20.0
             else:
                 break
 

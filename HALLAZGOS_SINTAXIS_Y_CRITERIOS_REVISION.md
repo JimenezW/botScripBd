@@ -181,6 +181,38 @@ Durante el análisis y compilación de las páginas 1 a 100 se identificaron dis
 
 ---
 
+### Criterio 13: Acumulación de Altura de Figuras en el Tracking Vertical (`_intercalar_figuras`)
+* **Descripción:** Cuando una página contiene múltiples figuras intercaladas con bloques de texto breves (ej. página 57 con 4 figuras entre pasos 3, 4 y párrafo de cierre), si el cursor vertical `y_actual` únicamente acumula la altura estimada del texto (`h_e`) y omite sumar la altura física de las figuras que ya fueron insertadas, el valor de `y_actual` queda artificialmente bajo. Como consecuencia, las figuras subsiguientes (`fig_2`, `fig_3`, `fig_4`) nunca alcanzan su condición `top_px <= corte` durante el recorrido y terminan amontonadas al final de la página.
+* **Hallazgos Reales Encontrados (Página 57):**
+  * La página 57 cuenta con 4 figuras intercaladas:
+    1. `fig_0057_1` (`top_px: 103`): cabecera de variables (al inicio).
+    2. Paso 3 (`3. From the Variables...`).
+    3. `fig_0057_2` (`top_px: 341`): variable asignada al panel Print task.
+    4. Paso 4 (`4. Expand the Advanced...`).
+    5. `fig_0057_3` (`top_px: 579`): panel Advanced y campo Output File.
+    6. Párrafo (*"The Project outline should look like..."*).
+    7. `fig_0057_4` (`top_px: 778`): esquema del proyecto completo.
+  * Antes del ajuste, las figuras 2, 3 y 4 se renderizaban todas juntas al pie de la página después del último párrafo.
+* **Criterios Normativos de Calidad:**
+  1. **Acumulación de Altura de Figuras:** Al emitir una figura en el flujo, debe incrementarse obligatoriamente el acumulador vertical: `y_actual += float(f.get("alto") or 100) + 20.0`.
+  2. **Calibración de Corte Proporcional:** El umbral de inserción debe evaluarse con `corte = y_actual + (h_e * 0.85)` para evitar postergaciones indebidas por variaciones de margen o fuentes.
+
+---
+
+### Criterio 14: Supresión de Falsos H1/H2 por Frases Verbales de Acción y Continuación de Temas
+* **Descripción:** Cuando una página continúa el procedimiento de la página anterior y no corresponde al inicio formal de un tema mayor en el TOC (ej. página 58), la primera línea suele ser una instrucción procesal de acción (ej. `"Click the Execute button..."`). Si el parser aplica una regla ciega de primer elemento (`if not elementos: elemento = H1`), fragmenta la oración convirtiendo `"Click the"` en un falso título `<h1>` y arrojando el resto a un párrafo subordinado, además de empujar indebidamente la figura asociada a la parte superior absoluta de la página por la regla de protección de H1.
+* **Hallazgos Reales Encontrados (Página 58):**
+  * La línea de Scribd `'Click the'` se promovía a `<h1 class="content-h1">Click the</h1>`, fragmentando el texto `"Execute button in the toolbar. A notification will appear when the Project is finished."`.
+  * La notificación de ejecución (`fig_0058_1`) se movía erróneamente arriba de `"Click the"`.
+  * Las palabras compuestas `'OutputFile'` y `'ViewJobLog'` aparecían sin espacio.
+* **Criterios Normativos de Calidad:**
+  1. **Filtro de Frases de Acción Verbal:** Líneas que inician con verbos o conectores procesales (`click`, `the`, `to`, `if`, `when`, `from`, `select`, `in`, `for`, `and`, `expand`, `navigate`, `run`, `set`, `build`) quedan terminantemente excluidas de la asignación automática de `H1` o `H2`.
+  2. **Agrupamiento Natural de Párrafos:** La frase se agrupa en su totalidad como `<p class="content-p">`, permitiendo que la figura de notificación se ubique limpiamente debajo de la instrucción.
+  3. **Jerarquía H2 para Secciones Secundarias:** Encabezados que inician en la mitad o final de una página con contenido previo (ej. `"What's Next?"`) deben tipificarse como `<h2 class="content-h2">` para respetar la jerarquía de la página.
+  4. **Desfragmentación de Comandos UI:** `'OutputFile'` $\rightarrow$ `'Output File'`, `'ViewJobLog'` $\rightarrow$ `'View Job Log'`.
+
+---
+
 ## 3. Matriz Comparativa: Antes vs. Después
 
 | Caso | Entrada en `paginas.json` | Antes (Sin regla) | Después (Con Desfragmentación) |
@@ -211,6 +243,9 @@ Durante el análisis y compilación de las páginas 1 a 100 se identificaron dis
 | **Crear Proyecto Pegado** | `['click the', 'CreateaProject', 'link']` | `"click the CreateaProject link"` | `"click the Create a Project link"` |
 | **Subpasos Mutilados (Pág 55)** | `['fields:', 'a.', 'ProjectName', '- Give...']` | Paso 3 absorbe `'a.'` y crea falso `<h2>` | `a. Project Name - Give the Project a name.` identado |
 | **Multi-H1 en Página (Pág 55)** | 4 temas de TOC en página 55 | 4 títulos `<h1 class="content-h1">` | 1 `<h1>` (tema mayor) y 3 `<h2>` (secciones) |
+| **Amontonamiento Figuras (Pág 57)** | 4 figuras con pasos breves | Figs 2, 3 y 4 al final de página | Cada figura tras su paso respectivo (Paso 3 $\rightarrow$ Fig 2, Paso 4 $\rightarrow$ Fig 3) |
+| **Falso H1 por 'Click the' (Pág 58)** | `['Click the', 'Execute', 'button...']` | `<h1>Click the</h1>` y figura al inicio | Párrafo continuo `"Click the Execute button..."` con figura de notificación debajo |
+| **Comando Ver Log (Pág 58)** | `['Click', 'ViewJobLog', 'to review...']` | `"Click ViewJobLog to review..."` | `"Click View Job Log to review..."` |
 
 ---
 
@@ -255,6 +290,11 @@ Antes de dar por aceptada una corrida masiva de páginas (ej. páginas 101 a 500
 - [ ] **12. Integridad de Pasos y Subpasos:**
   * Ningún paso numerado terminado en `:` debe absorber la letra de un subpaso siguiente (`a.`).
   * Los subpasos alfabéticos deben mantener su formato `a. [Título] - [Descripción]` con sangría CSS `.content-step--sub`.
+- [ ] **13. Tracking Vertical de Figuras Intercaladas:**
+  * En páginas con múltiples figuras secuenciales (ej. tutoriales paso a paso), verificar que cada figura se posicione inmediatamente después de su paso instructivo asociado y no se agrupen todas al pie de la página.
+- [ ] **14. Supresión de Falsos H1 por Frases de Acción:**
+  * 0 apariciones de encabezados `<h1>` o `<h2>` con frases verbales procesales (`Click the`, `Select the`, `Navigate to`, `Expand the`, etc.) al inicio de páginas continuas.
+  * Toda instrucción de acción debe renderizarse como párrafo `<p class="content-p">` con su figura correspondiente ubicada debajo.
 
 ---
 

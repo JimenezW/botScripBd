@@ -6,7 +6,7 @@
   <title>GoAnywhere MFT User Guide 7.7.0 · v7.7.0</title>
   <meta name="description" content="">
   <meta name="generator" content="compilador.py (Jinja2 3.1.6 + WeasyPrint)">
-  <meta name="dcterms.created" content="2026-10-19T10:56:04">
+  <meta name="dcterms.created" content="2026-10-19T11:16:14">
   <style>
     /* ═════════════════════ Fuentes locales (rutas relativas al HTML) ═════════════════════ */
 
@@ -7415,7 +7415,7 @@
               <img src="figuras/fig_p0044_1.png" alt="Figura del documento" class="doc-figure-img">
             </figure>
             <p class="content-step">5. You will be returned to the GoAnywhere MFT Login page.</p>
-            <h1 class="content-h1">Manually Activate a License</h1>
+            <h2 class="content-h2">Manually Activate a License</h2>
             <p class="content-p">If a direct connection to the internet is not possible, follow the instructions below to manually activate a GoAnywhere license:</p>
             <p class="content-step">1. On the Unlicensed page, click the 'having trouble' link below the Get License pane.</p>
             <p class="content-step">2. Follow the instructions on the HavingTrouble page to manually activate a license.</p>
@@ -7450,10 +7450,10 @@
               <span class="bullet-bullet">&bull;</span>
               <span class="bullet-text">[portnumber] is the port number of the GoAnywhere server. The default port for HTTP is 8000 and the default port for HTTPS is 8001. (for example, <a href="http://myserver:8000" class="doc-link" target="_blank" rel="noopener">http://myserver:8000</a> or <a href="https://myserver:8001" class="doc-link" target="_blank" rel="noopener">https://myserver:8001</a>).</span>
             </div>
-            <p class="content-step">2. The first time you launch GoAnywhere, you will be prompted to create an administrator account. This account is assigned all administrator roles with access rights to the entire GoAnywhere application. After this account is created, other Admin User accounts can be created from the Admin Users page. Specify a User Name and Password then click Submit.</p>
             <figure class="doc-figure">
               <img src="figuras/fig_p0045_1.png" alt="Figura del documento" class="doc-figure-img">
             </figure>
+            <p class="content-step">2. The first time you launch GoAnywhere, you will be prompted to create an administrator account. This account is assigned all administrator roles with access rights to the entire GoAnywhere application. After this account is created, other Admin User accounts can be created from the Admin Users page. Specify a User Name and Password then click Submit.</p>
       </main>
 
       <footer class="doc-page-footer">
@@ -7473,17 +7473,17 @@
               <strong class="tip-label">TIP:</strong>
               <span class="tip-text">NOTE: The System Name is only displayed if this system is a member of a GoAnywhere cluster</span>
             </div>
-            <h1 class="content-h1">RADIUS (RSA SecurID) Authentication</h1>
+            <h2 class="content-h2">RADIUS (RSA SecurID) Authentication</h2>
             <p class="content-p">If RADIUS (RSA SecurID) is enabled in Login Settings and the Admin User's profile,, you will need to provide your passcode when you click Login. Enter the passcode and then click Submit.</p>
             <figure class="doc-figure">
               <img src="figuras/fig_p0046_1.png" alt="Figura del documento" class="doc-figure-img">
             </figure>
             <h2 class="content-h2">RADIUS (RSA Secur ID)Token Authentication</h2>
             <p class="content-p">If this is the first time using your RSA Secure ID, you may need to specify a new PIN, and then verify it.</p>
-            <p class="content-p">After verifying your new PIN, you will need to wait for the RSA SecurID token code to change. Specify the new passcode and then click Submit to log in to GoAnywhere.</p>
             <figure class="doc-figure">
               <img src="figuras/fig_p0046_2.png" alt="Figura del documento" class="doc-figure-img">
             </figure>
+            <p class="content-p">After verifying your new PIN, you will need to wait for the RSA SecurID token code to change. Specify the new passcode and then click Submit to log in to GoAnywhere.</p>
       </main>
 
       <footer class="doc-page-footer">
@@ -7521,11 +7521,10 @@
       </header>
 
       <main class="doc-content-body">
+            <p class="content-p">Once scanned, GoAnywhere stores a unique secret key on the Admin User profile. Each login thereafter, the Admin User will provide a new one-time use password to GoAnywhere using the authenticator application.</p>
             <figure class="doc-figure">
               <img src="figuras/fig_p0048_1.png" alt="Figura del documento" class="doc-figure-img">
             </figure>
-            <h1 class="content-h1">Once scanned, GoAnywhere stores a unique secret key on the Admin User profile.</h1>
-            <p class="content-p">Each login thereafter, the Admin User will provide a new one-time use password to GoAnywhere using the authenticator application.</p>
             <h2 class="content-h2">Password Expiration</h2>
             <p class="content-p">If your Admin User password has expired, you will be prompted to change it on your next login.</p>
       </main>
@@ -7837,8 +7836,8 @@
       </header>
 
       <main class="doc-content-body">
-            <h1 class="content-h1">A variable is an element that acts as a reference to a value. Variables can contain the</h1>
-            <p class="content-p">current date, time, or timestamp within a Project. The Timestamp task is used to initialize the system.currentDate, system.currentTime, and system.currentTimestamp variables, which can then be used in other tasks, such as the Print task. Use the follow instructions to configure the Timestamp task:</p>
+            <p class="content-p">A variable is an element that acts as a reference to a value. Variables can contain the current date, time, or timestamp within a Project.</p>
+            <p class="content-p">The Timestamp task is used to initialize the system.currentDate, system.currentTime, and system.currentTimestamp variables, which can then be used in other tasks, such as the Print task. Use the follow instructions to configure the Timestamp task:</p>
             <p class="content-step">1. From within the Project Designer page, expand the Miscellaneous folder in the Component Library, and then drag the Timestamp task to the Project Outline.</p>
             <p class="content-step">2. The Timestamp task opens. You can optionally specify a Label, which would be shown in the Project outline.</p>
             <figure class="doc-figure">
@@ -7867,14 +7866,14 @@
               <img src="figuras/fig_p0057_1.png" alt="Figura del documento" class="doc-figure-img">
             </figure>
             <p class="content-step">3. From the Variables panel, drag system.currentTimestamp variable to the Print task Text field. The variable appears in the Text field in variable format.</p>
-            <p class="content-step">4. Expand the Advanced panel and specify an OutputFile. For this example, a.txt file will do.</p>
-            <p class="content-p">The Project outline should look like the image below. Notice that the Timestamp task, which was labeled as "Current Date and Time", is above the Print task.</p>
             <figure class="doc-figure">
               <img src="figuras/fig_p0057_2.png" alt="Figura del documento" class="doc-figure-img">
             </figure>
+            <p class="content-step">4. Expand the Advanced panel and specify an Output File. For this example, a.txt file will do.</p>
             <figure class="doc-figure doc-figure--large">
               <img src="figuras/fig_p0057_3.png" alt="Figura del documento" class="doc-figure-img">
             </figure>
+            <p class="content-p">The Project outline should look like the image below. Notice that the Timestamp task, which was labeled as "Current Date and Time", is above the Print task.</p>
             <figure class="doc-figure">
               <img src="figuras/fig_p0057_4.png" alt="Figura del documento" class="doc-figure-img">
             </figure>
@@ -7893,12 +7892,11 @@
       </header>
 
       <main class="doc-content-body">
+            <p class="content-p">Click the Execute button in the toolbar. A notification will appear when the Project is finished.</p>
             <figure class="doc-figure doc-figure--large">
               <img src="figuras/fig_p0058_1.png" alt="Figura del documento" class="doc-figure-img">
             </figure>
-            <h1 class="content-h1">Click the</h1>
-            <p class="content-p">Execute button in the toolbar. A notification will appear when the Project is finished.</p>
-            <p class="content-p">Click ViewJobLog to review the Project activity.</p>
+            <p class="content-p">Click View Job Log to review the Project activity.</p>
             <p class="content-p">The following is an image of the Job Log followed by an image of the output.txt file.</p>
             <figure class="doc-figure doc-figure--large">
               <img src="figuras/fig_p0058_2.png" alt="Figura del documento" class="doc-figure-img">
@@ -7988,8 +7986,7 @@
       </header>
 
       <main class="doc-content-body">
-            <h1 class="content-h1">In the left-hand panel of the FTP Configuration page, select</h1>
-            <p class="content-p">Listener:default under the Server drop down.</p>
+            <p class="content-p">In the left-hand panel of the FTP Configuration page, select Listener:default under the Server drop down.</p>
             <p class="content-p">Before starting the FTP service, take note of the port number that the service is listening on. This should be the same port number you provided the service when you installed GoAnywhere MFT. You need that port number to connect to the service and make transfers with the FTP client. The default port is 21.</p>
             <p class="content-p">With the port number configured, the host address and port number for the FTP service will be the hostname of the server GoAnywhere runs on, and the port number specified on this listener. For example, ftp://hostname:21</p>
             <figure class="doc-figure doc-figure--large">
@@ -8010,8 +8007,7 @@
       </header>
 
       <main class="doc-content-body">
-            <h1 class="content-h1">You do not need to configure any of the additional FTP service settings right now. Note</h1>
-            <p class="content-p">that you can click the '?' icon in the header to read more about the optional settings available. Click the icon next to Save and select SaveandFinish.</p>
+            <p class="content-p">You do not need to configure any of the additional FTP service settings right now. Note that you can click the '?' icon in the header to read more about the optional settings available. Click the icon next to Save and select SaveandFinish.</p>
             <p class="content-p">Back on the Service Manager page, start the FTP Service by clicking on Action and selecting Start.</p>
             <h2 class="content-h2">Configuring a New Web User</h2>
             <p class="content-p">Third party FTP clients require two primary items to transfer files using FTP: A host address and port number for the FTP server, and a user name and password to authenticate. You have just configured the host address and port number. Now you need to create a Web User account.</p>
@@ -8034,8 +8030,7 @@
       </header>
 
       <main class="doc-content-body">
-            <h1 class="content-h1">There many options available when creating a new Web User, but for now you only</h1>
-            <p class="content-p">need to be concerned with a few key items:</p>
+            <p class="content-p">There many options available when creating a new Web User, but for now you only need to be concerned with a few key items:</p>
             <p class="content-step">1. User Name</p>
             <p class="content-step">2. Authentication credentials</p>
             <p class="content-step">3. Access to the GoAnywhere FTP Feature</p>
@@ -8059,8 +8054,7 @@
       </header>
 
       <main class="doc-content-body">
-            <h1 class="content-h1">On the Authentication tab, specify a password for this Web User. You can have</h1>
-            <p class="content-p">GoAnywhere generate a password by leaving Generateapasswordbasedonthe passwordpolicy active, or you can specify a password. If GoAnywhere is generating the password, it will appear on screen when you save and exit Web User configuration.</p>
+            <p class="content-p">On the Authentication tab, specify a password for this Web User. You can have GoAnywhere generate a password by leaving Generateapasswordbasedonthe passwordpolicy active, or you can specify a password. If GoAnywhere is generating the password, it will appear on screen when you save and exit Web User configuration.</p>
             <figure class="doc-figure doc-figure--large">
               <img src="figuras/fig_p0064_1.png" alt="Figura del documento" class="doc-figure-img">
             </figure>
@@ -8086,8 +8080,7 @@
       </header>
 
       <main class="doc-content-body">
-            <h1 class="content-h1">have additional permissions, such as downloading or renaming, you can select those at</h1>
-            <p class="content-p">this time.</p>
+            <p class="content-p">have additional permissions, such as downloading or renaming, you can select those at this time.</p>
             <p class="content-p">Click Save. The Web User's password and home directory will be generated by GoAnywhere and will be displayed at the top of the screen.</p>
             <p class="content-p">You now have everything you need to configure a third party FTP client and transfer a file to GoAnywhere.</p>
             <h2 class="content-h2">Configuring an FTP Client</h2>
@@ -8140,12 +8133,12 @@
               <img src="figuras/fig_p0066_1.png" alt="Figura del documento" class="doc-figure-img">
             </figure>
             <p class="content-step">6. Upload a file using FileZilla.</p>
-            <p class="content-step">7. When the upload is successful, navigate to GoAnywhere's [install directory]\\userdata\\webdocs\\[user name] folder and verify you can access the file from the system.</p>
-            <p class="content-p">That's it! You have now made your first FTP file transfer in GoAnywhere.</p>
             <figure class="doc-figure">
               <img src="figuras/fig_p0066_2.png" alt="Figura del documento" class="doc-figure-img">
             </figure>
-            <h1 class="content-h1">Viewing the Logs</h1>
+            <p class="content-step">7. When the upload is successful, navigate to GoAnywhere's [install directory]\\userdata\\webdocs\\[user name] folder and verify you can access the file from the system.</p>
+            <p class="content-p">That's it! You have now made your first FTP file transfer in GoAnywhere.</p>
+            <h2 class="content-h2">Viewing the Logs</h2>
             <p class="content-p">Now that you have executed your first file transfer using FTP, the event has been recorded to the FTP Log, which can be found by navigating to Reporting > Audit Logs, and then click the FTP log in the left-hand navigation. You can view all details about the file transfer including the user name, remote IP address, file path information, and more.</p>
       </main>
 
@@ -8162,8 +8155,7 @@
       </header>
 
       <main class="doc-content-body">
-            <h1 class="content-h1">Additionally, the file transfer event has been recorded in several Dashboard gadgets,</h1>
-            <p class="content-p">including Service Statistics, Active Sessions, File Transfer - Summary, Recent File Activity, Recent Web User Logins, Recent Web User Activity, and Top Web Users by Transfers. You can add these gadgets to your Dashboard by clicking the Home button and then choose AddGadget.</p>
+            <p class="content-p">Additionally, the file transfer event has been recorded in several Dashboard gadgets, including Service Statistics, Active Sessions, File Transfer - Summary, Recent File Activity, Recent Web User Logins, Recent Web User Activity, and Top Web Users by Transfers. You can add these gadgets to your Dashboard by clicking the Home button and then choose AddGadget.</p>
             <h2 class="content-h2">What's Next?</h2>
             <div class="content-bullet">
               <span class="bullet-bullet">&bull;</span>
@@ -8215,11 +8207,10 @@
       </header>
 
       <main class="doc-content-body">
+            <p class="content-p">On the Service Manager page, you'll see a list of GoAnywhere Services. Click on Action next to the SFTP Service, and then click Edit.</p>
             <figure class="doc-figure doc-figure--large">
               <img src="figuras/fig_p0069_1.png" alt="Figura del documento" class="doc-figure-img">
             </figure>
-            <h1 class="content-h1">On the Service Manager page, you'll see a list of GoAnywhere Services. Click on</h1>
-            <p class="content-p">Action next to the SFTP Service, and then click Edit.</p>
             <p class="content-p">In the left-hand panel of the SFTP Configuration page, select Listener:default under the Server drop down.</p>
             <p class="content-p">Before starting the FTP service, take note of the port number that the service is listening on. This should be the same port number you provided the service when you installed GoAnywhere MFT. You need that port number to connect to the service and make transfers with the SFTP client. The default port is 22.</p>
             <p class="content-p">With the port number configured, the host address and port number for the SFTP service will be the hostname of the server GoAnywhere runs on, and the port number specified on this listener.</p>
@@ -8238,8 +8229,7 @@
       </header>
 
       <main class="doc-content-body">
-            <h1 class="content-h1">You do not need to configure any of the additional SFTP service settings right now.</h1>
-            <p class="content-p">Note that you can click the '?' icon in the header to read more about the optional settings available. Click the icon next to Save and select SaveandFinish.</p>
+            <p class="content-p">You do not need to configure any of the additional SFTP service settings right now. Note that you can click the '?' icon in the header to read more about the optional settings available. Click the icon next to Save and select SaveandFinish.</p>
             <p class="content-p">Back on the Service Manager page, start the SFTP Service by clicking on Action and selecting Start.</p>
             <h2 class="content-h2">Configuring a New Web User</h2>
             <p class="content-p">Third party SFTP clients require two primary items to transfer files using SFTP: A host address and port number for the SFTP server, and a user name and password to authenticate. You have just configured the host address and port number. Now you need to create a Web User account.</p>
@@ -8262,8 +8252,7 @@
       </header>
 
       <main class="doc-content-body">
-            <h1 class="content-h1">There many options available when creating a new Web User, but for now you only</h1>
-            <p class="content-p">need to be concerned with a few key items:</p>
+            <p class="content-p">There many options available when creating a new Web User, but for now you only need to be concerned with a few key items:</p>
             <p class="content-step">1. User Name</p>
             <p class="content-step">2. Authentication credentials</p>
             <p class="content-step">3. Access to the GoAnywhere SFTP Feature</p>
@@ -8288,15 +8277,15 @@
             </figure>
             <h1 class="content-h1">Authentication Credentials</h1>
             <p class="content-p">On the Authentication tab, specify a password for this Web User. You can have GoAnywhere generate a password by leaving Generateapasswordbasedonthe passwordpolicy active, or you can specify a password. If GoAnywhere is generating the password, it will appear on screen when you save and exit the Web User configuration.</p>
-            <h2 class="content-h2">Accesstothe GoAnywhere FTPFeature</h2>
-            <p class="content-p">On the Features tab, make sure that the SFTP Protocol is checked. If you intend to use other services provided by GoAnywhere, you can enable them now as well.</p>
             <figure class="doc-figure doc-figure--large">
               <img src="figuras/fig_p0072_2.png" alt="Figura del documento" class="doc-figure-img">
             </figure>
-            <h2 class="content-h2">Permissionto Uploadfiles</h2>
+            <h2 class="content-h2">Accesstothe GoAnywhere FTPFeature</h2>
+            <p class="content-p">On the Features tab, make sure that the SFTP Protocol is checked. If you intend to use other services provided by GoAnywhere, you can enable them now as well.</p>
             <figure class="doc-figure">
               <img src="figuras/fig_p0072_3.png" alt="Figura del documento" class="doc-figure-img">
             </figure>
+            <h2 class="content-h2">Permissionto Uploadfiles</h2>
       </main>
 
       <footer class="doc-page-footer">
@@ -8312,8 +8301,7 @@
       </header>
 
       <main class="doc-content-body">
-            <h1 class="content-h1">The Folders tab provides a list of directories on the system where files uploaded by the</h1>
-            <p class="content-p">Web User will be stored. This user's home directory will automatically be created in GoAnywhere's [install directory]\\userdata\\webdocs\\[user name] directory when the new user is saved. You will need to give the user permission to upload files. Make sure that Upload(Write) is checked. In addition, check List. List will allow the user to see a list of the files located in the home directory from within the SFTP client. If you'd like the user to have additional permissions, such as downloading or renaming, you can select those at this time.</p>
+            <p class="content-p">The Folders tab provides a list of directories on the system where files uploaded by the Web User will be stored. This user's home directory will automatically be created in GoAnywhere's [install directory]\\userdata\\webdocs\\[user name] directory when the new user is saved. You will need to give the user permission to upload files. Make sure that Upload(Write) is checked. In addition, check List. List will allow the user to see a list of the files located in the home directory from within the SFTP client. If you'd like the user to have additional permissions, such as downloading or renaming, you can select those at this time.</p>
             <p class="content-p">Click Save. The Web User's password and home directory will be generated by GoAnywhere and will be displayed at the top of the screen.</p>
             <p class="content-p">You now have everything you need to configure a third party SFTP client and transfer a file to GoAnywhere.</p>
             <h2 class="content-h2">Using SSH Key Based Authentication</h2>
@@ -8338,11 +8326,11 @@
       </header>
 
       <main class="doc-content-body">
-            <h1 class="content-h1">Configuring the Web User Authentication Type</h1>
-            <p class="content-step">4. Import an SSH public key into the Key Vault for a Web User by clicking the ImportPublicKey button. Once the key is imported, it will become associated to the Web User account.</p>
             <figure class="doc-figure doc-figure--large">
               <img src="figuras/fig_p0074_1.png" alt="Figura del documento" class="doc-figure-img">
             </figure>
+            <h1 class="content-h1">Configuring the Web User Authentication Type</h1>
+            <p class="content-step">4. Import an SSH public key into the Key Vault for a Web User by clicking the ImportPublicKey button. Once the key is imported, it will become associated to the Web User account.</p>
             <p class="content-step">5. Click the Done button to return to the Web User Management page.</p>
             <h2 class="content-h2">Configuring the Web User Authentication</h2>
             <p class="content-p">Type Now that the public portion of the SSH key pair has been imported and associated to the Web User, you need to configure the Web User's authentication type to use a password and SSH key.</p>
@@ -8415,10 +8403,10 @@
               <span class="bullet-text">Keyfile - If using a key file, navigate to the private portion of the SSH key pair.</span>
             </div>
             <p class="content-step">4. Click Connect.</p>
-            <p class="content-p">Once connected, you will be prompted to enter the Web User password.</p>
             <figure class="doc-figure doc-figure--large">
               <img src="figuras/fig_p0076_1.png" alt="Figura del documento" class="doc-figure-img">
             </figure>
+            <p class="content-p">Once connected, you will be prompted to enter the Web User password.</p>
       </main>
 
       <footer class="doc-page-footer">
@@ -8460,16 +8448,15 @@
             <figure class="doc-figure doc-figure--large">
               <img src="figuras/fig_p0078_1.png" alt="Figura del documento" class="doc-figure-img">
             </figure>
-            <h1 class="content-h1">In the left-hand panel of the HTTPS Configuration page, select</h1>
-            <p class="content-p">WebClient. Ensure that Enabled is checked on the General tab.</p>
+            <p class="content-p">In the left-hand panel of the HTTPS Configuration page, select WebClient. Ensure that Enabled is checked on the General tab.</p>
             <h2 class="content-h2">Next, select</h2>
             <p class="content-p">Listener:default under the Server drop-down in the left-hand panel.</p>
-            <p class="content-p">Before starting the HTTPS service, take note of the port number that the service is listening on. The URL to the Web Client will <a href="https://[hostname]:[portnumber]" class="doc-link" target="_blank" rel="noopener">https://[hostname]:[portnumber]</a>, where hostname is the host name or IP address of GoAnywhere and [portnumber] is the port number of the HTTPS Service. The default port number for the HTTPS Service is 443.</p>
-            <p class="content-p">It is not necessary to configure any of the HTTPS Service settings right now. Note that you can click the '?' icon in the header to read more about the optional settings available. Click the icon next to Save and select SaveandFinish.</p>
-            <p class="content-p">To start the HTTPS Service, click on Action and select Start.</p>
             <figure class="doc-figure">
               <img src="figuras/fig_p0078_2.png" alt="Figura del documento" class="doc-figure-img">
             </figure>
+            <p class="content-p">Before starting the HTTPS service, take note of the port number that the service is listening on. The URL to the Web Client will <a href="https://[hostname]:[portnumber]" class="doc-link" target="_blank" rel="noopener">https://[hostname]:[portnumber]</a>, where hostname is the host name or IP address of GoAnywhere and [portnumber] is the port number of the HTTPS Service. The default port number for the HTTPS Service is 443.</p>
+            <p class="content-p">It is not necessary to configure any of the HTTPS Service settings right now. Note that you can click the '?' icon in the header to read more about the optional settings available. Click the icon next to Save and select SaveandFinish.</p>
+            <p class="content-p">To start the HTTPS Service, click on Action and select Start.</p>
             <h2 class="content-h2">Configuring a New Web User</h2>
       </main>
 
@@ -8486,8 +8473,7 @@
       </header>
 
       <main class="doc-content-body">
-            <h1 class="content-h1">The GoAnywhere Web Client gives Web Users the ability to perform multiple types of</h1>
-            <p class="content-p">file transfers and file sharing through a browser. No additional software is required, and all popular browsers are supported.</p>
+            <p class="content-p">The GoAnywhere Web Client gives Web Users the ability to perform multiple types of file transfers and file sharing through a browser. No additional software is required, and all popular browsers are supported.</p>
             <p class="content-p">A Web User account with the necessary permissions is required to access Web Client features.</p>
             <p class="content-p">To create a Web User account, navigate to the Web User management page by selecting Users in the main menu bar and clicking WebUsers.</p>
             <p class="content-p">Click AddWebUser. A prompt will appear asking you to choose a Web User Template.</p>
@@ -8515,18 +8501,17 @@
       </header>
 
       <main class="doc-content-body">
-            <h1 class="content-h1">On the Authentication tab, specify a password for this Web User. You can have</h1>
-            <p class="content-p">GoAnywhere generate a password by leaving Generateapasswordbasedonthe passwordpolicy active, or you can specify a password. If GoAnywhere is generating the password, it will appear on screen when you save and exit Web User configuration.</p>
+            <p class="content-p">On the Authentication tab, specify a password for this Web User. You can have GoAnywhere generate a password by leaving Generateapasswordbasedonthe passwordpolicy active, or you can specify a password. If GoAnywhere is generating the password, it will appear on screen when you save and exit Web User configuration.</p>
             <figure class="doc-figure doc-figure--large">
               <img src="figuras/fig_p0080_1.png" alt="Figura del documento" class="doc-figure-img">
             </figure>
             <h2 class="content-h2">Accessto Web Client Features</h2>
             <p class="content-p">On the Features tab, make sure that the HTTPS Protocol is checked as well as the Secure Folders feature. If you intend to use other services provided by GoAnywhere, you can enable them now as well.</p>
-            <h2 class="content-h2">Permissionto Createfiles</h2>
-            <p class="content-p">The Folders tab provides a list of directories on the system where files uploaded by the Web User will be stored. This user's home directory will automatically be created in GoAnywhere's [install directory]\\userdata\\webdocs\\[user name] directory when the new user is saved. You will need to give the user permission to upload files. Make sure that</p>
             <figure class="doc-figure">
               <img src="figuras/fig_p0080_2.png" alt="Figura del documento" class="doc-figure-img">
             </figure>
+            <h2 class="content-h2">Permissionto Createfiles</h2>
+            <p class="content-p">The Folders tab provides a list of directories on the system where files uploaded by the Web User will be stored. This user's home directory will automatically be created in GoAnywhere's [install directory]\\userdata\\webdocs\\[user name] directory when the new user is saved. You will need to give the user permission to upload files. Make sure that</p>
       </main>
 
       <footer class="doc-page-footer">
@@ -8586,7 +8571,7 @@
               <span class="bullet-bullet">&bull;</span>
               <span class="bullet-text">Click on the Web User name initial to access the user's profile, preferences, and address book.</span>
             </div>
-            <h1 class="content-h1">Wh at's Next?</h1>
+            <h2 class="content-h2">Wh at's Next?</h2>
             <div class="content-bullet">
               <span class="bullet-bullet">&bull;</span>
               <span class="bullet-text">Learn how to configure custom Web Client Brands.</span>
@@ -8902,9 +8887,7 @@
             <p class="content-p">Use the following instructions to add a Gadget to a Dashboard: 1.</p>
             <p class="content-p">Login to GoAnywhere.</p>
             <p class="content-p">2. If needed, you can choose a different Dashboard to customize by clicking the button (located on the left side of the Dashboard name) and select a Dashboard.</p>
-            <p class="content-p">3.</p>
-            <h2 class="content-h2">Click the</h2>
-            <p class="content-p">AddGadget button.</p>
+            <p class="content-p">3. Click the AddGadget button.</p>
             <p class="content-step">4. On the AddGadget window, select the desired Gadget.</p>
             <p class="content-step">5. The Gadget is added to the Dashboard.</p>
             <h2 class="content-h2">Gadget Options</h2>
@@ -8960,11 +8943,11 @@
       </header>
 
       <main class="doc-content-body">
-            <h1 class="content-h1">Quick Links</h1>
-            <p class="content-p">The Quick Links Gadget provides shortcuts to GoAnywhere features. A Quick Link icon will appear gray if the Admin User does not have the appropriate permission to view that feature.</p>
             <figure class="doc-figure doc-figure--large">
               <img src="figuras/fig_p0093_1.png" alt="Figura del documento" class="doc-figure-img">
             </figure>
+            <h1 class="content-h1">Quick Links</h1>
+            <p class="content-p">The Quick Links Gadget provides shortcuts to GoAnywhere features. A Quick Link icon will appear gray if the Admin User does not have the appropriate permission to view that feature.</p>
             <p class="content-p">To customize the Quick Links available within the Gadget, click on the button (on the Gadget header) and then click Edit.</p>
             <h2 class="content-h2">Optional Parameters</h2>
             <div class="content-bullet">
@@ -9054,11 +9037,11 @@
       </header>
 
       <main class="doc-content-body">
-            <h1 class="content-h1">Service Status</h1>
-            <p class="content-p">The Service Status Gadget displays the status and active sessions for each service. Click on the Active Sessions link to view the Active Sessions for the selected protocol. The More Details link displays the Service Manager page.</p>
             <figure class="doc-figure">
               <img src="figuras/fig_p0096_1.png" alt="Figura del documento" class="doc-figure-img">
             </figure>
+            <h1 class="content-h1">Service Status</h1>
+            <p class="content-p">The Service Status Gadget displays the status and active sessions for each service. Click on the Active Sessions link to view the Active Sessions for the selected protocol. The More Details link displays the Service Manager page.</p>
             <p class="content-p">To customize the data available within the Gadget, click on the button (on the Gadget header) and then click Edit.</p>
             <h2 class="content-h2">Optional Parameters</h2>
             <div class="content-bullet">
@@ -9114,11 +9097,11 @@
       </header>
 
       <main class="doc-content-body">
-            <h1 class="content-h1">Active Sessions - Detail</h1>
-            <p class="content-p">The Active Sessions - Detail Gadget displays the IP address, User, and Protocol for each Active session. The More Details link displays the Active Sessions page.</p>
             <figure class="doc-figure doc-figure--large">
               <img src="figuras/fig_p0098_1.png" alt="Figura del documento" class="doc-figure-img">
             </figure>
+            <h1 class="content-h1">Active Sessions - Detail</h1>
+            <p class="content-p">The Active Sessions - Detail Gadget displays the IP address, User, and Protocol for each Active session. The More Details link displays the Active Sessions page.</p>
             <p class="content-p">To customize the data available within the Gadget, click on the button (on the Gadget header) and then click Edit.</p>
             <h2 class="content-h2">Optional Parameters</h2>
             <div class="content-bullet">
