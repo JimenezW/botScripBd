@@ -606,6 +606,23 @@ RE_PATRONES_DESFRAGMENTACION: list[tuple[re.Pattern, str]] = [
     (re.compile(r'\ba\s*\.\s*txt\b', re.I), 'a .txt'),
     (re.compile(r'\bUserName\b', re.I), 'User Name'),
     (re.compile(r'\bAuthenticationCredentials\b', re.I), 'Authentication Credentials'),
+    (re.compile(r'\bAccesstotheGoAnywhereFTPFeature\b', re.I), 'Access to the GoAnywhere FTP Feature'),
+    (re.compile(r'\bAccesstothe\s+GoAnywhere\s+FTPFeature\b', re.I), 'Access to the GoAnywhere FTP Feature'),
+    (re.compile(r'\bAccesstothe\b', re.I), 'Access to the'),
+    (re.compile(r'\bFTPFeature\b', re.I), 'FTP Feature'),
+    (re.compile(r'\bPermissiontoUploadfiles\b', re.I), 'Permission to Upload files'),
+    (re.compile(r'\bPermissionto\s+Uploadfiles\b', re.I), 'Permission to Upload files'),
+    (re.compile(r'\bPermissionto\b', re.I), 'Permission to'),
+    (re.compile(r'\bUploadfiles\b', re.I), 'Upload files'),
+    (re.compile(r'\bGenerateapasswordbasedonthe\s+passwordpolicy\b', re.I), 'Generate a password based on the password policy'),
+    (re.compile(r'\bGenerateapasswordbasedonthe\b', re.I), 'Generate a password based on the'),
+    (re.compile(r'\bpasswordpolicy\b', re.I), 'password policy'),
+    (re.compile(r'\bFTP-FileTransferProtocol\b', re.I), 'FTP - File Transfer Protocol'),
+    (re.compile(r'\bLogonType\b', re.I), 'Logon Type'),
+    (re.compile(r'\bSiteManager\b', re.I), 'Site Manager'),
+    (re.compile(r'\bNewSite\b', re.I), 'New Site'),
+    (re.compile(r'Upload\s*\(\s*Write\s*\)', re.I), '<strong>Upload (Write)</strong>'),
+    (re.compile(r'\bcheck\s+List\b', re.I), 'check <strong>List</strong>'),
 ]
 
 # Palabras objetivo para la heurística de letras desprendidas
@@ -657,6 +674,9 @@ def _reparar_palabras_rotas(texto: str) -> str:
     res = re.sub(r'\s+([.,;:!?])', r'\1', res)
     # 5. Normalizar duplicación accidental de puntos consecutivos
     res = re.sub(r'\.{2,}', '.', res)
+    # 6. Normalizar etiquetas de marcado inline (preservar formato sin espacios espurios)
+    res = re.sub(r'<\s*strong\s*>\s*', '<strong>', res)
+    res = re.sub(r'\s*<\s*/\s*strong\s*>', '</strong>', res)
     return res
 
 
@@ -1137,7 +1157,15 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
                 i += 1
             if buf_bullet:
                 txt = _enriquecer_links(_reparar_palabras_rotas(re.sub(r'\s+', ' ', " ".join(buf_bullet))))
-                elementos.append({"tipo": "bullet", "texto": txt})
+                # Jerarquía de viñetas: si cuelga de un paso previo o dos puntos, marcar subnivel (tab 2)
+                subnivel = False
+                if elementos:
+                    ult_e = elementos[-1]
+                    if ult_e.get("tipo") in ("numero", "subpaso") or ult_e.get("subnivel"):
+                        subnivel = True
+                    elif ult_e.get("texto", "").strip().endswith(":"):
+                        subnivel = True
+                elementos.append({"tipo": "bullet", "texto": txt, "subnivel": subnivel})
             continue
 
         # Pasos numerados (1. , 2. , etc.)
@@ -1152,7 +1180,7 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
                     norm_sig = re.sub(r'[^a-zA-Z0-9]', '', sig).lower()
                     if norm_sig in temas_esta_pag:
                         break
-                    actual_incompleto = bool(re.search(r'\b(the|a|an|of|to|in|for|from|with|by|and|or)\s*$', buf_num[-1], re.I))
+                    actual_incompleto = bool(re.search(r'\b(the|a|an|of|to|in|for|from|with|by|and|or|on|click|select|choose|enter|type|check|uncheck|press)\s*$', buf_num[-1], re.I))
                     sig_es_sub = (
                         not actual_incompleto
                         and 4 <= len(sig) < 45
@@ -1169,7 +1197,11 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
                         break
                     i += 1
             txt = _enriquecer_links(_reparar_palabras_rotas(re.sub(r'\s+', ' ', " ".join(buf_num))))
-            elementos.append({"tipo": "numero", "texto": txt})
+            m_num = re.match(r'^(\d+\.)\s*(.*)$', txt)
+            if m_num:
+                elementos.append({"tipo": "numero", "marcador": m_num.group(1), "texto": m_num.group(2)})
+            else:
+                elementos.append({"tipo": "numero", "texto": txt})
             continue
 
         # Subpasos alfabéticos (a. , b. , etc.)
@@ -1189,7 +1221,11 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
                     break
                 i += 1
             txt = _enriquecer_links(_reparar_palabras_rotas(re.sub(r'\s+', ' ', " ".join(buf_sub))))
-            elementos.append({"tipo": "subpaso", "texto": txt})
+            m_sub = re.match(r'^([a-z]\.)\s*(.*)$', txt)
+            if m_sub:
+                elementos.append({"tipo": "subpaso", "marcador": m_sub.group(1), "texto": m_sub.group(2)})
+            else:
+                elementos.append({"tipo": "subpaso", "texto": txt})
             continue
 
         # Bloques WARNING / TIP / NOTE
@@ -1342,26 +1378,46 @@ def _intercalar_figuras(elementos: list[dict], page_figs: list[dict], dir_html: 
     for e in elementos:
         t = e.get("tipo")
         txt = e.get("texto", "")
-        n_lin = max(1, len(txt) / 80.0)
+        n_lin = max(1, len(txt) / 75.0)
         if t == "h1":
-            h = 60.0
+            h = 35.0
         elif t == "h2":
-            h = 45.0
+            h = 28.0
         elif t in ("tip", "warning"):
-            h = 50.0 + n_lin * 22.0
+            h = 30.0 + n_lin * 18.0
         elif t in ("bullet", "numero", "subpaso"):
-            h = 10.0 + n_lin * 26.0
+            h = n_lin * 18.0 + 6.0
         else:
-            h = 10.0 + n_lin * 25.0
-        alturas.append(h + 15.0)
+            h = n_lin * 18.0 + 8.0
+        alturas.append(h)
 
     res: list[dict] = []
     idx_fig = 0
     n_figs = len(figs_ordenadas)
-    y_actual = 110.0
+    y_actual = 90.0
 
     for i, e in enumerate(elementos):
         h_e = alturas[i]
+
+        # Regla tipográfica: si el elemento anterior fue un H2 y hay una figura que ilustra esa subsección (top < 850),
+        # emitir la figura inmediatamente después del encabezado H2 y antes del párrafo descriptivo.
+        if i > 0 and elementos[i - 1].get("tipo") == "h2" and idx_fig < n_figs:
+            f_cand = figs_ordenadas[idx_fig]
+            top_cand = float(f_cand.get("posicion_top_px", 0))
+            if top_cand < 850:
+                ruta_rel = _sincronizar_figura(f_cand, dir_html)
+                res.append({
+                    "tipo": "figura",
+                    "id": f_cand.get("id"),
+                    "archivo": ruta_rel,
+                    "ancho": f_cand.get("ancho"),
+                    "alto": f_cand.get("alto"),
+                    "posicion_top_px": top_cand,
+                    "caption": f_cand.get("caption", ""),
+                })
+                idx_fig += 1
+                y_actual += float(f_cand.get("alto") or 100) + 15.0
+
         corte = y_actual + (h_e * 0.85)
 
         while idx_fig < n_figs:
@@ -1369,7 +1425,8 @@ def _intercalar_figuras(elementos: list[dict], page_figs: list[dict], dir_html: 
             top_px = float(f.get("posicion_top_px", 0))
             if i == 0 and e.get("tipo") == "h1" and top_px >= 90:
                 break
-            if e.get("tipo") in ("h1", "h2") and top_px >= 850:
+            # Un encabezado H2 abre una sección; ninguna figura de esa sección debe preceder al título
+            if e.get("tipo") in ("h1", "h2") and top_px >= 200:
                 break
             if top_px <= corte:
                 ruta_rel = _sincronizar_figura(f, dir_html)
@@ -1383,7 +1440,7 @@ def _intercalar_figuras(elementos: list[dict], page_figs: list[dict], dir_html: 
                     "caption": f.get("caption", ""),
                 })
                 idx_fig += 1
-                y_actual += float(f.get("alto") or 100) + 20.0
+                y_actual += float(f.get("alto") or 100) + 15.0
             else:
                 break
 
@@ -1405,22 +1462,22 @@ def _intercalar_figuras(elementos: list[dict], page_figs: list[dict], dir_html: 
         idx_fig += 1
 
     # Reglas tipográficas de composición:
-    # 1. Una figura no debe intercalarse entre un encabezado H1/H2 y su primer contenido,
-    #    a menos que el encabezado introduzca la figura al pie de página (ej. Authentication Credentials).
+    # 1. Un encabezado H1/H2 precede a la figura que lo ilustra en su sección.
+    #    Solo si el encabezado es una sección de transición/cierre (ej. "What's Next?"),
+    #    la figura anterior que ilustraba la sección previa se mantiene antes del encabezado.
     # 2. Una figura no debe intercalarse en medio o antes de subpasos alfabéticos de un paso previo.
     resultado_ordenado: list[dict] = []
     j = 0
     m = len(res)
     while j < m:
         if j < m - 1 and res[j]["tipo"] in ("h1", "h2") and res[j + 1]["tipo"] == "figura":
-            fig_top = float(res[j + 1].get("posicion_top_px") or 0)
-            if fig_top >= 800 and "What" not in res[j].get("texto", ""):
-                resultado_ordenado.append(res[j])
+            if "What" in res[j].get("texto", ""):
                 resultado_ordenado.append(res[j + 1])
+                resultado_ordenado.append(res[j])
                 j += 2
                 continue
-            resultado_ordenado.append(res[j + 1])
             resultado_ordenado.append(res[j])
+            resultado_ordenado.append(res[j + 1])
             j += 2
             continue
         if res[j]["tipo"] == "figura" and j + 1 < m and res[j + 1]["tipo"] == "subpaso":

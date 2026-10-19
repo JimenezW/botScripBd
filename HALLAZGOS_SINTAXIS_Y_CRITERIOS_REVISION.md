@@ -238,6 +238,31 @@ Durante el análisis y compilación de las páginas 1 a 100 se identificaron dis
 
 ---
 
+### Criterio 17: Control Estricto de Viñetas, Marcadores Tabulares y Subnivel de Anidación Flexbox
+* **Descripción:** 
+  1. Las listas numeradas (`.content-step`) no deben renderizarse como texto corrido donde la segunda línea se mete debajo del número. Deben utilizar una arquitectura flexbox con `.step-marker` (ancho tabular fijo con `font-variant-numeric: tabular-nums`) y `.step-body` (alineación en bloque colgante).
+  2. Los subpasos alfabéticos (`.content-step--sub`) deben mantener sangría de segundo nivel (`margin-left: 30px`) con su marcador propio (`a.`, `b.`).
+  3. Las viñetas (`•`) que cuelguen de un paso numerado previo o introducción terminada en dos puntos (`:`) deben recibir automáticamente la clase subordinada `.content-bullet--sub` con tabulador desplazado (`margin-left: 32px`).
+  4. Los pasos numerados no deben cortarse prematuramente ante verbos imperativos (`Click on`, `Click`, `Select`, `Choose`, `Enter`, `Type`, `Check`) ni confundir objetos de interfaz (`New Site`, `Connect`, `Save`) con subtítulos espurios.
+* **Criterios Normativos de Calidad:**
+  1. **Sangría Colgante Tabular:** Todo paso numerado o subpaso se divide en marcador y cuerpo flexbox sin roturas visuales multilínea.
+  2. **Jerarquía Visual de Viñetas:** Toda viñeta subordinada a un paso se indenta a 32px, manteniendo clara subordinación lógica.
+  3. **Absorción de Frases Verbales:** Un paso con verbo o preposición terminal incompleta continúa absorbiendo hasta la conclusión sintáctica de la instrucción.
+
+---
+
+### Criterio 18: Orden Canónico de Secciones H2 Ilustradas e Intercalación de Figuras Intermedias
+* **Descripción:** 
+  1. Un encabezado `<h2>` que abre una sección (ej. `Access to the GoAnywhere FTP Feature`, `Permission to Upload files`) introduce conceptualmente la temática y sus figuras asociadas. Una figura perteneciente a dicha subsección nunca debe colocarse antes de su encabezado de apertura.
+  2. En diagramas UI donde la figura precede inmediatamente a la explicación de la interfaz, la figura debe posicionarse justo después del encabezado H2 y antes del párrafo descriptivo siguiente.
+  3. Desfragmentación canónica de los títulos y opciones clave de la página 64 (`Access to the GoAnywhere FTP Feature`, `Permission to Upload files`, `Generate a password based on the password policy`, `Upload (Write)`, `List`).
+* **Criterios Normativos de Calidad:**
+  1. **Barrera de Encabezado:** Ninguna figura con `top_px >= 200` puede anteponerse a un H2 dentro de la misma subsección.
+  2. **Intercalación Ilustrativa H2:** La figura ilustrativa de un H2 se emite inmediatamente tras el título si precede al párrafo descriptivo.
+  3. **Excepción de Cierre:** Únicamente encabezados de cierre o transición externa (ej. `"What's Next?"`) permiten que las figuras explicativas de la sección previa se ubiquen antes del encabezado.
+
+---
+
 ## 3. Matriz Comparativa: Antes vs. Después
 
 | Caso | Entrada en `paginas.json` | Antes (Sin regla) | Después (Con Desfragmentación) |
@@ -274,6 +299,10 @@ Durante el análisis y compilación de las páginas 1 a 100 se identificaron dis
 | **Figura Superior Omitida (Pág 63)** | Formulario "Add Web User" (top=103, h=433) | Descartada por `abs_top < 90` | Extraída limpiamente como `fig_0063_1` (693x368px) al inicio de página |
 | **Subtítulo Tras Lista (Pág 63)** | `['4. Permission to upload files', 'UserName']` | Paso 4 absorbe `UserName` y párrafo | Paso 4 cerrado y `<h2>User Name</h2>` independiente |
 | **Figura al Pie (Pág 63)** | `AuthenticationCredentials` y `fig_0063_2` | Figura invertida arriba del subtítulo | `<h2>Authentication Credentials</h2>` seguido de figura `Password Generation` |
+| **Figuras Invertidas (Pág 64)** | Subtítulos H2 y figuras `fig_p0064_1` y `fig_p0064_2` | Figuras colocadas antes de sus H2 | H2 precede a su figura (`Access to...` $\rightarrow$ Protocols, `Permission to...` $\rightarrow$ Permissions) |
+| **Texto Partido en Pág 64** | `['Accesstothe', 'Permissionto', 'Upload(Write)']` | Texto fusionado sin espacios | `"Access to the GoAnywhere FTP Feature"`, `"Permission to Upload files"`, `<strong>Upload (Write)</strong>` |
+| **Estructura Tabular de Pasos** | `<p class="content-step">1. Texto multilínea</p>` | Texto debajo del número 1. | `.content-step` con `.step-marker` tabular y `.step-body` flex |
+| **Viñetas Subordinadas** | Viñeta dentro de paso 4 (Pág 65) | Viñeta plana en 14px | `.content-bullet--sub` indentada a 32px |
 
 ---
 
@@ -328,6 +357,11 @@ Antes de dar por aceptada una corrida masiva de páginas (ej. páginas 101 a 500
 - [ ] **16. Subtítulos tras Listas y Figuras al Pie:**
   * Los subtítulos que siguen a listas no deben fusionarse con el paso anterior.
   * Figuras con `top_px >= 850` deben colocarse siempre debajo de su encabezado introductorio.
+- [ ] **17. Estructura Tabular de Viñetas y Sangría Colgante:**
+  * Todo ítem numerado o alfabético debe estructurarse con `.step-marker` y `.step-body` flexbox.
+  * Toda viñeta subordinada a un paso debe tener sangría correspondiente de 32px (`.content-bullet--sub`).
+- [ ] **18. Orden Canónico de Secciones H2 Ilustradas:**
+  * Todo encabezado H2 debe preceder a la figura que lo ilustra en su subsección (`top_px >= 200`).
 
 ---
 
