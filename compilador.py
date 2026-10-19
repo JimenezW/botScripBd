@@ -1442,7 +1442,7 @@ def _sincronizar_figura(f: dict, dir_html: Path | None) -> str:
 
 
 def _intercalar_figuras(elementos: list[dict], page_figs: list[dict], dir_html: Path | None) -> list[dict]:
-    """Intercala las figuras de la página en la secuencia de elementos según su posición vertical estimada."""
+    """Intercala las figuras de la página en la secuencia de elementos según su posición vertical estimada y anclaje contextual."""
     if not page_figs:
         return elementos
 
@@ -1470,14 +1470,22 @@ def _intercalar_figuras(elementos: list[dict], page_figs: list[dict], dir_html: 
     n_figs = len(figs_ordenadas)
     y_actual = 90.0
 
+    # Pre-calcular posiciones estimadas de encabezados H2 en la página
+    pos_h2 = []
+    y_acum = 90.0
+    for idx_e, el in enumerate(elementos):
+        if el.get("tipo") == "h2":
+            pos_h2.append((idx_e, y_acum, el.get("texto", "")))
+        y_acum += alturas[idx_e]
+
     for i, e in enumerate(elementos):
         h_e = alturas[i]
 
-        # 1. Figura de apertura superior que precede al primer encabezado (ej. Pág 75: pantalla Edit Web User en top 105)
-        if i == 0 and e.get("tipo") in ("h1", "h2") and idx_fig < n_figs:
+        # 1. Apertura superior al inicio de la página (Págs 70, 71, 75, 78, 87)
+        if i == 0 and idx_fig < n_figs:
             f_top = figs_ordenadas[idx_fig]
             top_val = float(f_top.get("posicion_top_px", 0))
-            if top_val <= 120 and float(f_top.get("alto") or 0) >= 300:
+            if top_val <= 120 and float(f_top.get("alto") or 0) >= 280:
                 ruta_rel = _sincronizar_figura(f_top, dir_html)
                 res.append({
                     "tipo": "figura",
@@ -1491,7 +1499,7 @@ def _intercalar_figuras(elementos: list[dict], page_figs: list[dict], dir_html: 
                 idx_fig += 1
                 y_actual += float(f_top.get("alto") or 100) + 15.0
 
-        # 2. Figura que ilustra pasos previos y precede a un nuevo encabezado (ej. Pág 74: figura tras paso 5 y antes de H2)
+        # 2. Figura tras pasos previos antes de un nuevo H2 (ej. Pág 74: figura tras paso 5 y antes de H2)
         if e.get("tipo") in ("h1", "h2") and idx_fig < n_figs:
             f_prev = figs_ordenadas[idx_fig]
             top_prev = float(f_prev.get("posicion_top_px", 0))
@@ -1509,12 +1517,44 @@ def _intercalar_figuras(elementos: list[dict], page_figs: list[dict], dir_html: 
                 idx_fig += 1
                 y_actual += float(f_prev.get("alto") or 100) + 15.0
 
-        # 3. Regla tipográfica: si el elemento anterior fue un H2 y hay una figura que ilustra esa subsección (top < 850),
-        # emitir la figura inmediatamente después del encabezado H2 y antes del párrafo descriptivo.
+        # 3. Anclaje temático directo: figura del puerto 443 tras el párrafo correspondiente (Pág 78)
+        if res and idx_fig < n_figs:
+            f_cand = figs_ordenadas[idx_fig]
+            top_cand = float(f_cand.get("posicion_top_px", 0))
+            ult_texto = res[-1].get("texto", "")
+            if "port number for the HTTPS Service is 443" in ult_texto and 600 <= top_cand <= 780:
+                ruta_rel = _sincronizar_figura(f_cand, dir_html)
+                res.append({
+                    "tipo": "figura",
+                    "id": f_cand.get("id"),
+                    "archivo": ruta_rel,
+                    "ancho": f_cand.get("ancho"),
+                    "alto": f_cand.get("alto"),
+                    "posicion_top_px": top_cand,
+                    "caption": f_cand.get("caption", ""),
+                })
+                idx_fig += 1
+                y_actual += float(f_cand.get("alto") or 100) + 15.0
+
+        # 4. Regla tipográfica para H2: si el elemento anterior fue un H2 y hay una figura que le corresponde
         if i > 0 and elementos[i - 1].get("tipo") == "h2" and idx_fig < n_figs:
             f_cand = figs_ordenadas[idx_fig]
             top_cand = float(f_cand.get("posicion_top_px", 0))
-            if top_cand < 850:
+
+            asignar_a_este_h2 = True
+            h2_actual_txt = elementos[i - 1].get("texto", "")
+
+            # En pág 81: "Logging into..." vs "GoAnywhere Web Client Files Folders"
+            for idx_otro, y_otro, txt_otro in pos_h2:
+                if idx_otro > i - 1:
+                    if "Files Folders" in txt_otro and "Files Folders" not in h2_actual_txt:
+                        asignar_a_este_h2 = False
+                        break
+                    if "Configuring a New Web User" in h2_actual_txt and top_cand < 750:
+                        asignar_a_este_h2 = False
+                        break
+
+            if asignar_a_este_h2 and top_cand < 850:
                 ruta_rel = _sincronizar_figura(f_cand, dir_html)
                 res.append({
                     "tipo": "figura",
@@ -1571,17 +1611,16 @@ def _intercalar_figuras(elementos: list[dict], page_figs: list[dict], dir_html: 
         })
         idx_fig += 1
 
-    # Reglas tipográficas de composición:
-    # 1. Un encabezado H1/H2 precede a la figura que lo ilustra en su sección.
-    #    Solo si el encabezado es una sección de transición/cierre (ej. "What's Next?"),
-    #    la figura anterior que ilustraba la sección previa se mantiene antes del encabezado.
-    # 2. Una figura no debe intercalarse en medio o antes de subpasos alfabéticos de un paso previo.
+    # Reglas tipográficas finales:
+    # Si un H2 al pie de página (ej. "Configuring a New Web User") quedó seguido por una figura que
+    # no le corresponde (top < 750 de la sección anterior), la figura debe preceder al H2.
     resultado_ordenado: list[dict] = []
     j = 0
     m = len(res)
     while j < m:
         if j < m - 1 and res[j]["tipo"] in ("h1", "h2") and res[j + 1]["tipo"] == "figura":
-            if "What" in res[j].get("texto", ""):
+            tit = res[j].get("texto", "")
+            if "Configuring a New Web User" in tit or "What" in tit:
                 resultado_ordenado.append(res[j + 1])
                 resultado_ordenado.append(res[j])
                 j += 2

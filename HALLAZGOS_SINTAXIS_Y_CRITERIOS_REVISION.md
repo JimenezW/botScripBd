@@ -373,6 +373,10 @@ Antes de dar por aceptada una corrida masiva de páginas (ej. páginas 101 a 500
   * Si una figura de gran tamaño (`alto >= 300px`, `top <= 120px`) ocupa la mitad superior de la página y precede al texto (ej. pág 75: pantalla `Edit Web User`), debe emitirse al inicio de la página ANTES del encabezado H1/H2.
 - [ ] **22. Detección de Pasos Numerados Aislados en OCR:**
   * Si un número de paso aparece solo en su línea (`2.` o `3.`), debe ser reconocido como `.content-step` con su `.step-marker` junto con las líneas subsiguientes y no degradarse a párrafo `<p class="content-p">`.
+- [ ] **23. Anclaje Temático de Figuras y Alineación Canónica a la Izquierda:**
+  * **Anclaje a Párrafos Específicos:** Cuando una figura ilustra un ajuste descrito en un párrafo previo (ej. pág 78: cuadro de configuración con `Port: 443`), la figura debe insertarse inmediatamente después de dicho párrafo y ANTES de subtítulos H2 de nuevas secciones al pie de página (`Configuring a New Web User`).
+  * **Discriminación Contextual entre Múltiples H2:** Cuando una página contiene múltiples encabezados H2 (ej. pág 81: `Logging into the GoAnywhere Web Client` y `GoAnywhere Web Client Files Folders`), una figura no debe ser absorbida a ciegas por el primer H2 si su posición vertical (`top_px`) o temática corresponde al segundo H2.
+  * **Alineación Editorial:** Todas las figuras técnicas de `.doc-figure` deben alinearse al margen izquierdo (`margin: 14px 0 16px 0; text-align: left;`) respetando la geometría original de Scribd (`left: 121-122px`) y evitando el centrado horizontal artificial en figuras de tamaño reducido (ej. pág 79: cuadro `Password Generation`).
 
 ---
 
