@@ -454,7 +454,8 @@ def main():
                         src_f = Path(f_item["archivo_absoluto"])
                         dst_f = reporte_fig_dir / src_f.name
                         dst_f.write_bytes(src_f.read_bytes())
-            elif str(p_num) in catalogo["paginas"] and args.pagina:
+            elif str(p_num) in catalogo["paginas"]:
+                # Si una página ya no contiene figuras válidas, eliminarla del catálogo
                 del catalogo["paginas"][str(p_num)]
 
             progress.advance(task)

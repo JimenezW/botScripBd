@@ -1,5 +1,5 @@
 {
-  "total_figuras": 59,
+  "total_figuras": 48,
   "paginas": {
     "39": [
       {
@@ -85,62 +85,6 @@
         "alto": 289,
         "posicion_top_px": 651,
         "posicion_left_px": 121
-      }
-    ],
-    "50": [
-      {
-        "id": "fig_0050_1",
-        "archivo": "figuras/fig_p0050_1.png",
-        "ancho": 688,
-        "alto": 92,
-        "posicion_top_px": 248,
-        "posicion_left_px": 121
-      }
-    ],
-    "51": [
-      {
-        "id": "fig_0051_1",
-        "archivo": "figuras/fig_p0051_1.png",
-        "ancho": 302,
-        "alto": 37,
-        "posicion_top_px": 434,
-        "posicion_left_px": 336
-      },
-      {
-        "id": "fig_0051_2",
-        "archivo": "figuras/fig_p0051_2.png",
-        "ancho": 196,
-        "alto": 64,
-        "posicion_top_px": 827,
-        "posicion_left_px": 575
-      }
-    ],
-    "53": [
-      {
-        "id": "fig_0053_1",
-        "archivo": "figuras/fig_p0053_1.png",
-        "ancho": 191,
-        "alto": 60,
-        "posicion_top_px": 113,
-        "posicion_left_px": 584
-      }
-    ],
-    "54": [
-      {
-        "id": "fig_0054_1",
-        "archivo": "figuras/fig_p0054_1.png",
-        "ancho": 358,
-        "alto": 73,
-        "posicion_top_px": 243,
-        "posicion_left_px": 266
-      },
-      {
-        "id": "fig_0054_2",
-        "archivo": "figuras/fig_p0054_2.png",
-        "ancho": 687,
-        "alto": 147,
-        "posicion_top_px": 359,
-        "posicion_left_px": 122
       }
     ],
     "55": [
@@ -232,16 +176,6 @@
         "posicion_left_px": 122
       }
     ],
-    "59": [
-      {
-        "id": "fig_0059_1",
-        "archivo": "figuras/fig_p0059_1.png",
-        "ancho": 170,
-        "alto": 38,
-        "posicion_top_px": 147,
-        "posicion_left_px": 165
-      }
-    ],
     "61": [
       {
         "id": "fig_0061_1",
@@ -302,16 +236,6 @@
         "alto": 281,
         "posicion_top_px": 269,
         "posicion_left_px": 166
-      }
-    ],
-    "67": [
-      {
-        "id": "fig_0067_1",
-        "archivo": "figuras/fig_p0067_1.png",
-        "ancho": 231,
-        "alto": 37,
-        "posicion_top_px": 372,
-        "posicion_left_px": 457
       }
     ],
     "69": [
@@ -435,34 +359,6 @@
         "ancho": 693,
         "alto": 177,
         "posicion_top_px": 623,
-        "posicion_left_px": 121
-      }
-    ],
-    "82": [
-      {
-        "id": "fig_0082_1",
-        "archivo": "figuras/fig_p0082_1.png",
-        "ancho": 285,
-        "alto": 37,
-        "posicion_top_px": 454,
-        "posicion_left_px": 424
-      }
-    ],
-    "83": [
-      {
-        "id": "fig_0083_1",
-        "archivo": "figuras/fig_p0083_1.png",
-        "ancho": 316,
-        "alto": 57,
-        "posicion_top_px": 284,
-        "posicion_left_px": 120
-      },
-      {
-        "id": "fig_0083_2",
-        "archivo": "figuras/fig_p0083_2.png",
-        "ancho": 375,
-        "alto": 57,
-        "posicion_top_px": 884,
         "posicion_left_px": 121
       }
     ],
