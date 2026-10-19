@@ -645,6 +645,9 @@
       color: #1a1a1a;
       margin: 0 0 7px 10px;
     }
+    .content-step--sub {
+      margin: 0 0 5px 26px;
+    }
     .content-tip {
       background-color: #f7f9fa;
       border-left: 3.5pt solid #005f73;
@@ -843,6 +846,8 @@
             </div>
           {% elif elem.tipo == "numero" %}
             <p class="content-step">{{ elem.texto | safe }}</p>
+          {% elif elem.tipo == "subpaso" %}
+            <p class="content-step content-step--sub">{{ elem.texto | safe }}</p>
           {% elif elem.tipo == "tip" %}
             <div class="content-tip">
               <strong class="tip-label">TIP:</strong>

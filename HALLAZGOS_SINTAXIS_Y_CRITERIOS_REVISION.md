@@ -159,6 +159,28 @@ Durante el análisis y compilación de las páginas 1 a 100 se identificaron dis
 
 ---
 
+### Criterio 11: Integridad de Callouts Multi-Capa (TIP, WARNING, NOTE) y Enlaces Web
+* **Descripción:** En Scribd, los bloques destacados (`TIP:`, `WARNING:`, `NOTE:`) con fondos coloreados o decoraciones a menudo dividen la página en múltiples capas `.text_layer` con diferentes `z-index` (ej. `z-index: 2` para viñetas y rótulo del callout; `z-index: 4` para el cuerpo del callout y el pie de página). Si la extracción de la página no concatena secuencialmente todos los `text_layer`, el callout resulta mutilado o vacío en el HTML compilado.
+* **Hallazgos Reales Encontrados:**
+  * **Página 54:** El bloque `<div class="content-tip">` solo contenía el rótulo `"TIP:"` mientras que la explicación (*"Fortra offers a production go-live review of your GoAnywhere system..."*) y el enlace oficial residían en la segunda capa (`z-index: 4`).
+  * **Fragmentación de Enlaces y Cierre:** La frase de cierre venía descompuesta en los spans `'fo'`, `'r more infor'`, `'mation.'`, y las viñetas precedentes duplicaban puntos `..` por glifos sueltos `'.'`.
+* **Criterios Normativos de Calidad:**
+  1. **Concatenación Obligatoria Multi-Capa:** La extracción en `paginas.json` debe procesar todos los `text_layer` de la página para que ningún bloque callout quede huérfano.
+  2. **Desfragmentación de Vocablos de Asistencia:** Recomponer `"fo r more"` $\rightarrow$ `"for more"` e `"infor mation"` $\rightarrow$ `"information"`.
+  3. **Enriquecimiento de URLs:** Las URLs en callouts (ej. `https://www.goanywhere.com/...`) deben convertirse en etiquetas `<a>` interactivas con clase `.doc-link` abriendo en nueva pestaña (`target="_blank"`).
+  4. **Supresión de Doble Puntuación:** Eliminar dobles puntos accidentales `\.{2,}` producidos al anexar puntos aislados de Scribd a oraciones ya cerradas.
+
+---
+
+### Criterio 12: Subpasos Alfabéticos, Cierre de Pasos en Dos Puntos y Jerarquía H1/H2 por TOC
+* **Descripción:** En páginas de tutoriales o procedimientos guiados (ej. página 55):
+  1. **Jerarquía H1/H2 en Páginas Multi-Tema:** Cuando una página inicia una sección mayor (`Creating Your First Project`) y contiene múltiples temas del TOC subsecuentes (`Creating a Project`, `Building the Project`, `The Timestamp Task`), el compilador no debe generar múltiples etiquetas `<h1>`. Solo el tema principal que abre la página es `<h1>`; todos los demás temas secundarios del TOC en esa misma página deben clasificarse semánticamente como `<h2>`.
+  2. **Delimitación de Pasos con Dos Puntos (`:`):** Pasos numerados introductorios que terminan en dos puntos `:` (ej. `"3. In the Create Project window, specify the following fields:"`) deben cerrar su bloque de inmediato y no absorber la letra del subpaso siguiente (`'a.'`).
+  3. **Identificación de Subpasos Alfabéticos:** Líneas con formato `^[a-z]\.\s*` (ej. `a. Project Name - Give the Project a name.`) deben tipificarse como `subpaso` y renderizarse con sangría específica (`.content-step--sub`).
+  4. **Regla de Posposición de Figuras ante Subpasos:** Si una figura tiene una coordenada vertical que cae en medio o antes de una lista de subpasos alfabéticos que ilustran sus campos, la figura debe posponerse automáticamente para ubicarse justo después del último subpaso consecutivo (`subpaso b.`) y antes del siguiente paso numerado (`paso 4.`).
+
+---
+
 ## 3. Matriz Comparativa: Antes vs. Después
 
 | Caso | Entrada en `paginas.json` | Antes (Sin regla) | Después (Con Desfragmentación) |
@@ -183,6 +205,12 @@ Durante el análisis y compilación de las páginas 1 a 100 se identificaron dis
 | **Protocolo WebDAV** | `['W', 'ebDAV directories']` | `"W ebDAV directories"` | `"WebDAV directories"` |
 | **Duplicación Spans** | `['basic auth against a', 'ba', 'sic auth against a']` | `"basic auth... ba sic auth..."` | `"basic auth against a"` (sin repetición) |
 | **Fragmento Huérfano** | `['Agent service...', 'Agen', 't service...']` | `<h2>Agen</h2><p>t service...</p>` | Viñeta completa integrada |
+| **Callout Mutilado (Pág 54)** | `['TIP:']` (sin capa 2) | `<div class="content-tip">TIP:</div>` | Callout completo con cuerpo y enlace activo |
+| **Filtro IP pegado** | `['using the IPFilter and']` | `"using the IPFilter and"` | `"using the IP Filter and"` |
+| **Frase de Cierre TIP** | `['fo', 'r more infor', 'mation.']` | `"fo r more infor mation."` | `"for more information."` |
+| **Crear Proyecto Pegado** | `['click the', 'CreateaProject', 'link']` | `"click the CreateaProject link"` | `"click the Create a Project link"` |
+| **Subpasos Mutilados (Pág 55)** | `['fields:', 'a.', 'ProjectName', '- Give...']` | Paso 3 absorbe `'a.'` y crea falso `<h2>` | `a. Project Name - Give the Project a name.` identado |
+| **Multi-H1 en Página (Pág 55)** | 4 temas de TOC en página 55 | 4 títulos `<h1 class="content-h1">` | 1 `<h1>` (tema mayor) y 3 `<h2>` (secciones) |
 
 ---
 
@@ -213,10 +241,20 @@ Antes de dar por aceptada una corrida masiva de páginas (ej. páginas 101 a 500
   * Las figuras deben posicionarse en el flujo HTML según su coordenada `posicion_top_px` relativa al párrafo correspondiente.
   * Ninguna figura debe contener texto circundante mutilado o fondos tintados de callouts.
   * Los archivos en `reporte/.../figuras/` deben corresponder únicamente a imágenes activas referenciadas en el HTML.
+  * Ninguna figura debe quedar insertada en medio de una secuencia de subpasos alfabéticos (`a.`, `b.`).
 - [ ] **8. Supresión de Duplicados Multi-Capa:**
   * 0 apariciones de duplicaciones por desglose de spans (`ba sic`, `dmi n`, etc.).
 - [ ] **9. Integridad de Encabezados H2:**
   * Ningún elemento `<h2>` con menos de 6 caracteres (ej. no debe haber `<h2>Agen</h2>`, `<h2>FT</h2>`).
+- [ ] **10. Integridad de Callouts (TIP / WARNING / NOTE):**
+  * Ningún bloque callout vacío (`<div class="content-tip">` o similar que solo contenga el label sin contenido).
+  * Enlaces URL dentro de callouts correctamente enriquecidos con clase `doc-link`.
+  * 0 apariciones de dobles puntos `..` generados por glifos sueltos.
+- [ ] **11. Jerarquía de Títulos por Página:**
+  * Máximo un único `<h1 class="content-h1">` por página de contenido. Temas adicionales del TOC en la misma página deben ser `<h2 class="content-h2">`.
+- [ ] **12. Integridad de Pasos y Subpasos:**
+  * Ningún paso numerado terminado en `:` debe absorber la letra de un subpaso siguiente (`a.`).
+  * Los subpasos alfabéticos deben mantener su formato `a. [Título] - [Descripción]` con sangría CSS `.content-step--sub`.
 
 ---
 

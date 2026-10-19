@@ -590,6 +590,16 @@ RE_PATRONES_DESFRAGMENTACION: list[tuple[re.Pattern, str]] = [
     (re.compile(r'\bGetLicense\b', re.I), 'Get License'),
     (re.compile(r'\bf\s+ormat\s+f\s+ormat\b', re.I), 'format'),
     (re.compile(r'\bf\s+ormat\b', re.I), 'format'),
+    (re.compile(r'\bfo\s+r\s+more\b', re.I), 'for more'),
+    (re.compile(r'\bfo\s+r\b', re.I), 'for'),
+    (re.compile(r'\bIn\s*for\s*mation\b', re.I), 'Information'),
+    (re.compile(r'\bin\s*for\s*mation\b', re.I), 'information'),
+    (re.compile(r'\bIPFilter\b', re.I), 'IP Filter'),
+    (re.compile(r'\bPCI-DSSAudit\b', re.I), 'PCI-DSS Audit'),
+    (re.compile(r'\bCreateaProject\b', re.I), 'Create a Project'),
+    (re.compile(r'\bCreatea\s*Project\b', re.I), 'Create a Project'),
+    (re.compile(r'\bProjectName\b', re.I), 'Project Name'),
+    (re.compile(r'\bProjectDescription\b', re.I), 'Project Description'),
 ]
 
 # Palabras objetivo para la heurística de letras desprendidas
@@ -597,7 +607,8 @@ _PALABRAS_HEURISTICA = {
     'the', 'to', 'passwords', 'password', 'features', 'feature', 'partners', 'partner',
     'have', 'that', 'this', 'with', 'from', 'agent', 'agents', 'execute', 'executed',
     'executing', 'create', 'created', 'delete', 'update', 'start', 'history', 'system',
-    'resource', 'server', 'service', 'submitted', 'unauthorized', 'organize', 'wizard'
+    'resource', 'server', 'service', 'submitted', 'unauthorized', 'organize', 'wizard',
+    'information'
 }
 
 
@@ -638,6 +649,8 @@ def _reparar_palabras_rotas(texto: str) -> str:
     # 4. Normalizar casos de protocolos y puntuación espaciada
     res = re.sub(r'\[protocol\]:\s*//', '[protocol]://', res)
     res = re.sub(r'\s+([.,;:!?])', r'\1', res)
+    # 5. Normalizar duplicación accidental de puntos consecutivos
+    res = re.sub(r'\.{2,}', '.', res)
     return res
 
 
@@ -1095,8 +1108,10 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
 
         norm_l = re.sub(r'[^a-zA-Z0-9]', '', l).lower()
         if norm_l in temas_esta_pag:
-            tit_h1 = temas_esta_pag.pop(norm_l)
-            elementos.append({"tipo": "h1", "texto": tit_h1})
+            tit = temas_esta_pag.pop(norm_l)
+            ya_hay_h1 = any(e.get("tipo") == "h1" for e in elementos)
+            tipo_tit = "h2" if ya_hay_h1 else "h1"
+            elementos.append({"tipo": tipo_tit, "texto": tit})
             i += 1
             continue
 
@@ -1104,7 +1119,7 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
         if l == 'l':
             i += 1
             buf_bullet = []
-            while i < n and lineas[i].strip() != 'l' and not re.match(r'^\d+\.\s', lineas[i].strip()) and not lineas[i].strip().startswith(('TIP:', 'WARNING:', 'NOTE:')):
+            while i < n and lineas[i].strip() != 'l' and not re.match(r'^\d+\.\s', lineas[i].strip()) and not re.match(r'^[a-z]\.\s*', lineas[i].strip()) and not lineas[i].strip().startswith(('TIP:', 'WARNING:', 'NOTE:')):
                 item = lineas[i].strip()
                 norm_item = re.sub(r'[^a-zA-Z0-9]', '', item).lower()
                 if norm_item in temas_esta_pag:
@@ -1123,14 +1138,16 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
         if re.match(r'^\d+\.\s', l):
             buf_num = [l]
             i += 1
-            if not l.endswith('.'):
-                while i < n and not re.match(r'^\d+\.\s', lineas[i].strip()) and lineas[i].strip() != 'l' and not lineas[i].strip().startswith(('TIP:', 'WARNING:', 'NOTE:')):
-                    item = lineas[i].strip()
-                    norm_item = re.sub(r'[^a-zA-Z0-9]', '', item).lower()
-                    if norm_item in temas_esta_pag:
+            if not l.endswith(('.', ':')):
+                while i < n:
+                    sig = lineas[i].strip()
+                    if sig == 'l' or re.match(r'^\d+\.\s', sig) or re.match(r'^[a-z]\.\s*', sig) or (len(sig) == 2 and sig[0].islower() and sig[1] == '.') or sig.startswith(('TIP:', 'WARNING:', 'NOTE:')):
                         break
-                    buf_num.append(item)
-                    if item.endswith('.'):
+                    norm_sig = re.sub(r'[^a-zA-Z0-9]', '', sig).lower()
+                    if norm_sig in temas_esta_pag:
+                        break
+                    buf_num.append(sig)
+                    if sig.endswith('.'):
                         i += 1
                         break
                     i += 1
@@ -1138,12 +1155,32 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
             elementos.append({"tipo": "numero", "texto": txt})
             continue
 
+        # Subpasos alfabéticos (a. , b. , etc.)
+        if re.match(r'^[a-z]\.\s*', l) or (len(l) == 2 and l[0].islower() and l[1] == '.'):
+            buf_sub = [l]
+            i += 1
+            while i < n:
+                sig = lineas[i].strip()
+                if sig == 'l' or re.match(r'^\d+\.\s', sig) or re.match(r'^[a-z]\.\s*', sig) or (len(sig) == 2 and sig[0].islower() and sig[1] == '.') or sig.startswith(('TIP:', 'WARNING:', 'NOTE:')):
+                    break
+                norm_sig = re.sub(r'[^a-zA-Z0-9]', '', sig).lower()
+                if norm_sig in temas_esta_pag:
+                    break
+                buf_sub.append(sig)
+                if sig.endswith('.'):
+                    i += 1
+                    break
+                i += 1
+            txt = _enriquecer_links(_reparar_palabras_rotas(re.sub(r'\s+', ' ', " ".join(buf_sub))))
+            elementos.append({"tipo": "subpaso", "texto": txt})
+            continue
+
         # Bloques WARNING / TIP / NOTE
         if l.startswith(('WARNING:', 'TIP:', 'NOTE:')) or l in ('WARNING:', 'TIP:', 'NOTE:'):
             es_warning = l.startswith('WARNING:') or l == 'WARNING:'
             buf_callout = [l]
             i += 1
-            while i < n and not re.match(r'^\d+\.\s', lineas[i].strip()) and lineas[i].strip() != 'l' and not lineas[i].strip().startswith(('TIP:', 'WARNING:', 'NOTE:')):
+            while i < n and not re.match(r'^\d+\.\s', lineas[i].strip()) and not re.match(r'^[a-z]\.\s*', lineas[i].strip()) and lineas[i].strip() != 'l' and not lineas[i].strip().startswith(('TIP:', 'WARNING:', 'NOTE:')):
                 item = lineas[i].strip()
                 norm_item = re.sub(r'[^a-zA-Z0-9]', '', item).lower()
                 if norm_item in temas_esta_pag:
@@ -1181,7 +1218,7 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
         # Párrafos de texto continuo
         buf_p = [l]
         i += 1
-        while i < n and lineas[i].strip() != 'l' and not re.match(r'^\d+\.\s', lineas[i].strip()) and not lineas[i].strip().startswith(('TIP:', 'WARNING:', 'NOTE:')):
+        while i < n and lineas[i].strip() != 'l' and not re.match(r'^\d+\.\s', lineas[i].strip()) and not re.match(r'^[a-z]\.\s*', lineas[i].strip()) and not (len(lineas[i].strip()) == 2 and lineas[i].strip()[0].islower() and lineas[i].strip()[1] == '.') and not lineas[i].strip().startswith(('TIP:', 'WARNING:', 'NOTE:')):
             sig = lineas[i].strip()
             norm_sig = re.sub(r'[^a-zA-Z0-9]', '', sig).lower()
             if norm_sig in temas_esta_pag:
@@ -1288,7 +1325,7 @@ def _intercalar_figuras(elementos: list[dict], page_figs: list[dict], dir_html: 
             h = 45.0
         elif t in ("tip", "warning"):
             h = 50.0 + n_lin * 22.0
-        elif t in ("bullet", "numero"):
+        elif t in ("bullet", "numero", "subpaso"):
             h = 10.0 + n_lin * 26.0
         else:
             h = 10.0 + n_lin * 25.0
@@ -1340,7 +1377,9 @@ def _intercalar_figuras(elementos: list[dict], page_figs: list[dict], dir_html: 
         })
         idx_fig += 1
 
-    # Regla tipográfica: una figura no debe intercalarse entre un encabezado H1/H2 y su primer contenido
+    # Reglas tipográficas de composición:
+    # 1. Una figura no debe intercalarse entre un encabezado H1/H2 y su primer contenido
+    # 2. Una figura no debe intercalarse en medio o antes de subpasos alfabéticos de un paso previo
     resultado_ordenado: list[dict] = []
     j = 0
     m = len(res)
@@ -1349,9 +1388,17 @@ def _intercalar_figuras(elementos: list[dict], page_figs: list[dict], dir_html: 
             resultado_ordenado.append(res[j + 1])
             resultado_ordenado.append(res[j])
             j += 2
-        else:
+            continue
+        if res[j]["tipo"] == "figura" and j + 1 < m and res[j + 1]["tipo"] == "subpaso":
+            k = j + 1
+            while k < m and res[k]["tipo"] == "subpaso":
+                resultado_ordenado.append(res[k])
+                k += 1
             resultado_ordenado.append(res[j])
-            j += 1
+            j = k
+            continue
+        resultado_ordenado.append(res[j])
+        j += 1
 
     return resultado_ordenado
 
