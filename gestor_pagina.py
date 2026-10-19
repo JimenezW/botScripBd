@@ -255,7 +255,7 @@ def extraer_figuras_pagina_gestor(num_pagina: int, origen: Path, insumo_dir: Pat
             p_num=num_pagina,
             origen=out_dir,
             insumo_arg=insumo_dir,
-            mirror_reporte=False
+            mirror_reporte=True
         )
         print(f"\n{'='*75}")
         print(f" FIGURAS EXTRAÍDAS · PÁGINA {num_pagina} ({len(figs)} figuras detectadas)")

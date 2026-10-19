@@ -348,8 +348,8 @@ def procesar_pagina_figuras(
         elem_left = float(left_m.group(1)) if left_m else 0.0
         abs_left = elem_left + c_left
 
-        # 1. Supresión de cabeceras superiores repetitivas
-        if abs_top < 90 and cw > 650:
+        # 1. Supresión de cabeceras superiores repetitivas (solo líneas/franjas delgadas)
+        if abs_top < 90 and cw > 650 and ch <= 55:
             continue
 
         # 2. Supresión de iconos y glifos diminutos

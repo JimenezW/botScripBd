@@ -213,6 +213,31 @@ Durante el análisis y compilación de las páginas 1 a 100 se identificaron dis
 
 ---
 
+### Criterio 15: Discriminación de Cabeceras Repetitivas vs. Figuras UI de Gran Altura en Top
+* **Descripción:** En `extractor_figuras.py`, una regla descartaba imágenes con `abs_top < 90 and cw > 650`, asumiendo que eran franjas decorativas o cabeceras repetitivas. Esto provocaba que figuras legítimas de formularios UI que inician en la parte superior de la página (ej. la ventana "Add Web User" de la página 63, con `cw = 758px` y `ch = 433px`) fueran omitidas por completo del catálogo `figuras_paginas.json`.
+* **Hallazgos Reales Encontrados (Página 63):**
+  * La página 63 tiene 2 figuras claramente visibles:
+    1. `fig_0063_1` (`top_px: 103`, 693x368 px): formulario completo "Add Web User" con pestañas y campos.
+    2. `fig_0063_2` (`top_px: 929`, 449x99 px): panel "Password Generation" bajo Authentication Credentials.
+  * Por el filtro ciego de ancho y top, `fig_0063_1` se descartaba silenciosamente, dejando el reporte HTML con una sola figura.
+* **Criterios Normativos de Calidad:**
+  1. **Acotamiento por Altura de Cabecera:** La supresión de cabeceras superiores repetitivas debe restringirse únicamente a elementos con altura delgada: `if abs_top < 90 and cw > 650 and ch <= 55: continue`.
+  2. **Sincronización Espejo:** Asegurar que `extraer_figuras_pagina_gestor` ejecute siempre con `mirror_reporte=True` para actualizar simultáneamente `output/` y `reporte/`.
+
+---
+
+### Criterio 16: Delimitación de Subtítulos H2 tras Listas Cerradas y Preservación de Figuras de Cierre
+* **Descripción:** 
+  1. Si un ítem de lista numerada no termina en punto ortográfico (ej. `"4. Permission to upload files"`), no debe absorber la línea siguiente si el paso actual ya es una cláusula completa y la siguiente línea corresponde a un subtítulo (`"UserName"`).
+  2. `es_cierre_previo` en la detección de subtítulos `<h2>` debe considerar como cierre válido cuando el elemento precedente es una lista (`numero`, `subpaso`, `bullet`, `figura`), permitiendo que el subtítulo no se convierta en texto de párrafo ordinario.
+  3. Figuras ubicadas en la parte inferior de la página (`top_px >= 850`) que ilustran a un subtítulo final (ej. `Password Generation` bajo `Authentication Credentials`) no deben invertirse hacia arriba del título.
+* **Criterios Normativos de Calidad:**
+  1. **Corte Seguro de Pasos:** `sig_es_sub` evalúa si el paso actual concluye sintácticamente y corta la acumulación ante nombres propios o títulos.
+  2. **Cierre Semántico de Listas:** Un elemento `numero` o `bullet` habilita inmediatamente la evaluación de `<h2>` para la siguiente línea.
+  3. **Preservación de Figuras de Cierre:** Figuras con `top_px >= 850` permanecen después del `H2` introductorio.
+
+---
+
 ## 3. Matriz Comparativa: Antes vs. Después
 
 | Caso | Entrada en `paginas.json` | Antes (Sin regla) | Después (Con Desfragmentación) |
@@ -246,6 +271,9 @@ Durante el análisis y compilación de las páginas 1 a 100 se identificaron dis
 | **Amontonamiento Figuras (Pág 57)** | 4 figuras con pasos breves | Figs 2, 3 y 4 al final de página | Cada figura tras su paso respectivo (Paso 3 $\rightarrow$ Fig 2, Paso 4 $\rightarrow$ Fig 3) |
 | **Falso H1 por 'Click the' (Pág 58)** | `['Click the', 'Execute', 'button...']` | `<h1>Click the</h1>` y figura al inicio | Párrafo continuo `"Click the Execute button..."` con figura de notificación debajo |
 | **Comando Ver Log (Pág 58)** | `['Click', 'ViewJobLog', 'to review...']` | `"Click ViewJobLog to review..."` | `"Click View Job Log to review..."` |
+| **Figura Superior Omitida (Pág 63)** | Formulario "Add Web User" (top=103, h=433) | Descartada por `abs_top < 90` | Extraída limpiamente como `fig_0063_1` (693x368px) al inicio de página |
+| **Subtítulo Tras Lista (Pág 63)** | `['4. Permission to upload files', 'UserName']` | Paso 4 absorbe `UserName` y párrafo | Paso 4 cerrado y `<h2>User Name</h2>` independiente |
+| **Figura al Pie (Pág 63)** | `AuthenticationCredentials` y `fig_0063_2` | Figura invertida arriba del subtítulo | `<h2>Authentication Credentials</h2>` seguido de figura `Password Generation` |
 
 ---
 
@@ -295,6 +323,11 @@ Antes de dar por aceptada una corrida masiva de páginas (ej. páginas 101 a 500
 - [ ] **14. Supresión de Falsos H1 por Frases de Acción:**
   * 0 apariciones de encabezados `<h1>` o `<h2>` con frases verbales procesales (`Click the`, `Select the`, `Navigate to`, `Expand the`, etc.) al inicio de páginas continuas.
   * Toda instrucción de acción debe renderizarse como párrafo `<p class="content-p">` con su figura correspondiente ubicada debajo.
+- [ ] **15. Figuras UI Superiores vs. Cabeceras:**
+  * Ninguna figura rectangular con `ch > 60px` debe descartarse por residir en la parte superior (`abs_top < 90`).
+- [ ] **16. Subtítulos tras Listas y Figuras al Pie:**
+  * Los subtítulos que siguen a listas no deben fusionarse con el paso anterior.
+  * Figuras con `top_px >= 850` deben colocarse siempre debajo de su encabezado introductorio.
 
 ---
 

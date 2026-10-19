@@ -604,6 +604,8 @@ RE_PATRONES_DESFRAGMENTACION: list[tuple[re.Pattern, str]] = [
     (re.compile(r'\bViewJobLog\b', re.I), 'View Job Log'),
     (re.compile(r'\boutput\s*\.\s*txt\b', re.I), 'output .txt'),
     (re.compile(r'\ba\s*\.\s*txt\b', re.I), 'a .txt'),
+    (re.compile(r'\bUserName\b', re.I), 'User Name'),
+    (re.compile(r'\bAuthenticationCredentials\b', re.I), 'Authentication Credentials'),
 ]
 
 # Palabras objetivo para la heurística de letras desprendidas
@@ -1150,6 +1152,17 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
                     norm_sig = re.sub(r'[^a-zA-Z0-9]', '', sig).lower()
                     if norm_sig in temas_esta_pag:
                         break
+                    actual_incompleto = bool(re.search(r'\b(the|a|an|of|to|in|for|from|with|by|and|or)\s*$', buf_num[-1], re.I))
+                    sig_es_sub = (
+                        not actual_incompleto
+                        and 4 <= len(sig) < 45
+                        and not sig.endswith(('.', ',', ';', ':'))
+                        and not bool(re.match(r'^(for|where|and|or|with|to|in|of|on|at|by|from|the|a|an)\b', sig, re.I))
+                        and not bool(re.match(r'^(click|the|to|if|when|from|select|in|for|and|expand|navigate|run|set|build)\b', sig, re.I))
+                        and re.match(r'^[A-Z][a-zA-Z0-9\s]+$', sig)
+                    )
+                    if sig_es_sub:
+                        break
                     buf_num.append(sig)
                     if sig.endswith('.'):
                         i += 1
@@ -1206,9 +1219,13 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
             i += 1
             continue
 
-        # Subtítulo (h2) real: debe venir precedido de fin de oración, longitud mínima de 6 caracteres
+        # Subtítulo (h2) real: debe venir precedido de fin de oración o cierre de lista/bloque
         prev_texto = elementos[-1].get("texto", "") if elementos else ""
-        es_cierre_previo = not prev_texto or prev_texto.endswith(('.', '!', '?', ':', '</div>', '</p>'))
+        es_cierre_previo = (
+            not prev_texto
+            or prev_texto.endswith(('.', '!', '?', ':', '</div>', '</p>'))
+            or (elementos and elementos[-1].get("tipo") in ("numero", "subpaso", "bullet", "figura"))
+        )
         es_url = l.startswith(('http://', 'https://')) or '//' in l
         es_prep = bool(re.match(r'^(for|where|and|or|with|to|in|of|on|at|by|from|the|a|an)\b', l, re.I))
 
@@ -1352,6 +1369,8 @@ def _intercalar_figuras(elementos: list[dict], page_figs: list[dict], dir_html: 
             top_px = float(f.get("posicion_top_px", 0))
             if i == 0 and e.get("tipo") == "h1" and top_px >= 90:
                 break
+            if e.get("tipo") in ("h1", "h2") and top_px >= 850:
+                break
             if top_px <= corte:
                 ruta_rel = _sincronizar_figura(f, dir_html)
                 res.append({
@@ -1386,13 +1405,20 @@ def _intercalar_figuras(elementos: list[dict], page_figs: list[dict], dir_html: 
         idx_fig += 1
 
     # Reglas tipográficas de composición:
-    # 1. Una figura no debe intercalarse entre un encabezado H1/H2 y su primer contenido
-    # 2. Una figura no debe intercalarse en medio o antes de subpasos alfabéticos de un paso previo
+    # 1. Una figura no debe intercalarse entre un encabezado H1/H2 y su primer contenido,
+    #    a menos que el encabezado introduzca la figura al pie de página (ej. Authentication Credentials).
+    # 2. Una figura no debe intercalarse en medio o antes de subpasos alfabéticos de un paso previo.
     resultado_ordenado: list[dict] = []
     j = 0
     m = len(res)
     while j < m:
         if j < m - 1 and res[j]["tipo"] in ("h1", "h2") and res[j + 1]["tipo"] == "figura":
+            fig_top = float(res[j + 1].get("posicion_top_px") or 0)
+            if fig_top >= 800 and "What" not in res[j].get("texto", ""):
+                resultado_ordenado.append(res[j])
+                resultado_ordenado.append(res[j + 1])
+                j += 2
+                continue
             resultado_ordenado.append(res[j + 1])
             resultado_ordenado.append(res[j])
             j += 2
