@@ -656,6 +656,9 @@ RE_PATRONES_DESFRAGMENTACION: list[tuple[re.Pattern, str]] = [
     (re.compile(r'\bAdda\b', re.I), 'Add a'),
     (re.compile(r'\bSSHKeys\b', re.I), 'SSH Keys'),
     (re.compile(r'\bTradingPartner\b', re.I), 'Trading Partner'),
+    (re.compile(r'SFTP\s*-\s*SSHFileTransferProtocol', re.I), 'SFTP - SSH File Transfer Protocol'),
+    (re.compile(r'\bSFTP-SSHFileTransferProtocol\b', re.I), 'SFTP - SSH File Transfer Protocol'),
+    (re.compile(r'\bSSHFileTransferProtocol\b', re.I), 'SSH File Transfer Protocol'),
 ]
 
 # Palabras objetivo para la heurística de letras desprendidas
@@ -1198,25 +1201,27 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
         if l == 'l':
             i += 1
             buf_bullet = []
-            while i < n and lineas[i].strip() != 'l' and not re.match(r'^\d+\.\s', lineas[i].strip()) and not re.match(r'^[a-z]\.\s*', lineas[i].strip()) and not lineas[i].strip().startswith(('TIP:', 'WARNING:', 'NOTE:')):
+            while i < n and lineas[i].strip() != 'l' and not re.match(r'^\d+\.\s', lineas[i].strip()) and not re.match(r'^\d+\.$', lineas[i].strip()) and not re.match(r'^[a-z]\.\s*', lineas[i].strip()) and not lineas[i].strip().startswith(('TIP:', 'WARNING:', 'NOTE:')):
                 item = lineas[i].strip()
                 norm_item = re.sub(r'[^a-zA-Z0-9]', '', item).lower()
                 if norm_item in temas_esta_pag:
                     break
                 if buf_bullet and buf_bullet[-1].endswith(('.', '!', '?')) and 6 <= len(item) < 55 and not item.endswith(('.', ',', ';', ':')) and not item.startswith(('http:', 'https:')) and not re.match(r'^(for|where|and|or|with|to|in|of|on|at|by|from|the|a|an)\b', item, re.I):
-                    if i + 1 < n and lineas[i + 1].strip() not in ('l',) and not re.match(r'^\d+\.\s', lineas[i + 1].strip()):
+                    if i + 1 < n and lineas[i + 1].strip() not in ('l',) and not re.match(r'^\d+\.\s', lineas[i + 1].strip()) and not re.match(r'^\d+\.$', lineas[i + 1].strip()):
                         break
                 buf_bullet.append(item)
                 i += 1
             if buf_bullet:
                 txt = _enriquecer_links(_reparar_palabras_rotas(re.sub(r'\s+', ' ', " ".join(buf_bullet))))
-                # Jerarquía de viñetas: si cuelga de un paso previo o dos puntos, marcar subnivel (tab 2)
+                # Jerarquía de viñetas: si cuelga de un paso previo o dos puntos de paso, marcar subnivel (tab 2)
                 subnivel = False
                 if elementos:
                     ult_e = elementos[-1]
-                    if ult_e.get("tipo") in ("numero", "subpaso") or ult_e.get("subnivel"):
+                    if ult_e.get("tipo") in ("numero", "subpaso"):
                         subnivel = True
-                    elif ult_e.get("texto", "").strip().endswith(":"):
+                    elif ult_e.get("tipo") == "bullet" and ult_e.get("subnivel"):
+                        subnivel = True
+                    elif ult_e.get("texto", "").strip().endswith(":") and ult_e.get("tipo") not in ("h1", "h2"):
                         subnivel = True
                 else:
                     if re.match(r'^[A-Z][a-zA-Z0-9\s]{1,25}(\s*-\s*|\s*:\s*)', txt):
@@ -1224,19 +1229,19 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
                 elementos.append({"tipo": "bullet", "texto": txt, "subnivel": subnivel})
             continue
 
-        # Pasos numerados (1. , 2. , etc.)
-        if re.match(r'^\d+\.\s', l):
+        # Pasos numerados (1. , 2. , etc., o números solos en su propia línea '1.', '2.')
+        if re.match(r'^\d+\.\s', l) or re.match(r'^\d+\.$', l):
             buf_num = [l]
             i += 1
-            if not l.endswith(('.', ':')):
+            if re.match(r'^\d+\.$', l) or not l.endswith(('.', ':')):
                 while i < n:
                     sig = lineas[i].strip()
-                    if sig == 'l' or re.match(r'^\d+\.\s', sig) or re.match(r'^[a-z]\.\s*', sig) or (len(sig) == 2 and sig[0].islower() and sig[1] == '.') or sig.startswith(('TIP:', 'WARNING:', 'NOTE:')):
+                    if sig == 'l' or re.match(r'^\d+\.\s', sig) or re.match(r'^\d+\.$', sig) or re.match(r'^[a-z]\.\s*', sig) or (len(sig) == 2 and sig[0].islower() and sig[1] == '.') or sig.startswith(('TIP:', 'WARNING:', 'NOTE:')):
                         break
                     norm_sig = re.sub(r'[^a-zA-Z0-9]', '', sig).lower()
                     if norm_sig in temas_esta_pag:
                         break
-                    actual_incompleto = bool(re.search(r'\b(the|a|an|of|to|in|for|from|with|by|and|or|on|click|select|choose|enter|type|check|uncheck|press)\s*$', buf_num[-1], re.I))
+                    actual_incompleto = bool(re.search(r'\b(the|a|an|of|to|in|for|from|with|by|and|or|on|click|select|choose|enter|type|check|uncheck|press)\s*$', buf_num[-1], re.I)) or re.match(r'^\d+\.$', buf_num[-1])
                     sig_es_sub = (
                         not actual_incompleto
                         and 4 <= len(sig) < 45
@@ -1343,7 +1348,7 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
         # Párrafos de texto continuo
         buf_p = [l]
         i += 1
-        while i < n and lineas[i].strip() != 'l' and not re.match(r'^\d+\.\s', lineas[i].strip()) and not re.match(r'^[a-z]\.\s*', lineas[i].strip()) and not (len(lineas[i].strip()) == 2 and lineas[i].strip()[0].islower() and lineas[i].strip()[1] == '.') and not lineas[i].strip().startswith(('TIP:', 'WARNING:', 'NOTE:')):
+        while i < n and lineas[i].strip() != 'l' and not re.match(r'^\d+\.\s', lineas[i].strip()) and not re.match(r'^\d+\.$', lineas[i].strip()) and not re.match(r'^[a-z]\.\s*', lineas[i].strip()) and not (len(lineas[i].strip()) == 2 and lineas[i].strip()[0].islower() and lineas[i].strip()[1] == '.') and not lineas[i].strip().startswith(('TIP:', 'WARNING:', 'NOTE:')):
             sig = lineas[i].strip()
             norm_sig = re.sub(r'[^a-zA-Z0-9]', '', sig).lower()
             if norm_sig in temas_esta_pag:
@@ -1468,7 +1473,43 @@ def _intercalar_figuras(elementos: list[dict], page_figs: list[dict], dir_html: 
     for i, e in enumerate(elementos):
         h_e = alturas[i]
 
-        # Regla tipográfica: si el elemento anterior fue un H2 y hay una figura que ilustra esa subsección (top < 850),
+        # 1. Figura de apertura superior que precede al primer encabezado (ej. Pág 75: pantalla Edit Web User en top 105)
+        if i == 0 and e.get("tipo") in ("h1", "h2") and idx_fig < n_figs:
+            f_top = figs_ordenadas[idx_fig]
+            top_val = float(f_top.get("posicion_top_px", 0))
+            if top_val <= 120 and float(f_top.get("alto") or 0) >= 300:
+                ruta_rel = _sincronizar_figura(f_top, dir_html)
+                res.append({
+                    "tipo": "figura",
+                    "id": f_top.get("id"),
+                    "archivo": ruta_rel,
+                    "ancho": f_top.get("ancho"),
+                    "alto": f_top.get("alto"),
+                    "posicion_top_px": top_val,
+                    "caption": f_top.get("caption", ""),
+                })
+                idx_fig += 1
+                y_actual += float(f_top.get("alto") or 100) + 15.0
+
+        # 2. Figura que ilustra pasos previos y precede a un nuevo encabezado (ej. Pág 74: figura tras paso 5 y antes de H2)
+        if e.get("tipo") in ("h1", "h2") and idx_fig < n_figs:
+            f_prev = figs_ordenadas[idx_fig]
+            top_prev = float(f_prev.get("posicion_top_px", 0))
+            if res and res[-1].get("tipo") in ("numero", "subpaso") and top_prev <= 300:
+                ruta_rel = _sincronizar_figura(f_prev, dir_html)
+                res.append({
+                    "tipo": "figura",
+                    "id": f_prev.get("id"),
+                    "archivo": ruta_rel,
+                    "ancho": f_prev.get("ancho"),
+                    "alto": f_prev.get("alto"),
+                    "posicion_top_px": top_prev,
+                    "caption": f_prev.get("caption", ""),
+                })
+                idx_fig += 1
+                y_actual += float(f_prev.get("alto") or 100) + 15.0
+
+        # 3. Regla tipográfica: si el elemento anterior fue un H2 y hay una figura que ilustra esa subsección (top < 850),
         # emitir la figura inmediatamente después del encabezado H2 y antes del párrafo descriptivo.
         if i > 0 and elementos[i - 1].get("tipo") == "h2" and idx_fig < n_figs:
             f_cand = figs_ordenadas[idx_fig]

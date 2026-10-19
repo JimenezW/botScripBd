@@ -368,6 +368,11 @@ Antes de dar por aceptada una corrida masiva de páginas (ej. páginas 101 a 500
 - [ ] **20. Detección Multilínea de Temas del TOC y Viñetas Subordinadas Huérfanas:**
   * Si un tema del TOC está dividido en 2 líneas consecutivas en el texto de la página (ej. pág 74: `Configuring the Web User Authentication` + `Type`), el compilador debe reconocer la secuencia combinada en el cuerpo sin duplicar ni forzar un H1 espurio al inicio de la página.
   * Si una página inicia con viñetas con formato parámetro-valor (`Campo - Descripción`) que continúan un paso de la página previa (ej. pág 76 tras pág 75), deben heredar automáticamente la clase `.content-bullet--sub`.
+- [ ] **21. Posicionamiento Canónico de Figuras Transicionales y Figuras de Apertura:**
+  * Si una figura está ubicada físicamente tras un paso instructivo de cierre (ej. pág 74: tras el paso 5 con botón `Done`) y antes de un nuevo tema (`Configuring the Web User Authentication Type`), la figura debe insertarse ANTES del nuevo encabezado H2, ilustrando el bloque previo.
+  * Si una figura de gran tamaño (`alto >= 300px`, `top <= 120px`) ocupa la mitad superior de la página y precede al texto (ej. pág 75: pantalla `Edit Web User`), debe emitirse al inicio de la página ANTES del encabezado H1/H2.
+- [ ] **22. Detección de Pasos Numerados Aislados en OCR:**
+  * Si un número de paso aparece solo en su línea (`2.` o `3.`), debe ser reconocido como `.content-step` con su `.step-marker` junto con las líneas subsiguientes y no degradarse a párrafo `<p class="content-p">`.
 
 ---
 
