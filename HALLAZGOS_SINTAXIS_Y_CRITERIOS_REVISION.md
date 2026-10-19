@@ -362,6 +362,12 @@ Antes de dar por aceptada una corrida masiva de páginas (ej. páginas 101 a 500
   * Toda viñeta subordinada a un paso debe tener sangría correspondiente de 32px (`.content-bullet--sub`).
 - [ ] **18. Orden Canónico de Secciones H2 Ilustradas:**
   * Todo encabezado H2 debe preceder a la figura que lo ilustra en su subsección (`top_px >= 200`).
+- [ ] **19. Prevención de Falsos Encabezados H1/H2 por Oraciones Continuadas:**
+  * Una línea inicial nunca debe promoverse a `<h1>` o `<h2>` si la línea subsiguiente inicia en minúscula (`sig_raw[0].islower()`), lo cual denota un predicado continuo cortado por cambio de página (ej. pág 81: `Upload (Write)` seguido de `is checked...`).
+  * Conectores y verbos procesales iniciales (`Next, select`, `Before starting`, `Ensure that`, `It is not necessary`) deben permanecer como párrafos y no elevarse a encabezados.
+- [ ] **20. Detección Multilínea de Temas del TOC y Viñetas Subordinadas Huérfanas:**
+  * Si un tema del TOC está dividido en 2 líneas consecutivas en el texto de la página (ej. pág 74: `Configuring the Web User Authentication` + `Type`), el compilador debe reconocer la secuencia combinada en el cuerpo sin duplicar ni forzar un H1 espurio al inicio de la página.
+  * Si una página inicia con viñetas con formato parámetro-valor (`Campo - Descripción`) que continúan un paso de la página previa (ej. pág 76 tras pág 75), deben heredar automáticamente la clase `.content-bullet--sub`.
 
 ---
 

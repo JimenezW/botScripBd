@@ -572,6 +572,8 @@ RE_PATRONES_DESFRAGMENTACION: list[tuple[re.Pattern, str]] = [
     (re.compile(r'\bVie\s+w\b', re.I), 'View'),
     (re.compile(r'\bWhil\s+e\b', re.I), 'While'),
     (re.compile(r'\btransfer\s+s\b', re.I), 'transfers'),
+    (re.compile(r'\bTran\s+sfer\b', re.I), 'Transfer'),
+    (re.compile(r'\bTransfe\s+r\b', re.I), 'Transfer'),
     (re.compile(r'\byou\s+r\b', re.I), 'your'),
 
     # Casos de marca y nombres compuestos
@@ -623,6 +625,37 @@ RE_PATRONES_DESFRAGMENTACION: list[tuple[re.Pattern, str]] = [
     (re.compile(r'\bNewSite\b', re.I), 'New Site'),
     (re.compile(r'Upload\s*\(\s*Write\s*\)', re.I), '<strong>Upload (Write)</strong>'),
     (re.compile(r'\bcheck\s+List\b', re.I), 'check <strong>List</strong>'),
+    (re.compile(r'\bSaveandFinish\b', re.I), 'Save and Finish'),
+    (re.compile(r'\bWebUserManager\b', re.I), 'Web User Manager'),
+    (re.compile(r'\bWebUsers\b', re.I), 'Web Users'),
+    (re.compile(r'\bWebUser\b', re.I), 'Web User'),
+    (re.compile(r'\bImportPublicKey\b', re.I), 'Import Public Key'),
+    (re.compile(r'\bPublicKey\b', re.I), 'Public Key'),
+    (re.compile(r'\bKeyVault\b', re.I), 'Key Vault'),
+    (re.compile(r'\bKeyfile\b', re.I), 'Key file'),
+    (re.compile(r'\bWebClient\b', re.I), 'Web Client'),
+    (re.compile(r'\bManageDashboards\b', re.I), 'Manage Dashboards'),
+    (re.compile(r'\bAddaGadget\b', re.I), 'Add a Gadget'),
+    (re.compile(r'\bAddGadget\b', re.I), 'Add Gadget'),
+    (re.compile(r'\bEditLayout\b', re.I), 'Edit Layout'),
+    (re.compile(r'\bPageToolbar\b', re.I), 'Page Toolbar'),
+    (re.compile(r'\bAddDashboard\b', re.I), 'Add Dashboard'),
+    (re.compile(r'\bGadgetOptions\b', re.I), 'Gadget Options'),
+    (re.compile(r'\bOptionalParameters\b', re.I), 'Optional Parameters'),
+    (re.compile(r'\bDateRange\b', re.I), 'Date Range'),
+    (re.compile(r'\bAdministrationandModuleGuides:\b', re.I), 'Administration and Module Guides:'),
+    (re.compile(r'\bWh\s+at\'s\b', re.I), "What's"),
+    (re.compile(r'\bWh\s+at\b', re.I), "What"),
+    (re.compile(r'\bNewFolder\b', re.I), 'New Folder'),
+    (re.compile(r'\bMainMenuBar\b', re.I), 'Main Menu Bar'),
+    (re.compile(r'\bAccesstoWebClientFeatures\b', re.I), 'Access to Web Client Features'),
+    (re.compile(r'\bAccessto\b', re.I), 'Access to'),
+    (re.compile(r'\bPermissiontoCreatefiles\b', re.I), 'Permission to Create files'),
+    (re.compile(r'\bCreatefiles\b', re.I), 'Create files'),
+    (re.compile(r'\bAddaGadget\b', re.I), 'Add a Gadget'),
+    (re.compile(r'\bAdda\b', re.I), 'Add a'),
+    (re.compile(r'\bSSHKeys\b', re.I), 'SSH Keys'),
+    (re.compile(r'\bTradingPartner\b', re.I), 'Trading Partner'),
 ]
 
 # Palabras objetivo para la heurística de letras desprendidas
@@ -994,6 +1027,11 @@ def _parsear_items_toc(lineas_limpias: list[str]) -> list[dict]:
             ("Base 64", "Base64"),
             ("IPv 6", "IPv6"),
             ("SHA 1", "SHA1"),
+            ("Wh at's", "What's"),
+            ("Wh at", "What"),
+            ("QuickStartGuides", "Quick Start Guides"),
+            ("MakingYourFirstSFTPFileTransfer", "Making Your First SFTP File Transfer"),
+            ("MakingYourFirstWebFileTransfer", "Making Your First Web File Transfer"),
         ):
             if orig in clean_title:
                 clean_title = clean_title.replace(orig, corr)
@@ -1114,10 +1152,15 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
             lineas.pop(0)
             elementos.append({"tipo": "h1", "texto": primer_tema})
             temas_esta_pag.pop(tema_norm, None)
-        elif not any(re.sub(r'[^a-zA-Z0-9]', '', x).lower() == tema_norm for x in lineas):
-            # Si el tema no aparece como línea completa en las líneas siguientes (porque fue consumido en el encabezado, ej. pág 50)
-            elementos.append({"tipo": "h1", "texto": primer_tema})
-            temas_esta_pag.pop(tema_norm, None)
+        else:
+            esta_en_cuerpo = (
+                any(re.sub(r'[^a-zA-Z0-9]', '', x).lower() == tema_norm for x in lineas) or
+                any(re.sub(r'[^a-zA-Z0-9]', '', lineas[k] + lineas[k+1]).lower() == tema_norm for k in range(len(lineas) - 1))
+            )
+            if not esta_en_cuerpo:
+                # Si el tema no aparece como línea completa ni partida en las líneas siguientes (porque fue consumido en el encabezado, ej. pág 50, 83)
+                elementos.append({"tipo": "h1", "texto": primer_tema})
+                temas_esta_pag.pop(tema_norm, None)
 
     i = 0
     n = len(lineas)
@@ -1140,6 +1183,16 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
             elementos.append({"tipo": tipo_tit, "texto": tit})
             i += 1
             continue
+
+        if i + 1 < n:
+            norm_multi = re.sub(r'[^a-zA-Z0-9]', '', l + lineas[i+1].strip()).lower()
+            if norm_multi in temas_esta_pag:
+                tit = temas_esta_pag.pop(norm_multi)
+                ya_hay_h1 = any(e.get("tipo") == "h1" for e in elementos)
+                tipo_tit = "h2" if (ya_hay_h1 or len(elementos) > 0) else "h1"
+                elementos.append({"tipo": tipo_tit, "texto": tit})
+                i += 2
+                continue
 
         # Detección de viñeta (bullet) 'l' (acumula oraciones completas hasta siguiente ítem o encabezado)
         if l == 'l':
@@ -1164,6 +1217,9 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
                     if ult_e.get("tipo") in ("numero", "subpaso") or ult_e.get("subnivel"):
                         subnivel = True
                     elif ult_e.get("texto", "").strip().endswith(":"):
+                        subnivel = True
+                else:
+                    if re.match(r'^[A-Z][a-zA-Z0-9\s]{1,25}(\s*-\s*|\s*:\s*)', txt):
                         subnivel = True
                 elementos.append({"tipo": "bullet", "texto": txt, "subnivel": subnivel})
             continue
@@ -1246,12 +1302,22 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
             elementos.append({"tipo": tipo_bloque, "texto": txt})
             continue
 
-        es_frase = bool(re.match(r'^(click|the|to|if|when|from|select|in|for|and|expand|navigate|run|set|build)\b', l, re.I))
+        es_frase = bool(re.match(
+            r'^(click|the|to|if|when|from|select|in|for|and|expand|navigate|run|set|build|next|ensure|specify|use|now|on|under|before|after|you|as|at|once|there|it|this|note)\b',
+            l, re.I
+        ))
 
         # Título principal de página (primer elemento de contenido si no fue establecido por TOC)
-        if not elementos and not es_frase and 6 <= len(l) < 55 and not l.endswith(('.', ',', ';', ':')):
+        sig_es_continuacion = False
+        if i + 1 < n:
+            sig_raw = lineas[i+1].strip()
+            if sig_raw and sig_raw[0].islower():
+                sig_es_continuacion = True
+
+        if not elementos and not temas_esta_pag and not sig_es_continuacion and not es_frase and 6 <= len(l) < 55 and not l.endswith(('.', ',', ';', ':')):
             t = _reparar_palabras_rotas(re.sub(r'([a-z])([A-Z])', r'\1 \2', l).strip())
-            elementos.append({"tipo": "h1", "texto": t})
+            tipo_inicial = "h2" if (' / ' in running_header and num not in inicios_tema) else "h1"
+            elementos.append({"tipo": tipo_inicial, "texto": t})
             i += 1
             continue
 
@@ -1265,7 +1331,7 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
         es_url = l.startswith(('http://', 'https://')) or '//' in l
         es_prep = bool(re.match(r'^(for|where|and|or|with|to|in|of|on|at|by|from|the|a|an)\b', l, re.I))
 
-        if es_cierre_previo and not es_url and not es_prep and not es_frase and 6 <= len(l) < 55 and not l.endswith(('.', ',', ';', ':')):
+        if not sig_es_continuacion and es_cierre_previo and not es_url and not es_prep and not es_frase and 6 <= len(l) < 55 and not l.endswith(('.', ',', ';', ':')):
             t = _reparar_palabras_rotas(re.sub(r'([a-z])([A-Z])', r'\1 \2', l).strip())
             if elementos and elementos[-1].get("texto") == t:
                 i += 1
@@ -1286,7 +1352,10 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
             if buf_str.endswith(('.', '!', '?')):
                 sig_es_url = sig.startswith(('http://', 'https://')) or '//' in sig
                 sig_es_prep = bool(re.match(r'^(for|where|and|or|with|to|in|of|on|at|by|from|the|a|an)\b', sig, re.I))
-                sig_es_frase = bool(re.match(r'^(click|the|to|if|when|from|select|in|for|and|expand|navigate|run|set|build)\b', sig, re.I))
+                sig_es_frase = bool(re.match(
+                    r'^(click|the|to|if|when|from|select|in|for|and|expand|navigate|run|set|build|next|ensure|specify|use|now|on|under|before|after|you|as|at|once|there|it|this|note)\b',
+                    sig, re.I
+                ))
                 if not sig_es_url and not sig_es_prep and not sig_es_frase and len(sig) < 55 and not sig.endswith(('.', ',', ';', ':')):
                     break
             buf_p.append(sig)

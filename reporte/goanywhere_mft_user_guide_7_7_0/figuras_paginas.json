@@ -1,5 +1,5 @@
 {
-  "total_figuras": 1710,
+  "total_figuras": 1714,
   "paginas": {
     "39": [
       {
@@ -17905,6 +17905,50 @@
         "alto": 303,
         "posicion_top_px": 610,
         "posicion_left_px": 122
+      }
+    ],
+    "70": [
+      {
+        "id": "fig_0070_1",
+        "archivo": "figuras/fig_p0070_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\output\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0070_1.png",
+        "ancho": 688,
+        "alto": 221,
+        "posicion_top_px": 103,
+        "posicion_left_px": 122
+      }
+    ],
+    "71": [
+      {
+        "id": "fig_0071_1",
+        "archivo": "figuras/fig_p0071_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\output\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0071_1.png",
+        "ancho": 693,
+        "alto": 368,
+        "posicion_top_px": 103,
+        "posicion_left_px": 121
+      }
+    ],
+    "75": [
+      {
+        "id": "fig_0075_1",
+        "archivo": "figuras/fig_p0075_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\output\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0075_1.png",
+        "ancho": 627,
+        "alto": 430,
+        "posicion_top_px": 105,
+        "posicion_left_px": 154
+      }
+    ],
+    "87": [
+      {
+        "id": "fig_0087_1",
+        "archivo": "figuras/fig_p0087_1.png",
+        "archivo_absoluto": "C:\\IA_Proyectos\\botScribd\\output\\goanywhere_mft_user_guide_7_7_0\\figuras\\fig_p0087_1.png",
+        "ancho": 757,
+        "alto": 715,
+        "posicion_top_px": 39,
+        "posicion_left_px": 72
       }
     ]
   }
