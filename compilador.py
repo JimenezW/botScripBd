@@ -697,6 +697,18 @@ RE_PATRONES_DESFRAGMENTACION: list[tuple[re.Pattern, str]] = [
     (re.compile(r'\bConnectionTimeout\b', re.I), 'Connection Timeout'),
     (re.compile(r'\bGroupBy\b', re.I), 'Group By'),
     (re.compile(r'\bfilt\s+ered\b', re.I), 'filtered'),
+    (re.compile(r'\bMQProviderSpecificExample:?', re.I), 'MQ Provider Specific Example:'),
+    (re.compile(r'\bProjectDesignerFeatures\b', re.I), 'Project Designer Features'),
+    (re.compile(r'\bAmazonS3BucketsResource\b', re.I), 'Amazon S3 Buckets Resource'),
+    (re.compile(r'\bAS2ServersResource\b', re.I), 'AS2 Servers Resource'),
+    (re.compile(r'\bAS2FromID\b', re.I), 'AS2 From ID'),
+    (re.compile(r'\bAS2ToID\b', re.I), 'AS2 To ID'),
+    (re.compile(r'\bCertificateAlias\b', re.I), 'Certificate Alias'),
+    (re.compile(r'\bKeyStore\b', re.I), 'Key Store'),
+    (re.compile(r'\bKeyLocation\b', re.I), 'Key Location'),
+    (re.compile(r'\bKeyVault\b', re.I), 'Key Vault'),
+    (re.compile(r'\bResourceReferencesAction\b', re.I), 'Resource References Action'),
+    (re.compile(r'\bEditingResourcePermissions\b', re.I), 'Editing Resource Permissions'),
 ]
 
 # Palabras objetivo para la heurística de letras desprendidas
@@ -1369,14 +1381,17 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
                 i += 1
             txt = _reparar_palabras_rotas(re.sub(r'\s+', ' ', " ".join(buf_callout)))
             txt = _enriquecer_links(txt)
-            tipo_bloque = "warning" if es_warning else "tip"
-            elementos.append({"tipo": tipo_bloque, "texto": txt})
+            cuerpo = re.sub(r'^(TIP|WARNING|NOTE)\s*:\s*', '', txt, flags=re.I).strip()
+            if cuerpo:
+                tipo_bloque = "warning" if es_warning else "tip"
+                elementos.append({"tipo": tipo_bloque, "texto": txt})
             continue
 
         es_frase = bool(re.match(
-            r'^(click|the|to|if|when|from|select|in|for|and|expand|navigate|run|set|build|next|ensure|specify|use|now|on|under|before|after|you|as|at|once|there|it|this|note)\b',
+            r'^(click|the|to|if|when|from|select|in|for|and|expand|navigate|run|set|build|next|ensure|specify|use|now|on|under|before|after|you|as|at|once|there|it|this|note|access|double|search|press|drag|drop)\b',
             l, re.I
         ))
+        ends_with_connector = bool(re.search(r'\b(the|a|an|of|to|in|for|from|with|by|and|or|on)\s*$', l, re.I))
 
         # Título principal de página (primer elemento de contenido si no fue establecido por TOC)
         sig_es_continuacion = False
@@ -1385,7 +1400,7 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
             if sig_raw and sig_raw[0].islower() and sig_raw != 'l' and not (len(sig_raw) == 2 and sig_raw[1] == '.'):
                 sig_es_continuacion = True
 
-        if not elementos and not temas_esta_pag and not sig_es_continuacion and not es_frase and 6 <= len(l) < 55 and not l.endswith(('.', ',', ';', ':')):
+        if not elementos and not temas_esta_pag and not sig_es_continuacion and not es_frase and not ends_with_connector and 6 <= len(l) < 55 and not l.endswith(('.', ',', ';', ':')):
             t = _reparar_palabras_rotas(re.sub(r'([a-z])([A-Z])', r'\1 \2', l).strip())
             tipo_inicial = "h2" if (' / ' in running_header and num not in inicios_tema) else "h1"
             elementos.append({"tipo": tipo_inicial, "texto": t})
