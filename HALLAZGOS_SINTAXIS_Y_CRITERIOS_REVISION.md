@@ -125,6 +125,40 @@ Durante el análisis y compilación de las páginas 1 a 100 se identificaron dis
 
 ---
 
+### Criterio 8: Extracción, Desacople e Inyección de Figuras y Diagramas UI
+* **Descripción:** Scribd rasteriza pantallas de interfaz, cuadros de diálogo y diagramas dentro de hojas de atlas compuestas (`.image_layer`), a menudo combinando múltiples elementos visuales o fragmentos de texto en una misma rebanada gráfica (`clip: rect`).
+* **Hallazgos Reales Encontrados:**
+  * **Rebanadas Compuestas con Texto Intermedio (Pág. 57):** Scribd agrupó dos tarjetas UI en un solo bloque. Al extraer la segunda tarjeta, se arrastraba el texto intermedio del PDF si el corte no comenzaba estrictamente en su borde superior exacto (`y = 238` en vez de `120`).
+  * **Falsos Positivos de Texto Formateado (Págs. 84, 94, 98):** Títulos con líneas decorativas arriba/abajo o bloques de enlaces sin bordes laterales eran capturados por error como imágenes.
+  * **Duplicidad de Callouts Tintados (Pág. 43, 45, 78):** Cajas de `WARNING:` o `TIP:` con barras laterales azules no deben extraerse como imagen, sino formatearse como cajas CSS en el HTML para mantener fidelidad tipográfica y accesibilidad.
+* **Criterios Normativos de Calidad:**
+  1. **Regla de Cierre de 4 Bordes:** Toda tarjeta UI legítima debe poseer cuatro bordes continuos (`top >= 40%`, `bottom >= 40%`, `left >= 60%`, `right >= 60%`).
+  2. **Desacople Quirúrgico:** Cuando existan múltiples tarjetas en una rebanada, cada una debe aislarse desde su propio borde superior a su borde inferior, descartando espacios en blanco o textos externos.
+  3. **Diagramas Complejos:** Gráficos estructurales mayores (ej. arquitectura en pág. 39) se preservan íntegros por su alta crominancia y complejidad visual.
+  4. **Separación de Ciclo de Vida:** Las figuras residen en `output/.../figuras/` y su catálogo en `figuras_paginas.json`. La carpeta `reporte/` solo debe recibir copias de aquellas figuras que efectivamente hayan sido inyectadas en el HTML compilado.
+
+---
+
+### Criterio 9: Desglose Redundante de Spans Hijos (Multi-Capa con Enlaces Internos)
+* **Descripción:** En páginas con enlaces internos cruzados (ej. `<a class="ll">`), Scribd emite un nodo contenedor `<span class="g">` con la oración completa ensamblada, e inmediatamente después emite una serie de nodos hijos `<span class="a">` con los fragmentos desglosados del enlace. Al capturarse ambos niveles en `paginas.json`, se producían duplicaciones fantasma dentro del mismo párrafo o viñeta.
+* **Hallazgos Reales Encontrados:**
+  * **Página 51:** La línea `'basic authentication of Admin User passwords against a'` fue seguida por los fragmentos `'ba'`, `'sic authentication of A'`, `'dmi'`, `'n User p'`, `'asswords against a'`, produciendo la duplicación `"basic authentication... ba sic authentication..."`.
+  * **Página 52:** La línea `'Agent service from the Service Manager page.'` fue seguida por sus fragmentos `'Agen'`, `'t service from the'`, `'Service Manager'`, `'page.'`.
+* **Criterio de Resolución en Compilador:**
+  * **Algoritmo de Deduplicación en 2 Pasadas:** Tras colapsar sufijos idénticos consecutivos, se evalúa si la concatenación alfanumérica sin espacios de las $k$ líneas siguientes coincide exactamente con la línea completa precedente (`actual_norm == buf_hijos_norm`). De ser así, los fragmentos hijos se descartan en bloque.
+
+---
+
+### Criterio 10: Delimitación Semántica de Viñetas Multioracionales y Supresión de Falsos H2
+* **Descripción:** 
+  1. Las viñetas en manuales técnicos frecuentemente contienen dos o más oraciones completas. El corte prematuro de viñeta al primer punto `.` causaba que las oraciones subsecuentes quedaran huérfanas como párrafos sueltos.
+  2. Fragmentos huérfanos muy cortos (ej. `'Agen'` o `'FT'`) que no terminaban en punto eran clasificados erróneamente como subtítulos `<h2>`.
+* **Criterios Normativos de Calidad:**
+  1. **Cierre Semántico de Viñeta:** Una viñeta acumula todas sus oraciones y solo concluye cuando se detecta el inicio de otra viñeta (`'l'`), un paso numerado (`^\d+\.\s`), un bloque callout (`TIP:`, `WARNING:`) o un nuevo título de sección.
+  2. **Umbral Mínimo de Subtítulos H2:** Ninguna línea con longitud menor a 6 caracteres (`len(l) < 6`) puede ser promovida a subtítulo `<h2>`.
+
+---
+
 ## 3. Matriz Comparativa: Antes vs. Después
 
 | Caso | Entrada en `paginas.json` | Antes (Sin regla) | Después (Con Desfragmentación) |
@@ -145,6 +179,10 @@ Durante el análisis y compilación de las páginas 1 a 100 se identificaron dis
 | **Gatillo en 3** | `['Copy T', 'rig', 'ger 541']` | `"Copy T rig ger 541"` | `"Copy Trigger 541"` |
 | **Sistema en 3** | `['File Sy', 'ste', 'm Tasks']` | `"File Sy ste m Tasks"` | `"File System Tasks"` |
 | **Mago en 3** | `['SQL W', 'iza', 'rd 3375']` | `"SQL W iza rd 3375"` | `"SQL Wizard 3375"` |
+| **Ruta de Menú** | `['navigate to', 'GettingStarted>GoAnywhereFeatureTour']` | `"GettingStarted>GoAnywhereFeatureTour"` | `"Getting Started > GoAnywhere Feature Tour"` |
+| **Protocolo WebDAV** | `['W', 'ebDAV directories']` | `"W ebDAV directories"` | `"WebDAV directories"` |
+| **Duplicación Spans** | `['basic auth against a', 'ba', 'sic auth against a']` | `"basic auth... ba sic auth..."` | `"basic auth against a"` (sin repetición) |
+| **Fragmento Huérfano** | `['Agent service...', 'Agen', 't service...']` | `<h2>Agen</h2><p>t service...</p>` | Viñeta completa integrada |
 
 ---
 
@@ -170,6 +208,15 @@ Antes de dar por aceptada una corrida masiva de páginas (ej. páginas 101 a 500
 - [ ] **6. Limpieza de Artefactos de Visor:**
   * 0 apariciones de cadenas `\ue000` a `\uf8ff` (caracteres privados de Scribd).
   * 0 apariciones de cadenas `"page: "` dentro del cuerpo de texto compilado.
+- [ ] **7. Auditoría de Figuras y Diagramas UI:**
+  * Toda imagen insertada debe provenir del catálogo `figuras_paginas.json`.
+  * Las figuras deben posicionarse en el flujo HTML según su coordenada `posicion_top_px` relativa al párrafo correspondiente.
+  * Ninguna figura debe contener texto circundante mutilado o fondos tintados de callouts.
+  * Los archivos en `reporte/.../figuras/` deben corresponder únicamente a imágenes activas referenciadas en el HTML.
+- [ ] **8. Supresión de Duplicados Multi-Capa:**
+  * 0 apariciones de duplicaciones por desglose de spans (`ba sic`, `dmi n`, etc.).
+- [ ] **9. Integridad de Encabezados H2:**
+  * Ningún elemento `<h2>` con menos de 6 caracteres (ej. no debe haber `<h2>Agen</h2>`, `<h2>FT</h2>`).
 
 ---
 

@@ -272,11 +272,25 @@ def extraer_figuras_pagina_gestor(num_pagina: int, origen: Path, insumo_dir: Pat
         log.error("Error al extraer figuras de la página %d: %s", num_pagina, e)
 
 
+def limpiar_previews(origen: Path) -> int:
+    """Elimina los archivos temporales preview_pagina_XXXX.html generados para pruebas individuales."""
+    eliminados = 0
+    for p in origen.glob("preview_pagina_*.html"):
+        try:
+            p.unlink()
+            eliminados += 1
+            log.info("Eliminado preview temporal: %s", p.name)
+        except Exception as e:
+            log.warning("No se pudo eliminar %s: %s", p.name, e)
+    log.info("Limpieza completada: %d archivo(s) preview temporal(es) eliminado(s).", eliminados)
+    return eliminados
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Gestor y auditor de páginas individuales del Bot Scribd"
     )
-    parser.add_argument("--pagina", type=int, required=True,
+    parser.add_argument("--pagina", type=int, default=None,
                         help="Número de página a procesar (ej: --pagina 43)")
     parser.add_argument("--origen", type=str, default="reporte/goanywhere_mft_user_guide_7_7_0",
                         help="Directorio del reporte técnico (defecto: reporte/goanywhere_mft_user_guide_7_7_0)")
@@ -294,32 +308,43 @@ def main():
                         help="Recompila el documento maestro preview.html")
     parser.add_argument("--auto", action="store_true",
                         help="Flujo completo: previsualizar página puntual y sincronizar maestro")
+    parser.add_argument("--limpiar-previews", action="store_true",
+                        help="Elimina todos los archivos preview_pagina_*.html temporales de la carpeta de reporte")
 
     args = parser.parse_args()
     origen = Path(args.origen).resolve()
     insumo = Path(args.insumo).resolve()
+
+    if args.limpiar_previews:
+        limpiar_previews(origen)
+        if not args.pagina:
+            return
+
     pagina = args.pagina
+    if not pagina and not args.integrar:
+        parser.error("Debe indicar --pagina <N> o utilizar --limpiar-previews / --integrar.")
 
     # Si no se pasó ninguna acción específica, activar --preview por defecto
     if not any([args.extraer, args.extraer_figuras, args.preview, args.ver_texto, args.integrar, args.auto]):
         args.preview = True
 
-    if args.extraer or args.auto:
+    if (args.extraer or args.auto) and pagina:
         extraer_pagina_puntual(pagina, origen, insumo)
 
-    if args.extraer_figuras:
+    if args.extraer_figuras and pagina:
         extraer_figuras_pagina_gestor(pagina, origen, insumo)
 
-    if args.ver_texto:
+    if args.ver_texto and pagina:
         ver_texto_pagina(pagina, origen)
 
-    if args.preview or args.auto:
+    if (args.preview or args.auto) and pagina:
         preview_p = compilar_preview_puntual(pagina, origen)
         print(f"\n[OK] Vista previa individual lista: file:///{preview_p.as_posix()}\n")
 
     if args.integrar or args.auto:
         maestro_p = integrar_documento_maestro(origen)
-        print(f"\n[OK] Documento maestro actualizado: file:///{maestro_p.as_posix()}#page-{pagina}\n")
+        ref_pagina = f"#page-{pagina}" if pagina else ""
+        print(f"\n[OK] Documento maestro actualizado: file:///{maestro_p.as_posix()}{ref_pagina}\n")
 
 
 if __name__ == "__main__":

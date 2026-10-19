@@ -35,6 +35,7 @@ import json
 import logging
 import os
 import re
+import shutil
 import sys
 import textwrap
 import time
@@ -574,8 +575,14 @@ RE_PATRONES_DESFRAGMENTACION: list[tuple[re.Pattern, str]] = [
     (re.compile(r'\byou\s+r\b', re.I), 'your'),
 
     # Casos de marca y nombres compuestos
+    (re.compile(r'GettingStarted>GoAnywhereFeatureTour', re.I), 'Getting Started > GoAnywhere Feature Tour'),
+    (re.compile(r'\bW\s+ebDAV\b', re.I), 'WebDAV'),
+    (re.compile(r'\bGoAn\s*ywhere\b', re.I), 'GoAnywhere'),
     (re.compile(r'\bGo\s+A\s+nywhere\b', re.I), 'GoAnywhere'),
     (re.compile(r'\bGo\s+Anywhere\b', re.I), 'GoAnywhere'),
+    (re.compile(r'\bcom\s+municates\b', re.I), 'communicates'),
+    (re.compile(r'\bFT\s+P,\s*FTP\s+S,', re.I), 'FTP, FTPS,'),
+    (re.compile(r'\bExec\s+ute\b', re.I), 'Execute'),
     (re.compile(r'\bOA\s+uth\b', re.I), 'OAuth'),
     (re.compile(r'\bActivatea\s*License\b', re.I), 'Activate a License'),
     (re.compile(r'\bActivateaLicense\b', re.I), 'Activate a License'),
@@ -626,7 +633,9 @@ def _reparar_palabras_rotas(texto: str) -> str:
         res = pat.sub(_rep_func, res)
     # 2. Aplicar heurística dinámica de desfragmentación
     res = _desfragmentar_letras_sueltas(res)
-    # 3. Normalizar casos de protocolos y puntuación espaciada
+    # 3. Normalizar rutas de navegación de menús con '>'
+    res = re.sub(r'([a-z])>([A-Z])', r'\1 > \2', res)
+    # 4. Normalizar casos de protocolos y puntuación espaciada
     res = re.sub(r'\[protocol\]:\s*//', '[protocol]://', res)
     res = re.sub(r'\s+([.,;:!?])', r'\1', res)
     return res
@@ -711,32 +720,62 @@ def detectar_esquema(datos: Any) -> str:
 
 
 def _limpiar_lineas_scribd(lineas: list[str]) -> list[str]:
-    """Elimina redundancias posicionales de Scribd (.text_layer) y normaliza caracteres."""
-    lineas_limpias: list[str] = []
+    """Elimina redundancias posicionales de Scribd (.text_layer), sufijos y fragmentos hijos duplicados."""
+    # 1. Normalizar caracteres y filtrar líneas vacías
+    raw: list[str] = []
+    for l in lineas:
+        s = re.sub(r"[\ue000-\uf8ff]", "", str(l)).replace("\u00a0", " ").replace("\u2019", "'").replace("\u2018", "'").strip()
+        if s:
+            raw.append(s)
+
+    # 2. Colapsar sufijos idénticos consecutivos
+    etapa1: list[str] = []
     i = 0
-    n = len(lineas)
+    n = len(raw)
     while i < n:
-        actual = str(lineas[i]).strip()
-        if not actual:
-            i += 1
-            continue
-        actual = re.sub(r"[\ue000-\uf8ff]", "", actual)
-        actual = actual.replace("\u00a0", " ").replace("\u2019", "'").replace("\u2018", "'").strip()
-        if not actual:
-            i += 1
-            continue
-        lineas_limpias.append(actual)
+        actual = raw[i]
+        etapa1.append(actual)
         j = i + 1
         while j < n:
-            sig = str(lineas[j]).strip()
-            sig = re.sub(r"[\ue000-\uf8ff]", "", sig)
-            sig = sig.replace("\u00a0", " ").replace("\u2019", "'").replace("\u2018", "'").strip()
-            if sig and (actual == sig or (actual.endswith(sig) and len(sig) < len(actual))):
+            sig = raw[j]
+            if actual == sig or (actual.endswith(sig) and len(sig) < len(actual)):
                 j += 1
             else:
                 break
         i = j
-    return lineas_limpias
+
+    # 3. Detectar y suprimir fragmentos hijos desglosados inmediatamente posteriores
+    etapa2: list[str] = []
+    i = 0
+    n = len(etapa1)
+    while i < n:
+        actual = etapa1[i]
+        etapa2.append(actual)
+        if actual == 'l':
+            i += 1
+            continue
+
+        actual_norm = re.sub(r'[^a-zA-Z0-9]', '', actual).lower()
+        if len(actual_norm) >= 8:
+            j = i + 1
+            buf_str = ""
+            while j < n and len(buf_str) < len(actual_norm):
+                if etapa1[j] == 'l':
+                    break
+                s_norm = re.sub(r'[^a-zA-Z0-9]', '', etapa1[j]).lower()
+                if not s_norm:
+                    j += 1
+                    continue
+                if not actual_norm.startswith(buf_str + s_norm):
+                    break
+                buf_str += s_norm
+                j += 1
+                if buf_str == actual_norm:
+                    i = j - 1
+                    break
+        i += 1
+
+    return etapa2
 
 
 def _parsear_items_toc(lineas_limpias: list[str]) -> list[dict]:
@@ -1027,13 +1066,19 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
 
     # Si esta página es el inicio oficial de un tema en el TOC, asegurar el título H1 correspondiente
     temas_que_inician = inicios_tema.get(num, [])
+    temas_esta_pag = {re.sub(r'[^a-zA-Z0-9]', '', t).lower(): t for t in temas_que_inician}
     if temas_que_inician:
         primer_tema = temas_que_inician[0]
         primer_linea_norm = re.sub(r'[^a-zA-Z0-9]', '', lineas[0]).lower() if lineas else ""
         tema_norm = re.sub(r'[^a-zA-Z0-9]', '', primer_tema).lower()
         if primer_linea_norm == tema_norm:
             lineas.pop(0)
-        elementos.append({"tipo": "h1", "texto": primer_tema})
+            elementos.append({"tipo": "h1", "texto": primer_tema})
+            temas_esta_pag.pop(tema_norm, None)
+        elif not any(re.sub(r'[^a-zA-Z0-9]', '', x).lower() == tema_norm for x in lineas):
+            # Si el tema no aparece como línea completa en las líneas siguientes (porque fue consumido en el encabezado, ej. pág 50)
+            elementos.append({"tipo": "h1", "texto": primer_tema})
+            temas_esta_pag.pop(tema_norm, None)
 
     i = 0
     n = len(lineas)
@@ -1048,16 +1093,26 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
             i += 1
             continue
 
-        # Detección de viñeta (bullet) 'l'
+        norm_l = re.sub(r'[^a-zA-Z0-9]', '', l).lower()
+        if norm_l in temas_esta_pag:
+            tit_h1 = temas_esta_pag.pop(norm_l)
+            elementos.append({"tipo": "h1", "texto": tit_h1})
+            i += 1
+            continue
+
+        # Detección de viñeta (bullet) 'l' (acumula oraciones completas hasta siguiente ítem o encabezado)
         if l == 'l':
             i += 1
             buf_bullet = []
             while i < n and lineas[i].strip() != 'l' and not re.match(r'^\d+\.\s', lineas[i].strip()) and not lineas[i].strip().startswith(('TIP:', 'WARNING:', 'NOTE:')):
                 item = lineas[i].strip()
-                buf_bullet.append(item)
-                if item.endswith('.'):
-                    i += 1
+                norm_item = re.sub(r'[^a-zA-Z0-9]', '', item).lower()
+                if norm_item in temas_esta_pag:
                     break
+                if buf_bullet and buf_bullet[-1].endswith(('.', '!', '?')) and 6 <= len(item) < 55 and not item.endswith(('.', ',', ';', ':')) and not item.startswith(('http:', 'https:')) and not re.match(r'^(for|where|and|or|with|to|in|of|on|at|by|from|the|a|an)\b', item, re.I):
+                    if i + 1 < n and lineas[i + 1].strip() not in ('l',) and not re.match(r'^\d+\.\s', lineas[i + 1].strip()):
+                        break
+                buf_bullet.append(item)
                 i += 1
             if buf_bullet:
                 txt = _enriquecer_links(_reparar_palabras_rotas(re.sub(r'\s+', ' ', " ".join(buf_bullet))))
@@ -1068,13 +1123,17 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
         if re.match(r'^\d+\.\s', l):
             buf_num = [l]
             i += 1
-            while i < n and not re.match(r'^\d+\.\s', lineas[i].strip()) and lineas[i].strip() != 'l' and not lineas[i].strip().startswith(('TIP:', 'WARNING:', 'NOTE:')):
-                item = lineas[i].strip()
-                buf_num.append(item)
-                if item.endswith('.'):
+            if not l.endswith('.'):
+                while i < n and not re.match(r'^\d+\.\s', lineas[i].strip()) and lineas[i].strip() != 'l' and not lineas[i].strip().startswith(('TIP:', 'WARNING:', 'NOTE:')):
+                    item = lineas[i].strip()
+                    norm_item = re.sub(r'[^a-zA-Z0-9]', '', item).lower()
+                    if norm_item in temas_esta_pag:
+                        break
+                    buf_num.append(item)
+                    if item.endswith('.'):
+                        i += 1
+                        break
                     i += 1
-                    break
-                i += 1
             txt = _enriquecer_links(_reparar_palabras_rotas(re.sub(r'\s+', ' ', " ".join(buf_num))))
             elementos.append({"tipo": "numero", "texto": txt})
             continue
@@ -1086,6 +1145,9 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
             i += 1
             while i < n and not re.match(r'^\d+\.\s', lineas[i].strip()) and lineas[i].strip() != 'l' and not lineas[i].strip().startswith(('TIP:', 'WARNING:', 'NOTE:')):
                 item = lineas[i].strip()
+                norm_item = re.sub(r'[^a-zA-Z0-9]', '', item).lower()
+                if norm_item in temas_esta_pag:
+                    break
                 buf_callout.append(item)
                 i += 1
             txt = _reparar_palabras_rotas(re.sub(r'\s+', ' ', " ".join(buf_callout)))
@@ -1094,20 +1156,20 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
             elementos.append({"tipo": tipo_bloque, "texto": txt})
             continue
 
-        # Título principal de página (primer elemento de contenido)
+        # Título principal de página (primer elemento de contenido si no fue establecido por TOC)
         if not elementos:
             t = _reparar_palabras_rotas(re.sub(r'([a-z])([A-Z])', r'\1 \2', l).strip())
             elementos.append({"tipo": "h1", "texto": t})
             i += 1
             continue
 
-        # Subtítulo (h2) real: debe venir precedido de fin de oración, no ser URL ni preposición subordinada
+        # Subtítulo (h2) real: debe venir precedido de fin de oración, longitud mínima de 6 caracteres
         prev_texto = elementos[-1].get("texto", "") if elementos else ""
         es_cierre_previo = not prev_texto or prev_texto.endswith(('.', '!', '?', ':', '</div>', '</p>'))
         es_url = l.startswith(('http://', 'https://')) or '//' in l
         es_prep = bool(re.match(r'^(for|where|and|or|with|to|in|of|on|at|by|from|the|a|an)\b', l, re.I))
 
-        if es_cierre_previo and not es_url and not es_prep and len(l) < 55 and not l.endswith(('.', ',', ';')):
+        if es_cierre_previo and not es_url and not es_prep and 6 <= len(l) < 55 and not l.endswith(('.', ',', ';', ':')):
             t = _reparar_palabras_rotas(re.sub(r'([a-z])([A-Z])', r'\1 \2', l).strip())
             if elementos and elementos[-1].get("texto") == t:
                 i += 1
@@ -1121,11 +1183,14 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
         i += 1
         while i < n and lineas[i].strip() != 'l' and not re.match(r'^\d+\.\s', lineas[i].strip()) and not lineas[i].strip().startswith(('TIP:', 'WARNING:', 'NOTE:')):
             sig = lineas[i].strip()
+            norm_sig = re.sub(r'[^a-zA-Z0-9]', '', sig).lower()
+            if norm_sig in temas_esta_pag:
+                break
             buf_str = " ".join(buf_p).strip()
             if buf_str.endswith(('.', '!', '?')):
                 sig_es_url = sig.startswith(('http://', 'https://')) or '//' in sig
                 sig_es_prep = bool(re.match(r'^(for|where|and|or|with|to|in|of|on|at|by|from|the|a|an)\b', sig, re.I))
-                if not sig_es_url and not sig_es_prep and len(sig) < 55 and not sig.endswith(('.', ',', ';')):
+                if not sig_es_url and not sig_es_prep and len(sig) < 55 and not sig.endswith(('.', ',', ';', ':')):
                     break
             buf_p.append(sig)
             if sig.endswith('.'):
@@ -1140,7 +1205,164 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
     return {"running_header": running_header, "elementos": elementos}
 
 
-def _reconstruir_paginas_documento(paginas: list[dict], doc_meta: dict, indice_toc: dict | None = None) -> list[dict]:
+def _cargar_figuras_paginas(origen: Path | None) -> dict[int, list[dict]]:
+    """Carga el catálogo de figuras_paginas.json buscando en origen o en output/."""
+    candidatos: list[Path] = []
+    if origen:
+        candidatos.append(origen / "figuras_paginas.json")
+        candidatos.append(origen.parent.parent / "output" / origen.name / "figuras_paginas.json")
+        candidatos.append(origen.parent / "output" / origen.name / "figuras_paginas.json")
+        candidatos.append(DIR_SCRIPT / "output" / origen.name / "figuras_paginas.json")
+    candidatos.append(DIR_SCRIPT / "output" / "goanywhere_mft_user_guide_7_7_0" / "figuras_paginas.json")
+
+    for ruta in candidatos:
+        if ruta.is_file():
+            try:
+                datos = leer_json(ruta)
+                raw_pags = datos.get("paginas", {}) if isinstance(datos, dict) else {}
+                cat: dict[int, list[dict]] = {}
+                for k, v in raw_pags.items():
+                    try:
+                        cat[int(k)] = v
+                    except ValueError:
+                        pass
+                log.info("Catálogo de figuras cargado desde %s (%d páginas con figuras)", ruta, len(cat))
+                return cat
+            except Exception as e:
+                log.warning("No se pudo leer catálogo de figuras en %s: %s", ruta, e)
+    return {}
+
+
+def _sincronizar_figura(f: dict, dir_html: Path | None) -> str:
+    """Copia la figura a dir_html (subcarpeta figuras/) solo si no existe ya o su tamaño cambió."""
+    rel_archivo = f.get("archivo", "")
+    if not rel_archivo:
+        return ""
+    rel_normalizado = rel_archivo.replace("\\", "/")
+
+    if dir_html is None:
+        return rel_normalizado
+
+    dest = dir_html / rel_archivo
+    dest.parent.mkdir(parents=True, exist_ok=True)
+
+    cands: list[Path] = []
+    if f.get("archivo_absoluto"):
+        cands.append(Path(f["archivo_absoluto"]))
+    cands.append(DIR_SCRIPT / "output" / "goanywhere_mft_user_guide_7_7_0" / rel_archivo)
+    cands.append(DIR_SCRIPT / rel_archivo)
+
+    copiado = False
+    for orig in cands:
+        if orig.is_file():
+            if not dest.is_file() or dest.stat().st_size != orig.stat().st_size:
+                try:
+                    shutil.copy2(orig, dest)
+                    log.info("Figura sincronizada a reporte: %s -> %s", orig.name, dest)
+                except Exception as exc:
+                    log.warning("No se pudo copiar figura %s a %s: %s", orig, dest, exc)
+            copiado = True
+            break
+
+    if not copiado and not dest.is_file():
+        log.warning("Archivo de figura no localizado para %s", rel_archivo)
+
+    return rel_normalizado
+
+
+def _intercalar_figuras(elementos: list[dict], page_figs: list[dict], dir_html: Path | None) -> list[dict]:
+    """Intercala las figuras de la página en la secuencia de elementos según su posición vertical estimada."""
+    if not page_figs:
+        return elementos
+
+    figs_ordenadas = sorted(page_figs, key=lambda x: x.get("posicion_top_px", 0))
+
+    alturas = []
+    for e in elementos:
+        t = e.get("tipo")
+        txt = e.get("texto", "")
+        n_lin = max(1, len(txt) / 80.0)
+        if t == "h1":
+            h = 60.0
+        elif t == "h2":
+            h = 45.0
+        elif t in ("tip", "warning"):
+            h = 50.0 + n_lin * 22.0
+        elif t in ("bullet", "numero"):
+            h = 10.0 + n_lin * 26.0
+        else:
+            h = 10.0 + n_lin * 25.0
+        alturas.append(h + 15.0)
+
+    res: list[dict] = []
+    idx_fig = 0
+    n_figs = len(figs_ordenadas)
+    y_actual = 110.0
+
+    for i, e in enumerate(elementos):
+        h_e = alturas[i]
+        y_medio = y_actual + (h_e * 0.5)
+
+        while idx_fig < n_figs:
+            f = figs_ordenadas[idx_fig]
+            top_px = float(f.get("posicion_top_px", 0))
+            if i == 0 and e.get("tipo") == "h1" and top_px >= 90:
+                break
+            if top_px <= y_medio:
+                ruta_rel = _sincronizar_figura(f, dir_html)
+                res.append({
+                    "tipo": "figura",
+                    "id": f.get("id"),
+                    "archivo": ruta_rel,
+                    "ancho": f.get("ancho"),
+                    "alto": f.get("alto"),
+                    "posicion_top_px": top_px,
+                    "caption": f.get("caption", ""),
+                })
+                idx_fig += 1
+            else:
+                break
+
+        res.append(e)
+        y_actual += h_e
+
+    while idx_fig < n_figs:
+        f = figs_ordenadas[idx_fig]
+        ruta_rel = _sincronizar_figura(f, dir_html)
+        res.append({
+            "tipo": "figura",
+            "id": f.get("id"),
+            "archivo": ruta_rel,
+            "ancho": f.get("ancho"),
+            "alto": f.get("alto"),
+            "posicion_top_px": float(f.get("posicion_top_px", 0)),
+            "caption": f.get("caption", ""),
+        })
+        idx_fig += 1
+
+    # Regla tipográfica: una figura no debe intercalarse entre un encabezado H1/H2 y su primer contenido
+    resultado_ordenado: list[dict] = []
+    j = 0
+    m = len(res)
+    while j < m:
+        if j < m - 1 and res[j]["tipo"] in ("h1", "h2") and res[j + 1]["tipo"] == "figura":
+            resultado_ordenado.append(res[j + 1])
+            resultado_ordenado.append(res[j])
+            j += 2
+        else:
+            resultado_ordenado.append(res[j])
+            j += 1
+
+    return resultado_ordenado
+
+
+def _reconstruir_paginas_documento(
+    paginas: list[dict],
+    doc_meta: dict,
+    indice_toc: dict | None = None,
+    figuras_dict: dict[int, list[dict]] | None = None,
+    dir_html: Path | None = None
+) -> list[dict]:
     """Genera la lista de páginas reconstruidas fielmente a partir de paginas.json guiado por el TOC."""
     paginas_doc = []
 
@@ -1194,21 +1416,32 @@ def _reconstruir_paginas_documento(paginas: list[dict], doc_meta: dict, indice_t
             })
         else:
             cnt = _parsear_contenido_pagina(num, limpias, indice_toc)
+            elementos = cnt["elementos"]
+            page_figs = figuras_dict.get(num, []) if figuras_dict else []
+            if page_figs:
+                elementos = _intercalar_figuras(elementos, page_figs, dir_html)
+
             paginas_doc.append({
                 "tipo": "contenido",
                 "numero": num,
                 "running_header": cnt["running_header"],
-                "elementos": cnt["elementos"],
+                "elementos": elementos,
             })
 
     return paginas_doc
 
 
-def adaptar_paginas_json(datos: dict, limite: int | None, pagina_objetivo: int | None = None) -> dict:
+def adaptar_paginas_json(
+    datos: dict,
+    limite: int | None,
+    pagina_objetivo: int | None = None,
+    origen: Path | None = None,
+    dir_html: Path | None = None
+) -> dict:
     """
     Convierte el esquema de extracción botScribd (paginas.json) en una reconstrucción
-    textual directa y fiel del documento original, sin metadatos ni secciones artificiales.
-    Permite filtrar por una sola página puntual si se indica pagina_objetivo.
+    textual directa y fiel del documento original, consultando figuras_paginas.json
+    para intercalar figuras existentes y sincronizarlas al reporte HTML.
     """
     doc = datos.get("documento") or {}
     paginas = datos.get("paginas")
@@ -1218,6 +1451,8 @@ def adaptar_paginas_json(datos: dict, limite: int | None, pagina_objetivo: int |
     total = len(paginas)
     # Construir el índice canónico del TOC a partir del catálogo completo
     indice_toc = _construir_indice_toc(paginas)
+    # Cargar figuras asociadas a las páginas
+    figuras_dict = _cargar_figuras_paginas(origen)
 
     if pagina_objetivo:
         seleccion = [p for p in paginas if p.get("numero_pagina") == pagina_objetivo]
@@ -1236,7 +1471,13 @@ def adaptar_paginas_json(datos: dict, limite: int | None, pagina_objetivo: int |
     titulo = _txt(doc.get("titulo")) or _txt(doc.get("slug")) or "Documento reconstruido"
     version = _txt(doc.get("version")) or (RE_VERSION.search(titulo).group(0) if RE_VERSION.search(titulo) else "7.7.0")
 
-    paginas_doc = _reconstruir_paginas_documento(seleccion, doc, indice_toc)
+    paginas_doc = _reconstruir_paginas_documento(
+        seleccion,
+        doc,
+        indice_toc=indice_toc,
+        figuras_dict=figuras_dict,
+        dir_html=dir_html
+    )
 
     return {
         "modo_documento": True,
@@ -1548,7 +1789,13 @@ def fase_1_html(rutas: Rutas, args: argparse.Namespace) -> None:
         esquema = detectar_esquema(datos)
         log.info("[2/4] Esquema detectado: '%s'", esquema)
         if esquema == "paginas":
-            datos = adaptar_paginas_json(datos, args.limite_paginas, getattr(args, "pagina", None))
+            datos = adaptar_paginas_json(
+                datos,
+                args.limite_paginas,
+                getattr(args, "pagina", None),
+                origen=rutas.origen,
+                dir_html=rutas.html.parent
+            )
         elif args.limite_paginas:
             log.warning("--limite-paginas solo aplica al esquema paginas.json (se ignora).")
 

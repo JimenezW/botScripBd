@@ -695,6 +695,34 @@
       text-decoration: underline;
     }
 
+    /* Figuras e ilustraciones del documento */
+    .doc-figure {
+      margin: 14px auto 16px auto;
+      text-align: center;
+      display: block;
+      max-width: 100%;
+      page-break-inside: avoid;
+    }
+    .doc-figure img, .doc-figure-img {
+      max-width: 100%;
+      height: auto;
+      border: 1px solid #d2d6dc;
+      border-radius: 4px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .doc-figure--large img, .doc-figure--large .doc-figure-img {
+      max-width: 100%;
+      width: auto;
+    }
+    .doc-figure-caption {
+      margin-top: 6px;
+      font-size: 8pt;
+      color: #6b7280;
+      font-style: italic;
+    }
+
     /* Pie de página institucional común */
     .doc-page-footer {
       margin-top: auto;
@@ -825,6 +853,13 @@
               <strong class="warning-label">WARNING:</strong>
               <div class="warning-text">{{ elem.texto | replace("WARNING:", "") | trim | safe }}</div>
             </div>
+          {% elif elem.tipo == "figura" %}
+            <figure class="doc-figure{% if elem.ancho and elem.ancho > 550 %} doc-figure--large{% endif %}">
+              <img src="{{ elem.archivo }}" alt="{{ elem.caption or 'Figura del documento' }}" class="doc-figure-img">
+              {% if elem.caption %}
+              <figcaption class="doc-figure-caption">{{ elem.caption }}</figcaption>
+              {% endif %}
+            </figure>
           {% endif %}
         {% endfor %}
       </main>

@@ -22,6 +22,7 @@ scratch/
 downloads/
 *.tmp
 **/preview_pagina_*.html
+reporte/**/figuras/
 
 # Navegadores y artefactos de Playwright
 .playwright/
