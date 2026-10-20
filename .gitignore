@@ -23,6 +23,7 @@ downloads/
 *.tmp
 **/preview_pagina_*.html
 reporte/**/figuras/
+reporte/**/imagenes/
 
 # Navegadores y artefactos de Playwright
 .playwright/
