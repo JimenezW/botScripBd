@@ -1545,9 +1545,9 @@ def _intercalar_figuras(elementos: list[dict], page_figs: list[dict], dir_html: 
         elif t in ("tip", "warning"):
             h = 30.0 + n_lin * 18.0
         elif t in ("bullet", "numero", "subpaso"):
-            h = n_lin * 18.0 + 6.0
+            h = n_lin * 18.0 + 10.0
         else:
-            h = n_lin * 18.0 + 8.0
+            h = n_lin * 18.0 + 10.0
         alturas.append(h)
 
     res: list[dict] = []
@@ -1647,6 +1647,43 @@ def _intercalar_figuras(elementos: list[dict], page_figs: list[dict], dir_html: 
                     idx_fig += 1
                     y_actual += float(f_cand.get("alto") or 100) + 15.0
 
+        # 4b. Anclaje de figuras de pasos previos antes de oraciones referenciales ("look like the image below"):
+        if res and idx_fig < n_figs:
+            f_cand = figs_ordenadas[idx_fig]
+            top_cand = float(f_cand.get("posicion_top_px", 0))
+            txt_actual = e.get("texto", "")
+            if ("look like the image below" in txt_actual or "as shown below" in txt_actual) and top_cand < 650:
+                ruta_rel = _sincronizar_figura(f_cand, dir_html)
+                res.append({
+                    "tipo": "figura",
+                    "id": f_cand.get("id"),
+                    "archivo": ruta_rel,
+                    "ancho": f_cand.get("ancho"),
+                    "alto": f_cand.get("alto"),
+                    "posicion_top_px": top_cand,
+                    "caption": f_cand.get("caption", ""),
+                })
+                idx_fig += 1
+                y_actual += float(f_cand.get("alto") or 100) + 15.0
+
+        # 4c. Cierre de paso ilustrado: una figura que ilustra un paso previo con parrafo descriptivo no debe postergarse
+        if e.get("tipo") == "numero" and res and idx_fig < n_figs:
+            f_cand = figs_ordenadas[idx_fig]
+            top_cand = float(f_cand.get("posicion_top_px", 0))
+            if top_cand <= 400 and res[-1].get("tipo") == "p":
+                ruta_rel = _sincronizar_figura(f_cand, dir_html)
+                res.append({
+                    "tipo": "figura",
+                    "id": f_cand.get("id"),
+                    "archivo": ruta_rel,
+                    "ancho": f_cand.get("ancho"),
+                    "alto": f_cand.get("alto"),
+                    "posicion_top_px": top_cand,
+                    "caption": f_cand.get("caption", ""),
+                })
+                idx_fig += 1
+                y_actual += float(f_cand.get("alto") or 100) + 20.0
+
         # 5. Regla tipográfica para H2: si el elemento anterior fue un H2 y hay una figura que le corresponde
         if i > 0 and elementos[i - 1].get("tipo") == "h2" and idx_fig < n_figs:
             f_cand = figs_ordenadas[idx_fig]
@@ -1690,7 +1727,7 @@ def _intercalar_figuras(elementos: list[dict], page_figs: list[dict], dir_html: 
                 idx_fig += 1
                 y_actual += float(f_cand.get("alto") or 100) + 15.0
 
-        corte = y_actual + (h_e * 0.85)
+        corte = y_actual + (h_e * 1.15)
 
         while idx_fig < n_figs:
             f = figs_ordenadas[idx_fig]
