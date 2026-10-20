@@ -1724,7 +1724,7 @@ def _intercalar_figuras(elementos: list[dict], page_figs: list[dict], dir_html: 
                 ult_txt = ult_e.get("texto", "")
                 es_descriptivo_gadget = bool(
                     re.search(r'\b(Gadget\s+(displays|provides)|allows Admin Users to add, edit, or delete Dashboards)\b', ult_txt, re.I)
-                ) or ("the selected status" in ult_txt)
+                ) or ("the selected status" in ult_txt) or ("The Contacts tab allows you to store" in ult_txt)
                 if es_descriptivo_gadget:
                     ruta_rel = _sincronizar_figura(f_cand, dir_html)
                     res.append({
@@ -1786,7 +1786,10 @@ def _intercalar_figuras(elementos: list[dict], page_figs: list[dict], dir_html: 
 
             # No asignar si el elemento actual es un párrafo descriptivo que adoptará la figura en la regla 4
             sig_txt = e.get("texto", "")
-            if e.get("tipo") == "p" and re.search(r'\b(Gadget\s+(displays|provides)|allows Admin Users to add)\b', sig_txt, re.I):
+            if e.get("tipo") == "p" and (
+                re.search(r'\b(Gadget\s+(displays|provides)|allows Admin Users to add)\b', sig_txt, re.I)
+                or h2_actual_txt == "Contacts Tab"
+            ):
                 asignar_a_este_h2 = False
 
             # En páginas de configuración con pestañas (Tabs): no asignar la figura del Tab a un H2 de parámetro superior

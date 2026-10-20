@@ -82,3 +82,15 @@
 - [x] **4.1.** Recompilado y sincronizado el documento maestro [`reporte/goanywhere_mft_user_guide_7_7_0/preview.html`](file:///c:/IA_Proyectos/botScribd/reporte/goanywhere_mft_user_guide_7_7_0/preview.html) en 36.25 s.
 - [x] **4.2.** Verificación de cero comandos CLI o rutas mutiladas en todo el documento.
 - [x] **4.3.** Cambios protegidos bajo control de versiones Git.
+
+---
+
+## 5. Calibración Visual: Páginas con Pestañas de Contactos (Página 331 y análogas)
+
+| Caso | Alcance | Causa Raíz | Solución Aplicada en `compilador.py` | Estado |
+| :---: | :--- | :--- | :--- | :---: |
+| **Inversión de Figura en `Contacts Tab`** | Pág 331 (y 26 pestañas de recursos con formulario de contactos) | La regla 5 de H2 asignaba figuras inmediatas antes del párrafo descriptivo (*"The Contacts tab allows you..."*), cuando visualmente la figura ilustra el formulario y se ubica debajo de la oración. | Ajuste en Regla 4 y Regla 5 de `_intercalar_figuras` para que `Contacts Tab` postergue la figura y la ancle inmediatamente después de su párrafo descriptivo. | **RESUELTO [x]** |
+
+- [x] **5.1.** Validado en [`preview_pagina_0331.html`](file:///c:/IA_Proyectos/botScribd/reporte/goanywhere_mft_user_guide_7_7_0/preview_pagina_0331.html): encabezado `<h2>Contacts Tab</h2>`, seguido de `<p>The Contacts tab allows you to store the contact information for the Resource.</p>`, seguido de la figura `<figure class="doc-figure"><img src="figuras/fig_p0331_1.png" ...></figure>`, seguido de los parámetros `Name`, `Phone Number` y `Email`.
+- [x] **5.2.** Documento maestro [`preview.html`](file:///c:/IA_Proyectos/botScribd/reporte/goanywhere_mft_user_guide_7_7_0/preview.html) sincronizado y actualizado.
+- [x] **5.3.** Control de versiones protegido con Git commit.
