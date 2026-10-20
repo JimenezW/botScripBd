@@ -709,6 +709,38 @@ RE_PATRONES_DESFRAGMENTACION: list[tuple[re.Pattern, str]] = [
     (re.compile(r'\bKeyVault\b', re.I), 'Key Vault'),
     (re.compile(r'\bResourceReferencesAction\b', re.I), 'Resource References Action'),
     (re.compile(r'\bEditingResourcePermissions\b', re.I), 'Editing Resource Permissions'),
+
+    # Desfragmentación léxica de auditoría (Páginas 701-3712 y segundo barrido)
+    (re.compile(r'\bPDFFile\b', re.I), 'PDF File'),
+    (re.compile(r'\bRow\s+Set\s+Variable\b', re.I), 'RowSet Variable'),
+    (re.compile(r'\bEDIFACTTransaction\b', re.I), 'EDIFACT Transaction'),
+    (re.compile(r'\bFTPServer\b', re.I), 'FTP Server'),
+    (re.compile(r'\bForexample\b', re.I), 'For example'),
+    (re.compile(r'\bS\s+ervers\b', re.I), 'Servers'),
+    (re.compile(r'\bJVMMemory\b', re.I), 'JVM Memory'),
+    (re.compile(r'\bCop\s+y\s+Ta\s*sk\b', re.I), 'Copy Task'),
+    (re.compile(r'\bCop\s+y\s+Task\b', re.I), 'Copy Task'),
+    (re.compile(r'\bTa\s*sk\b', re.I), 'Task'),
+    (re.compile(r'\bBloc\s+ked\b', re.I), 'Blocked'),
+    (re.compile(r'\bRe\s+gular\b', re.I), 'Regular'),
+    (re.compile(r'\bUn\s+resolved\b', re.I), 'Unresolved'),
+    (re.compile(r'\bSe\s+cure\b', re.I), 'Secure'),
+    (re.compile(r'\bSoftwa\s+re\b', re.I), 'Software'),
+    (re.compile(r'\bCo\s+ntrol\b', re.I), 'Control'),
+    (re.compile(r'\bEx\s+pressions\b', re.I), 'Expressions'),
+    (re.compile(r'\bS\s+connections\b', re.I), 'SSL connections'),
+    (re.compile(r'\ba\s+pp\b', re.I), 'app'),
+    (re.compile(r'\ba\s+nd\b', re.I), 'and'),
+    (re.compile(r'\ba\s+ll\b', re.I), 'all'),
+    (re.compile(r'\ba\s+re\b', re.I), 'are'),
+    (re.compile(r'\ba\s+nother\b', re.I), 'another'),
+    (re.compile(r'\banoth\s+er\b', re.I), 'another'),
+    (re.compile(r'\bth\s+at\b', re.I), 'that'),
+    (re.compile(r'\bth\s+is\b', re.I), 'this'),
+    (re.compile(r'\bth\s+e\b', re.I), 'the'),
+    (re.compile(r'\bRSA\s+Secur\s+ID\b', re.I), 'RSA SecurID'),
+    (re.compile(r'\bSecur\s+ID\b', re.I), 'SecurID'),
+    (re.compile(r'\bAuthentic\s+ation\b', re.I), 'Authentication'),
 ]
 
 # Palabras objetivo para la heurística de letras desprendidas
@@ -757,7 +789,12 @@ def _reparar_palabras_rotas(texto: str) -> str:
     res = re.sub(r'([a-z])>([A-Z])', r'\1 > \2', res)
     # 4. Normalizar casos de protocolos y puntuación espaciada
     res = re.sub(r'\[protocol\]:\s*//', '[protocol]://', res)
-    res = re.sub(r'\s+([.,;:!?])', r'\1', res)
+    # Eliminar duplicación de comas accidentales (,, o , ,)
+    res = re.sub(r',\s*,+', ', ', res)
+    # Eliminar espacios antes de puntuación de cierre
+    res = re.sub(r'\s+([.,;:!?\)\]])', r'\1', res)
+    # Eliminar espacios tras signos de apertura
+    res = re.sub(r'([(\[{])\s+', r'\1', res)
     # 5. Normalizar duplicación accidental de puntos consecutivos
     res = re.sub(r'\.{2,}', '.', res)
     # 6. Normalizar etiquetas de marcado inline (preservar formato sin espacios espurios)
@@ -1336,9 +1373,12 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
             txt = _enriquecer_links(_reparar_palabras_rotas(re.sub(r'\s+', ' ', " ".join(buf_num))))
             m_num = re.match(r'^(\d+\.)\s*(.*)$', txt)
             if m_num:
-                elementos.append({"tipo": "numero", "marcador": m_num.group(1), "texto": m_num.group(2)})
+                cuerpo_step = m_num.group(2).strip()
+                if cuerpo_step:
+                    elementos.append({"tipo": "numero", "marcador": m_num.group(1), "texto": cuerpo_step})
             else:
-                elementos.append({"tipo": "numero", "texto": txt})
+                if txt.strip():
+                    elementos.append({"tipo": "numero", "texto": txt})
             continue
 
         # Subpasos alfabéticos (a. , b. , etc.)
@@ -1360,9 +1400,12 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
             txt = _enriquecer_links(_reparar_palabras_rotas(re.sub(r'\s+', ' ', " ".join(buf_sub))))
             m_sub = re.match(r'^([a-z]\.)\s*(.*)$', txt)
             if m_sub:
-                elementos.append({"tipo": "subpaso", "marcador": m_sub.group(1), "texto": m_sub.group(2)})
+                cuerpo_sub = m_sub.group(2).strip()
+                if cuerpo_sub:
+                    elementos.append({"tipo": "subpaso", "marcador": m_sub.group(1), "texto": cuerpo_sub})
             else:
-                elementos.append({"tipo": "subpaso", "texto": txt})
+                if txt.strip():
+                    elementos.append({"tipo": "subpaso", "texto": txt})
             continue
 
         # Bloques WARNING / TIP / NOTE
@@ -1400,7 +1443,9 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
             if sig_raw and sig_raw[0].islower() and sig_raw != 'l' and not (len(sig_raw) == 2 and sig_raw[1] == '.'):
                 sig_es_continuacion = True
 
-        if not elementos and not temas_esta_pag and not sig_es_continuacion and not es_frase and not ends_with_connector and 6 <= len(l) < 55 and not l.endswith(('.', ',', ';', ':')):
+        es_codigo_xml = bool(re.match(r'^\s*<[/!a-zA-Z\?]', l))
+
+        if not elementos and not temas_esta_pag and not sig_es_continuacion and not es_frase and not ends_with_connector and not es_codigo_xml and 6 <= len(l) < 55 and not l.endswith(('.', ',', ';', ':')):
             t = _reparar_palabras_rotas(re.sub(r'([a-z])([A-Z])', r'\1 \2', l).strip())
             tipo_inicial = "h2" if (' / ' in running_header and num not in inicios_tema) else "h1"
             elementos.append({"tipo": tipo_inicial, "texto": t})
@@ -1418,7 +1463,7 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
         es_prep = bool(re.match(r'^(for|where|and|or|with|to|in|of|on|at|by|from|the|a|an)\b', l, re.I))
         ends_with_connector = bool(re.search(r'\b(the|a|an|of|to|in|for|from|with|by|and|or|on)\s*$', l, re.I))
         es_campo_parametro = l.strip() in CAMPOS_PARAMETROS or l.strip().endswith('Tab')
-        if not sig_es_continuacion and es_cierre_previo and not es_url and not es_prep and not ends_with_connector and not es_frase and ((6 <= len(l) < 55) or es_campo_parametro) and not l.endswith(('.', ',', ';', ':')):
+        if not sig_es_continuacion and es_cierre_previo and not es_url and not es_prep and not ends_with_connector and not es_frase and not es_codigo_xml and ((6 <= len(l) < 55) or es_campo_parametro) and not l.endswith(('.', ',', ';', ':')):
             t = _reparar_palabras_rotas(re.sub(r'([a-z])([A-Z])', r'\1 \2', l).strip())
             if elementos and elementos[-1].get("texto") == t:
                 i += 1
@@ -1436,7 +1481,8 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
             if norm_sig in temas_esta_pag:
                 break
             buf_str = " ".join(buf_p).strip()
-            if buf_str.endswith(('.', '!', '?')):
+            # Si el búfer actual termina en signo de fin de oración o dos puntos, evaluar corte de párrafo
+            if buf_str.endswith(('.', '!', '?', ':')):
                 if sig in CAMPOS_PARAMETROS or sig.endswith('Tab') or sig.startswith('To customize the'):
                     break
                 sig_es_url = sig.startswith(('http://', 'https://')) or '//' in sig
@@ -1446,7 +1492,11 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
                     sig, re.I
                 ))
                 sig_termina_conector = bool(re.search(r'\b(the|a|an|of|to|in|for|from|with|by|and|or|on)\s*$', sig, re.I))
-                if not sig_es_url and not sig_es_prep and not sig_termina_conector and not sig_es_frase and len(sig) < 55 and not sig.endswith(('.', ',', ';', ':')):
+                sig_es_codigo = bool(re.match(r'^\s*<[/!a-zA-Z\?]', sig))
+                # Cortar si la siguiente línea introduce una nueva figura ("The following image...")
+                if sig.startswith(('The following image illustrates', 'The image below illustrates', 'The following screen demonstrates')):
+                    break
+                if not sig_es_url and not sig_es_prep and not sig_termina_conector and not sig_es_frase and not sig_es_codigo and len(sig) < 55 and not sig.endswith(('.', ',', ';', ':')):
                     break
             buf_p.append(sig)
             if sig.endswith('.'):
@@ -1455,10 +1505,29 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
             i += 1
 
         txt = _enriquecer_links(_reparar_palabras_rotas(re.sub(r'\s+', ' ', " ".join(buf_p))))
+        # Descartar párrafos huérfanos que contengan únicamente signos de puntuación
+        if re.match(r'^[.,;:!?\s]+$', txt):
+            if elementos and elementos[-1].get("tipo") in ("h1", "h2", "p", "bullet", "numero", "subpaso"):
+                prev_t = elementos[-1].get("texto", "")
+                if prev_t and not prev_t.endswith(('.', ':', '!', '?')):
+                    elementos[-1]["texto"] = prev_t + txt.strip()
+            continue
+
         if not elementos or elementos[-1].get("texto") != txt:
             elementos.append({"tipo": "p", "texto": txt})
 
-    return {"running_header": running_header, "elementos": elementos}
+    # Purgar cualquier paso o párrafo vacío residual al final del análisis
+    elementos_filtrados = []
+    for e in elementos:
+        if e.get("tipo") in ("numero", "subpaso") and not e.get("texto", "").strip():
+            continue
+        if e.get("tipo") in ("h1", "h2") and not e.get("texto", "").strip():
+            continue
+        if e.get("tipo") == "p" and re.match(r'^[.,;:!?\s]*$', e.get("texto", "")):
+            continue
+        elementos_filtrados.append(e)
+
+    return {"running_header": running_header, "elementos": elementos_filtrados}
 
 
 def _cargar_figuras_paginas(origen: Path | None) -> dict[int, list[dict]]:
@@ -1563,11 +1632,19 @@ def _intercalar_figuras(elementos: list[dict], page_figs: list[dict], dir_html: 
             pos_h2.append((idx_e, y_acum, el.get("texto", "")))
         y_acum += alturas[idx_e]
 
+    # Factor de escala vertical para páginas con alta densidad de figuras (>= 3 figuras)
+    # Evita que figuras subsecuentes queden con top_px inalcanzable y caigan todas al pie de página
+    h_tot_txt = sum(alturas)
+    alt_figs_tot = sum(float(f.get("alto") or 100) for f in figs_ordenadas)
+    scale_factor = 1.0
+    if n_figs >= 3 and h_tot_txt < 550:
+        scale_factor = max(0.45, min(1.0, (1000.0 - alt_figs_tot) / 1000.0))
+
     for i, e in enumerate(elementos):
         h_e = alturas[i]
 
-        # 1. Apertura superior al inicio de la página (Págs 70, 71, 75, 78, 87)
-        if i == 0 and idx_fig < n_figs:
+        # 1. Apertura superior al inicio de la página (Págs 70, 71, 78): solo si el primer elemento NO es h1
+        if i == 0 and idx_fig < n_figs and e.get("tipo") != "h1":
             f_top = figs_ordenadas[idx_fig]
             top_val = float(f_top.get("posicion_top_px", 0))
             if top_val <= 120 and float(f_top.get("alto") or 0) >= 280:
@@ -1732,12 +1809,12 @@ def _intercalar_figuras(elementos: list[dict], page_figs: list[dict], dir_html: 
         while idx_fig < n_figs:
             f = figs_ordenadas[idx_fig]
             top_px = float(f.get("posicion_top_px", 0))
-            if i == 0 and e.get("tipo") == "h1" and top_px >= 90:
+            if i == 0 and e.get("tipo") == "h1":
                 break
             # Un encabezado H2 abre una sección; ninguna figura de esa sección debe preceder al título
             if e.get("tipo") in ("h1", "h2") and top_px >= 200:
                 break
-            if top_px <= corte:
+            if (top_px * scale_factor) <= corte:
                 ruta_rel = _sincronizar_figura(f, dir_html)
                 res.append({
                     "tipo": "figura",
