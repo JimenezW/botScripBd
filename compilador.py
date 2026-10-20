@@ -1604,6 +1604,59 @@ def _cargar_figuras_paginas(origen: Path | None) -> dict[int, list[dict]]:
     return {}
 
 
+def _cargar_enlaces_internos(origen: Path | None) -> dict[int, list[dict]]:
+    """Carga el catálogo enlaces_internos.json buscando en origen."""
+    if not origen:
+        return {}
+    ruta = origen / "enlaces_internos.json"
+    if ruta.is_file():
+        try:
+            datos = leer_json(ruta)
+            raw_pags = datos.get("paginas", {}) if isinstance(datos, dict) else {}
+            cat: dict[int, list[dict]] = {}
+            for k, v in raw_pags.items():
+                try:
+                    cat[int(k)] = v
+                except ValueError:
+                    pass
+            log.info("Catálogo de enlaces internos cargado desde %s (%d páginas con enlaces)", ruta, len(cat))
+            return cat
+        except Exception as e:
+            log.warning("No se pudo leer catálogo de enlaces internos en %s: %s", ruta, e)
+    return {}
+
+
+def _vincular_enlaces_internos(elementos: list[dict], enlaces_pagina: list[dict]) -> list[dict]:
+    """Envuelve los subtítulos o términos exactos con etiquetas <a href="#page-N" class="doc-link">."""
+    if not enlaces_pagina:
+        return elementos
+
+    for elem in elementos:
+        t_elem = elem.get("texto", "")
+        if not t_elem:
+            continue
+        for en in enlaces_pagina:
+            txt_link = en.get("texto", "").strip()
+            dest_ref = en.get("destino_ref", "")
+            if not txt_link or not dest_ref or len(txt_link) < 3:
+                continue
+            # 1. Si el elemento es h1 o h2 y coincide con el texto del enlace (o contiene el enlace)
+            if elem.get("tipo") in ("h1", "h2"):
+                norm_elem = re.sub(r'[^a-zA-Z0-9]', '', t_elem).lower()
+                norm_link = re.sub(r'[^a-zA-Z0-9]', '', txt_link).lower()
+                if norm_elem == norm_link:
+                    elem["texto"] = f'<a href="{dest_ref}" class="doc-link">{t_elem}</a>'
+                    break
+            # 2. Si el elemento es un párrafo o viñeta, reemplazar mención textual exacta si no está ya enlazada
+            elif elem.get("tipo") in ("p", "bullet", "numero", "subpaso"):
+                if f'href="{dest_ref}"' not in t_elem:
+                    pat = re.compile(rf'\b({re.escape(txt_link)})\b', re.I)
+                    if pat.search(t_elem):
+                        elem["texto"] = pat.sub(rf'<a href="{dest_ref}" class="doc-link">\1</a>', t_elem, count=1)
+
+    return elementos
+
+
 def _sincronizar_figura(f: dict, dir_html: Path | None) -> str:
     """Copia la figura a dir_html (subcarpeta figuras/) solo si no existe ya o su tamaño cambió."""
     rel_archivo = f.get("archivo", "")
@@ -1933,6 +1986,7 @@ def _reconstruir_paginas_documento(
     doc_meta: dict,
     indice_toc: dict | None = None,
     figuras_dict: dict[int, list[dict]] | None = None,
+    enlaces_dict: dict[int, list[dict]] | None = None,
     dir_html: Path | None = None
 ) -> list[dict]:
     """Genera la lista de páginas reconstruidas fielmente a partir de paginas.json guiado por el TOC."""
@@ -1993,6 +2047,11 @@ def _reconstruir_paginas_documento(
             if page_figs:
                 elementos = _intercalar_figuras(elementos, page_figs, dir_html)
 
+            # Inyectar hipervínculos internos registrados en el catálogo
+            page_enlaces = enlaces_dict.get(num, []) if enlaces_dict else []
+            if page_enlaces:
+                elementos = _vincular_enlaces_internos(elementos, page_enlaces)
+
             paginas_doc.append({
                 "tipo": "contenido",
                 "numero": num,
@@ -2027,6 +2086,8 @@ def adaptar_paginas_json(
     indice_toc = _construir_indice_toc(paginas)
     # Cargar figuras asociadas a las páginas
     figuras_dict = _cargar_figuras_paginas(origen)
+    # Cargar hipervínculos internos del catálogo
+    enlaces_dict = _cargar_enlaces_internos(origen)
 
     if pagina_objetivo:
         seleccion = [p for p in paginas if p.get("numero_pagina") == pagina_objetivo]
@@ -2057,6 +2118,7 @@ def adaptar_paginas_json(
         doc,
         indice_toc=indice_toc,
         figuras_dict=figuras_dict,
+        enlaces_dict=enlaces_dict,
         dir_html=dir_html
     )
 
