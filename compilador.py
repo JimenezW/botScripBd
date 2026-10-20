@@ -1394,6 +1394,51 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
                 i += 1
             if buf_codigo:
                 elementos.append({"tipo": "codigo", "texto": "\n".join(buf_codigo)})
+                continue
+
+        # Detección y unificación de valores por defecto (Default Value: ...)
+        norm_val = re.sub(r'[^a-zA-Z0-9]', '', l).lower()
+        if norm_val in ('defaultvalue', 'defaultvalue:'):
+            buf_dv = ["Default Value:"]
+            i += 1
+            while i < n:
+                sig_dv = lineas[i].strip()
+                if not sig_dv or sig_dv in (':', ':-', '-'):
+                    i += 1
+                    continue
+                norm_sig = re.sub(r'[^a-zA-Z0-9]', '', sig_dv).lower()
+                if norm_sig in temas_esta_pag or sig_dv == 'l' or re.match(r'^\d+\.\s', sig_dv) or sig_dv.startswith(('TIP:', 'WARNING:', 'NOTE:')):
+                    break
+                # Si inicia con ':' (ej. ': false', ': Triple-DES')
+                if sig_dv.startswith(':'):
+                    cuerpo_dv = sig_dv.lstrip(':').strip()
+                    if cuerpo_dv:
+                        buf_dv.append(cuerpo_dv)
+                    i += 1
+                    # Continuar acumulando si la siguiente línea es explicación continua (ej. 'DSA private key...')
+                    while i < n:
+                        sig_cont = lineas[i].strip()
+                        if not sig_cont or sig_cont == 'l' or re.match(r'^\d+\.\s', sig_cont) or sig_cont.startswith(('TIP:', 'WARNING:', 'NOTE:')):
+                            break
+                        norm_cont = re.sub(r'[^a-zA-Z0-9]', '', sig_cont).lower()
+                        if norm_cont in temas_esta_pag or norm_cont.endswith('panel') or norm_cont.endswith('tab') or norm_cont == 'defaultvalue':
+                            break
+                        # Si parece el siguiente encabezado de parámetro (PascalCase corto sin punto), romper
+                        if len(sig_cont) < 45 and not sig_cont.endswith(('.', ',', ';')) and re.match(r'^[A-Z][a-zA-Z0-9\s]+$', sig_cont) and not re.match(r'^(for|where|and|or|with|to|in|of|on|at|by|from|the|a|an)\b', sig_cont, re.I):
+                            if i + 1 < n and ('Specify' in lineas[i+1] or 'Choose' in lineas[i+1] or 'Click' in lineas[i+1]):
+                                break
+                        buf_dv.append(sig_cont)
+                        if sig_cont.endswith('.'):
+                            i += 1
+                            break
+                        i += 1
+                    break
+                else:
+                    buf_dv.append(sig_dv)
+                    i += 1
+                    break
+            txt_dv = _reparar_palabras_rotas(re.sub(r'\s+', ' ', " ".join(buf_dv)))
+            elementos.append({"tipo": "p", "texto": txt_dv})
             continue
 
         # Detección de viñeta (bullet) 'l' (acumula oraciones completas hasta siguiente ítem o encabezado)
