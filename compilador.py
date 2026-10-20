@@ -2495,8 +2495,9 @@ def _generar_pdf_playwright(rutas: Rutas, args: argparse.Namespace) -> None:
         with sync_playwright() as p:
             browser = p.chromium.launch()
             page = browser.new_page()
+            page.set_default_timeout(600000)
             log.info("[2/3] Cargando documento HTML y recursos...")
-            page.goto(html_file.as_uri(), wait_until="networkidle", timeout=120000)
+            page.goto(html_file.as_uri(), wait_until="networkidle", timeout=600000)
             # Evaluar rangos de páginas si se solicitó
             page_ranges = getattr(args, "rango_pdf", None)
             kwargs: dict[str, Any] = {
