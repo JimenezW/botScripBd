@@ -709,6 +709,12 @@ RE_PATRONES_DESFRAGMENTACION: list[tuple[re.Pattern, str]] = [
     (re.compile(r'\bKeyVault\b', re.I), 'Key Vault'),
     (re.compile(r'\bResourceReferencesAction\b', re.I), 'Resource References Action'),
     (re.compile(r'\bEditingResourcePermissions\b', re.I), 'Editing Resource Permissions'),
+    (re.compile(r'\bImplicitSSL\b', re.I), 'Implicit SSL'),
+    (re.compile(r'\bExplicitSSL\b', re.I), 'Explicit SSL'),
+    (re.compile(r'\bEnabledSSLProtocols\b', re.I), 'Enabled SSL Protocols'),
+    (re.compile(r'\bSSLProtocols\b', re.I), 'SSL Protocols'),
+    (re.compile(r'\bSSLProtocol\b', re.I), 'SSL Protocol'),
+    (re.compile(r'\bSSLContextProtocol\b', re.I), 'SSL Context Protocol'),
 
     # Desfragmentación léxica de auditoría (Páginas 701-3712 y segundo barrido)
     (re.compile(r'\bPDFFile\b', re.I), 'PDF File'),
@@ -2451,8 +2457,105 @@ def _advertir_html_desactualizado(rutas: Rutas, nombre_datos: str | None) -> Non
             return
 
 
+def _generar_pdf_playwright(rutas: Rutas, args: argparse.Namespace) -> None:
+    """Genera el PDF a partir del HTML usando Playwright (Chromium headless)."""
+    try:
+        from playwright.sync_api import sync_playwright
+    except ImportError as exc:
+        raise CompiladorError("Playwright no está instalado. Ejecute: pip install playwright && playwright install chromium") from exc
+
+    html_file = rutas.html.resolve()
+    pdf_file = rutas.pdf.resolve()
+    pdf_file.parent.mkdir(parents=True, exist_ok=True)
+    temporal = pdf_file.with_name(pdf_file.name + ".tmp")
+
+    log.info("[1/3] Motor: Playwright (Chromium headless)")
+    log.info("      HTML de entrada: %s", html_file)
+    log.info("      Salida PDF     : %s", pdf_file)
+
+    t0 = time.perf_counter()
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch()
+            page = browser.new_page()
+            log.info("[2/3] Cargando documento HTML y recursos...")
+            page.goto(html_file.as_uri(), wait_until="networkidle", timeout=120000)
+            # Evaluar rangos de páginas si se solicitó
+            page_ranges = getattr(args, "rango_pdf", None)
+            kwargs: dict[str, Any] = {
+                "path": str(temporal),
+                "print_background": True,
+                "prefer_css_page_size": True
+            }
+            if page_ranges:
+                kwargs["page_ranges"] = page_ranges
+                log.info("      Rango de impresión configurado: %s", page_ranges)
+
+            log.info("      Renderizando PDF...")
+            page.pdf(**kwargs)
+            browser.close()
+
+        os.replace(temporal, pdf_file)
+    except PermissionError as exc:
+        temporal.unlink(missing_ok=True)
+        raise CompiladorError(
+            f"Sin permiso para escribir {pdf_file}. ¿Está abierto en un visor de PDF? ({exc})"
+        ) from exc
+    except Exception as exc:
+        temporal.unlink(missing_ok=True)
+        raise CompiladorError(f"Fallo al generar PDF con Playwright: {exc}") from exc
+
+    dt = time.perf_counter() - t0
+    tam = _tamano_legible(pdf_file.stat().st_size)
+    log.info("[3/3] PDF generado exitosamente: %s (%s en %.2f s)", pdf_file, tam, dt)
+
+
+def _generar_pdf_weasyprint(rutas: Rutas, args: argparse.Namespace) -> None:
+    """Genera el PDF a partir del HTML usando WeasyPrint."""
+    HTML = importar_weasyprint()
+    base_url = rutas.html.parent.as_uri() + "/"
+    log.info("[1/3] Motor: WeasyPrint")
+    log.info("      HTML de entrada: %s", rutas.html)
+    log.info("      base_url       : %s", base_url)
+
+    monitor = _MonitorWeasyPrint()
+    logger_wp = logging.getLogger("weasyprint")
+    logger_wp.addHandler(monitor)
+    try:
+        t0 = time.perf_counter()
+        documento = HTML(filename=str(rutas.html), base_url=base_url).render()
+        log.info("[2/3] Maquetación completa: %d páginas (%.2f s)",
+                 len(documento.pages), time.perf_counter() - t0)
+    except Exception as exc:
+        raise CompiladorError(f"WeasyPrint falló al maquetar el HTML: {exc}") from exc
+    finally:
+        logger_wp.removeHandler(monitor)
+
+    if monitor.recursos:
+        log.warning("WeasyPrint no pudo cargar %d recurso(s) referenciado(s).", len(monitor.recursos))
+        if args.estricto:
+            raise PrecondicionError("Modo estricto: existen recursos no resueltos en el HTML.")
+
+    temporal = rutas.pdf.with_name(rutas.pdf.name + ".tmp")
+    try:
+        rutas.pdf.parent.mkdir(parents=True, exist_ok=True)
+        documento.write_pdf(str(temporal))
+        os.replace(temporal, rutas.pdf)
+    except PermissionError as exc:
+        temporal.unlink(missing_ok=True)
+        raise CompiladorError(
+            f"Sin permiso para escribir {rutas.pdf}. ¿Está abierto en un visor de PDF? ({exc})"
+        ) from exc
+    except OSError as exc:
+        temporal.unlink(missing_ok=True)
+        raise CompiladorError(f"No se pudo escribir el PDF {rutas.pdf}: {exc}") from exc
+
+    log.info("[3/3] PDF generado: %s (%s, %d páginas, %d aviso(s) de WeasyPrint)",
+             rutas.pdf, _tamano_legible(rutas.pdf.stat().st_size), len(documento.pages), monitor.avisos)
+
+
 def fase_2_pdf(rutas: Rutas, args: argparse.Namespace) -> None:
-    with etapa("FASE 2 · Compilación a PDF (WeasyPrint)"):
+    with etapa("FASE 2 · Compilación de HTML a PDF"):
         # 1. Precondiciones
         if not rutas.html.is_file():
             raise PrecondicionError(
@@ -2463,47 +2566,17 @@ def fase_2_pdf(rutas: Rutas, args: argparse.Namespace) -> None:
             raise PrecondicionError(f"El HTML de entrada está vacío: {rutas.html}")
         _advertir_html_desactualizado(rutas, args.datos)
 
-        HTML = importar_weasyprint()
-        base_url = rutas.html.parent.as_uri() + "/"
-        log.info("[1/3] HTML de entrada: %s", rutas.html)
-        log.info("      base_url       : %s", base_url)
-
-        # 2. Maquetación
-        monitor = _MonitorWeasyPrint()
-        logger_wp = logging.getLogger("weasyprint")
-        logger_wp.addHandler(monitor)
-        try:
-            t0 = time.perf_counter()
-            documento = HTML(filename=str(rutas.html), base_url=base_url).render()
-            log.info("[2/3] Maquetación completa: %d páginas (%.2f s)",
-                     len(documento.pages), time.perf_counter() - t0)
-        except Exception as exc:
-            raise CompiladorError(f"WeasyPrint falló al maquetar el HTML: {exc}") from exc
-        finally:
-            logger_wp.removeHandler(monitor)
-
-        if monitor.recursos:
-            log.warning("WeasyPrint no pudo cargar %d recurso(s) referenciado(s).", len(monitor.recursos))
-            if args.estricto:
-                raise PrecondicionError("Modo estricto: existen recursos no resueltos en el HTML.")
-
-        # 3. Escritura atómica (evita PDFs corruptos si falla a mitad de camino)
-        temporal = rutas.pdf.with_name(rutas.pdf.name + ".tmp")
-        try:
-            rutas.pdf.parent.mkdir(parents=True, exist_ok=True)
-            documento.write_pdf(str(temporal))
-            os.replace(temporal, rutas.pdf)
-        except PermissionError as exc:
-            temporal.unlink(missing_ok=True)
-            raise CompiladorError(
-                f"Sin permiso para escribir {rutas.pdf}. ¿Está abierto en un visor de PDF? ({exc})"
-            ) from exc
-        except OSError as exc:
-            temporal.unlink(missing_ok=True)
-            raise CompiladorError(f"No se pudo escribir el PDF {rutas.pdf}: {exc}") from exc
-
-        log.info("[3/3] PDF generado: %s (%s, %d páginas, %d aviso(s) de WeasyPrint)",
-                 rutas.pdf, _tamano_legible(rutas.pdf.stat().st_size), len(documento.pages), monitor.avisos)
+        motor = getattr(args, "motor", "auto")
+        if motor == "weasyprint":
+            _generar_pdf_weasyprint(rutas, args)
+        elif motor == "playwright":
+            _generar_pdf_playwright(rutas, args)
+        else:  # auto: intentar playwright primero (máxima fidelidad y sin DLLs externas en Windows)
+            try:
+                _generar_pdf_playwright(rutas, args)
+            except Exception as err_pw:
+                log.warning("Playwright no disponible o falló (%s). Intentando WeasyPrint...", err_pw)
+                _generar_pdf_weasyprint(rutas, args)
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -2559,6 +2632,10 @@ def construir_parser() -> argparse.ArgumentParser:
                         help="Página inicial para compilar un rango específico (ej: --desde 101)")
     parser.add_argument("--hasta", type=_entero_positivo, default=None,
                         help="Página final para compilar un rango específico (ej: --hasta 180)")
+    parser.add_argument("--motor", type=str.lower, choices=("auto", "playwright", "weasyprint"), default="auto",
+                        help="Motor de renderizado a PDF (defecto: 'auto', usa Playwright si está disponible con fallback a WeasyPrint)")
+    parser.add_argument("--rango-pdf", dest="rango_pdf", default=None,
+                        help="Rango de páginas para exportar en PDF con Playwright (ej: '1-10', '40-55')")
     parser.add_argument("--estricto", action="store_true",
                         help="Aborta si hay imágenes/fuentes referenciadas que no existen")
     parser.add_argument("-v", "--verbose", action="store_true", help="Logs de depuración")

@@ -6,7 +6,7 @@
   <title>GoAnywhere MFT User Guide 7.7.0 · v7.7.0</title>
   <meta name="description" content="">
   <meta name="generator" content="compilador.py (Jinja2 3.1.6 + WeasyPrint)">
-  <meta name="dcterms.created" content="2026-10-20T10:15:30">
+  <meta name="dcterms.created" content="2026-10-20T10:28:39">
   <style>
     /* ═════════════════════ Fuentes locales (rutas relativas al HTML) ═════════════════════ */
 
@@ -13426,7 +13426,7 @@
             </figure>
             <h2 class="content-h2">Connection Type</h2>
             <h2 class="content-h2">Indicates if the connection type is</h2>
-            <p class="content-p">ImplicitSSL or ExplicitSSL. The preferred connection type is the more modern Explicit SSL standard, however some trading partners may still require Implicit SSL. If this field is left blank, then the default connection type of Explicit SSL will be used.</p>
+            <p class="content-p">Implicit SSL or Explicit SSL. The preferred connection type is the more modern Explicit SSL standard, however some trading partners may still require Implicit SSL. If this field is left blank, then the default connection type of Explicit SSL will be used.</p>
       </main>
 
       <footer class="doc-page-footer">
@@ -15121,7 +15121,7 @@
               <strong class="note-label">NOTE:</strong>
               <span class="note-text">The value specified in this field will not force the SSL protocol to be used. Other factors, such as the security providers installed in the JRE, are also taken into account.</span>
             </div>
-            <h2 class="content-h2">Enabled SSLProtocols</h2>
+            <h2 class="content-h2">Enabled SSL Protocols</h2>
             <p class="content-p">Specify a comma separated list of SSL/TLS protocol versions to allow. For example, to enable TLS 1.1 and TLS 1.2 only, specify TLSv1.1, TLSv1.2.</p>
             <p class="content-p">Likewise, to enable all versions of SSL/TLS, specify SSLv3, TLSv1, TLSv1.1, TLSv1.2, TLSv1.3 (if running Java 11).</p>
             <h2 class="content-h2">Timeout</h2>
@@ -16245,7 +16245,7 @@
             </div>
             <div class="content-bullet">
               <span class="bullet-bullet">&bull;</span>
-              <span class="bullet-text">ExplicitSSL - After initial authentication with the SMTP server, the connection is encrypted with SSL.</span>
+              <span class="bullet-text">Explicit SSL - After initial authentication with the SMTP server, the connection is encrypted with SSL.</span>
             </div>
       </main>
 
@@ -16264,7 +16264,7 @@
       <main class="doc-content-body">
             <div class="content-bullet content-bullet--sub">
               <span class="bullet-bullet">&bull;</span>
-              <span class="bullet-text">ImplicitSSL - The entire connection and transmission is encrypted using SSL.</span>
+              <span class="bullet-text">Implicit SSL - The entire connection and transmission is encrypted using SSL.</span>
             </div>
             <h2 class="content-h2">SSL Context Protocol</h2>
             <p class="content-p">Specify a protocol to use when creating the SSL Context. The value you need to specify here depends on the security providers you have installed in the JRE (Java Runtime Environment). In most cases, the default value (TLS) is appropriate. However, on some IBM JRE implementations, the default value will not work if the server you are connecting to does not support TLSv1.</p>
@@ -16272,7 +16272,7 @@
               <strong class="note-label">NOTE:</strong>
               <span class="note-text">The value specified in this field will not force the SSL protocol to be used. Other factors, such as the security providers installed in the JRE, are also taken into account.</span>
             </div>
-            <h2 class="content-h2">Enabled SSLProtocols</h2>
+            <h2 class="content-h2">Enabled SSL Protocols</h2>
             <p class="content-p">Specify a comma separated list of SSL/TLS protocol versions to allow. For example, to enable TLS 1.1 and TLS 1.2 only, specify TLSv1.1, TLSv1.2.</p>
             <p class="content-p">Likewise, to enable all versions of SSL/TLS, specify SSLv3, TLSv1, TLSv1.1, TLSv1.2, TLSv1.3 (if running Java 11).</p>
             <h2 class="content-h2">Timeout</h2>
@@ -73578,7 +73578,7 @@
               <span class="bullet-bullet">&bull;</span>
               <span class="bullet-text">No - Transmissions are not secured with SSL.</span>
             </div>
-            <h2 class="content-h2">SSLProtocol</h2>
+            <h2 class="content-h2">SSL Protocol</h2>
             <p class="content-p">From the drop-down list, select the appropriate option:</p>
             <div class="content-bullet">
               <span class="bullet-bullet">&bull;</span>
@@ -73588,7 +73588,7 @@
               <span class="bullet-bullet">&bull;</span>
               <span class="bullet-text">TLS - A new version of SSL, Transport Layer Security will be used to secure the transmission (default).</span>
             </div>
-            <h2 class="content-h2">Enabled SSLProtocols</h2>
+            <h2 class="content-h2">Enabled SSL Protocols</h2>
             <p class="content-p">Specify a comma separated list of SSL/TLS protocol versions to allow. For example, to enable TLS 1.1 and TLS 1.2 only, specify TLSv1.1, TLSv1.2. Likewise, to enable all versions of SSL/TLS, specify SSLv3, TLSv1, TLSv1.1, TLSv1.2, TLSv1.3 (if running Java 11).</p>
       </main>
 
@@ -74381,7 +74381,7 @@
             <h2 class="content-h2">Logout(Quit)Message</h2>
             <p class="content-p">The message to return to the client after the quit command is issued. By default, the logout message is "Goodbye".</p>
             <h2 class="content-h2">Listener</h2>
-            <p class="content-p">The listener specifies on which port the FTP service will monitor traffic. To add an FTP listener, complete the required fields and click the Save button. Click the AddSSL link in the page toolbar to add an Explicit SSL configuration or click the ExplicitSSL link (in the Configuration Outline) to modify existing SSL options. Click the Delete link in the page toolbar to delete this FTP Listener.</p>
+            <p class="content-p">The listener specifies on which port the FTP service will monitor traffic. To add an FTP listener, complete the required fields and click the Save button. Click the AddSSL link in the page toolbar to add an Explicit SSL configuration or click the Explicit SSL link (in the Configuration Outline) to modify existing SSL options. Click the Delete link in the page toolbar to delete this FTP Listener.</p>
       </main>
 
       <footer class="doc-page-footer">
@@ -74461,7 +74461,7 @@
             <figure class="doc-figure doc-figure--large">
               <img src="figuras/fig_p2003_1.png" alt="Figura del documento" class="doc-figure-img">
             </figure>
-            <h2 class="content-h2">SSLProtocol</h2>
+            <h2 class="content-h2">SSL Protocol</h2>
             <figure class="doc-figure doc-figure--large">
               <img src="figuras/fig_p2003_2.png" alt="Figura del documento" class="doc-figure-img">
             </figure>
@@ -74489,7 +74489,7 @@
       </header>
 
       <main class="doc-content-body">
-            <h2 class="content-h2">Enabled SSLProtocols</h2>
+            <h2 class="content-h2">Enabled SSL Protocols</h2>
             <p class="content-p">Specify a comma separated list of SSL/TLS protocol versions to allow. For example, to enable TLS 1.1 and TLS 1.2 only, specify TLSv1.1, TLSv1.2. Likewise, to enable all versions of SSL/TLS, specify SSLv3, TLSv1, TLSv1.1, TLSv1.2, TLSv1.3 (if running Java 11).</p>
             <h2 class="content-h2">Client Authentication</h2>
             <p class="content-p">The client authentication option indicates if SSL authentication is expected when a client connects to GoAnywhere. If a Web User or Web User Template is configured to authenticate using a certificate, the Optional or Required setting should be selected.</p>
@@ -74920,7 +74920,7 @@
 <span class="step-marker">b.</span>              <span class="step-body">Select Edit next to the FTPS Service.</span>
             </div>
             <div class="content-step content-step--sub">
-<span class="step-marker">c.</span>              <span class="step-body">On the left side of the page, select ImplicitSSL under the Configuration Outline.</span>
+<span class="step-marker">c.</span>              <span class="step-body">On the left side of the page, select Implicit SSL under the Configuration Outline.</span>
             </div>
             <div class="content-step content-step--sub">
 <span class="step-marker">d.</span>              <span class="step-body">Change the Client Authentication attribute to either Optional or Required:</span>
@@ -75145,7 +75145,7 @@
             <figure class="doc-figure">
               <img src="figuras/fig_p2023_2.png" alt="Figura del documento" class="doc-figure-img">
             </figure>
-            <p class="content-p">The listener specifies on which port the FTPS service will monitor traffic. To add an FTPS listener, complete the required fields and click the Save button. Click the ImplicitSSL link (in the Configuration Outline) to modify existing SSL options. Click the Delete link in the page toolbar to delete this FTPS Listener.</p>
+            <p class="content-p">The listener specifies on which port the FTPS service will monitor traffic. To add an FTPS listener, complete the required fields and click the Save button. Click the Implicit SSL link (in the Configuration Outline) to modify existing SSL options. Click the Delete link in the page toolbar to delete this FTPS Listener.</p>
             <h2 class="content-h2">Name</h2>
             <p class="content-p">Providing an identifiable name for the Listener helps identify it in the Configuration Outline list.</p>
       </main>
@@ -75191,7 +75191,7 @@
             <figure class="doc-figure doc-figure--large">
               <img src="figuras/fig_p2025_1.png" alt="Figura del documento" class="doc-figure-img">
             </figure>
-            <h2 class="content-h2">SSLProtocol</h2>
+            <h2 class="content-h2">SSL Protocol</h2>
             <figure class="doc-figure doc-figure--large">
               <img src="figuras/fig_p2025_2.png" alt="Figura del documento" class="doc-figure-img">
             </figure>
@@ -75219,7 +75219,7 @@
       </header>
 
       <main class="doc-content-body">
-            <h2 class="content-h2">Enabled SSLProtocols</h2>
+            <h2 class="content-h2">Enabled SSL Protocols</h2>
             <p class="content-p">Specify a comma separated list of SSL/TLS protocol versions to allow. For example, to enable TLS 1.1 and TLS 1.2 only, specify TLSv1.1, TLSv1.2. Likewise, to enable all versions of SSL/TLS, specify SSLv3, TLSv1, TLSv1.1, TLSv1.2, TLSv1.3 (if running Java 11).</p>
             <h2 class="content-h2">Client Authentication</h2>
             <p class="content-p">The client authentication option indicates if SSL authentication is expected when a client connects to GoAnywhere. If a Web User or Web User Template is configured to authenticate using a certificate, the Optional or Required setting should be selected.</p>
@@ -76607,7 +76607,7 @@
             <figure class="doc-figure doc-figure--large">
               <img src="figuras/fig_p2069_1.png" alt="Figura del documento" class="doc-figure-img">
             </figure>
-            <h2 class="content-h2">SSLProtocol</h2>
+            <h2 class="content-h2">SSL Protocol</h2>
             <p class="content-p">Specify the desired SSL protocol to be used for the GoFast Control Channel:</p>
             <div class="content-bullet">
               <span class="bullet-bullet">&bull;</span>
@@ -76617,7 +76617,7 @@
               <span class="bullet-bullet">&bull;</span>
               <span class="bullet-text">TLS - A new version of SSL, Transport Layer Security (default).</span>
             </div>
-            <h2 class="content-h2">Enabled SSLProtocols</h2>
+            <h2 class="content-h2">Enabled SSL Protocols</h2>
             <p class="content-p">Specify a comma separated list of SSL/TLS protocol versions to allow. For example, to enable TLS 1.1 and TLS 1.2 only, specify TLSv1.1, TLSv1.2. Likewise, to enable all versions of SSL/TLS, specify SSLv3, TLSv1, TLSv1.1, TLSv1.2, TLSv1.3.</p>
       </main>
 
@@ -77129,7 +77129,7 @@
               <span class="bullet-bullet">&bull;</span>
               <span class="bullet-text">On the Server Certificate page's PEM tab, you can view the Base64 encoded certificate in PEM format.</span>
             </div>
-            <h2 class="content-h2">SSLProtocol</h2>
+            <h2 class="content-h2">SSL Protocol</h2>
             <p class="content-p">Specify the desired SSL protocol to be used for the Agent Control Channel:</p>
             <div class="content-bullet">
               <span class="bullet-bullet">&bull;</span>
@@ -77139,7 +77139,7 @@
               <span class="bullet-bullet">&bull;</span>
               <span class="bullet-text">SSL - A traditional Secure Socket Layer protocol.</span>
             </div>
-            <h2 class="content-h2">Enabled SSLProtocols</h2>
+            <h2 class="content-h2">Enabled SSL Protocols</h2>
             <p class="content-p">Specify a comma separated list of SSL/TLS protocol versions to allow. For example, to enable TLS 1.1 and TLS 1.2 only, specify TLSv1.1, TLSv1.2.</p>
             <p class="content-p">Likewise, to enable all versions of SSL/TLS, specify SSLv3, TLSv1, TLSv1.1, TLSv1.2. It is recommended to use only TLSv1.2 to provide the best security.</p>
             <h2 class="content-h2">Enabled Cipher Suites</h2>
@@ -77665,7 +77665,7 @@
               <span class="bullet-bullet">&bull;</span>
               <span class="bullet-text">No - Transmissions are not secured with SSL.</span>
             </div>
-            <h2 class="content-h2">SSLProtocol</h2>
+            <h2 class="content-h2">SSL Protocol</h2>
             <p class="content-p">Select the appropriate option:</p>
             <div class="content-bullet">
               <span class="bullet-bullet">&bull;</span>
@@ -77675,7 +77675,7 @@
               <span class="bullet-bullet">&bull;</span>
               <span class="bullet-text">TLS - A new version of SSL, Transport Layer Security will be used to secure the transmission (default).</span>
             </div>
-            <h2 class="content-h2">Enabled SSLProtocols</h2>
+            <h2 class="content-h2">Enabled SSL Protocols</h2>
             <p class="content-p">Specify a comma separated list of SSL/TLS protocol versions to allow. For example, to enable TLS 1.1 and TLS 1.2 only, specify TLSv1.1, TLSv1.2. Likewise, to enable all versions of SSL/TLS, specify SSLv3, TLSv1, TLSv1.1, TLSv1.2, TLSv1.3 (if running Java 11).</p>
       </main>
 
@@ -78612,7 +78612,7 @@
             <figure class="doc-figure">
               <img src="figuras/fig_p2121_1.png" alt="Figura del documento" class="doc-figure-img">
             </figure>
-            <h2 class="content-h2">SSLProtocol</h2>
+            <h2 class="content-h2">SSL Protocol</h2>
             <p class="content-p">From the drop-down list, select the appropriate option:</p>
             <div class="content-bullet">
               <span class="bullet-bullet">&bull;</span>
@@ -78622,7 +78622,7 @@
               <span class="bullet-bullet">&bull;</span>
               <span class="bullet-text">TLS - A new version of SSL, Transport Layer Security will be used to secure the transmission (default).</span>
             </div>
-            <h2 class="content-h2">Enabled SSLProtocols</h2>
+            <h2 class="content-h2">Enabled SSL Protocols</h2>
             <p class="content-p">Specify a comma separated list of SSL/TLS protocol versions to allow. For example, to enable TLS 1.1 and TLS 1.2 only, specify TLSv1.1, TLSv1.2. Likewise, to enable all versions of SSL/TLS, specify SSLv3, TLSv1, TLSv1.1, TLSv1.2, TLSv1.3 (if running Java 11).</p>
       </main>
 
@@ -89852,7 +89852,7 @@
             </div>
             <div class="content-bullet">
               <span class="bullet-bullet">&bull;</span>
-              <span class="bullet-text">Password and Certificate - Web Users are authenticated by their standard Web User name and password along with a shared certificate that is both on the GoAnywhere server and the Web Users' local computer. FTPS(ImplicitSSL)</span>
+              <span class="bullet-text">Password and Certificate - Web Users are authenticated by their standard Web User name and password along with a shared certificate that is both on the GoAnywhere server and the Web Users' local computer. FTPS(Implicit SSL)</span>
             </div>
             <div class="content-bullet">
               <span class="bullet-bullet">&bull;</span>
@@ -93000,7 +93000,7 @@
             <p class="content-p">and password. If either is selected, type a SHA1 Fingerprint for the Web User's certificate in the box.</p>
             <div class="content-bullet">
               <span class="bullet-bullet">&bull;</span>
-              <span class="bullet-text">Password and Certificate - Web Users are authenticated by their standard Web User name and password along with a shared certificate that is both on the GoAnywhere server and the Web Users' local computer. FTPES(ExplicitSSL)</span>
+              <span class="bullet-text">Password and Certificate - Web Users are authenticated by their standard Web User name and password along with a shared certificate that is both on the GoAnywhere server and the Web Users' local computer. FTPES(Explicit SSL)</span>
             </div>
             <div class="content-bullet">
               <span class="bullet-bullet">&bull;</span>
@@ -93016,7 +93016,7 @@
             </div>
             <div class="content-bullet">
               <span class="bullet-bullet">&bull;</span>
-              <span class="bullet-text">Password and Certificate - Web Users are authenticated by their standard Web User name and password along with a shared certificate that is both on the GoAnywhere server and the Web Users' local computer. FTPS(ImplicitSSL)</span>
+              <span class="bullet-text">Password and Certificate - Web Users are authenticated by their standard Web User name and password along with a shared certificate that is both on the GoAnywhere server and the Web Users' local computer. FTPS(Implicit SSL)</span>
             </div>
             <div class="content-bullet">
               <span class="bullet-bullet">&bull;</span>
@@ -114614,15 +114614,15 @@
             </div>
             <div class="content-bullet">
               <span class="bullet-bullet">&bull;</span>
-              <span class="bullet-text">ExplicitSSL - After initial authentication with the SMTP server, the connection is encrypted with SSL.</span>
+              <span class="bullet-text">Explicit SSL - After initial authentication with the SMTP server, the connection is encrypted with SSL.</span>
             </div>
             <div class="content-bullet">
               <span class="bullet-bullet">&bull;</span>
-              <span class="bullet-text">ImplicitSSL - The entire connection and transmission is encrypted using SSL.</span>
+              <span class="bullet-text">Implicit SSL - The entire connection and transmission is encrypted using SSL.</span>
             </div>
             <h2 class="content-h2">SSL Context Protocol</h2>
             <p class="content-p">Specify a protocol to use when creating the SSL Context. The value you need to specify here depends on the security providers you have installed in the JRE (Java Runtime Environment). In most cases, the default value (TLS) should just work fine. However, on some IBM JRE implementations the default value would not work if the server you are connecting to does not support TLSv1.</p>
-            <h2 class="content-h2">Enabled SSLProtocols</h2>
+            <h2 class="content-h2">Enabled SSL Protocols</h2>
             <p class="content-p">Specify a comma separated list of SSL/TLS protocol versions to allow. For example, to enable TLS 1.1 and TLS 1.2 only, specify TLSv1.1, TLSv1.2.</p>
             <p class="content-p">Likewise, to enable all versions of SSL/TLS, specify SSLv3, TLSv1, TLSv1.1, TLSv1.2, TLSv1.3 (if running Java 11).</p>
       </main>
@@ -116095,7 +116095,7 @@
               <span class="bullet-bullet">&bull;</span>
               <span class="bullet-text">No - Transmissions are not secured with SSL.</span>
             </div>
-            <h2 class="content-h2">SSLProtocol</h2>
+            <h2 class="content-h2">SSL Protocol</h2>
             <p class="content-p">From the drop-down list, select the appropriate option:</p>
             <div class="content-bullet">
               <span class="bullet-bullet">&bull;</span>
@@ -116105,7 +116105,7 @@
               <span class="bullet-bullet">&bull;</span>
               <span class="bullet-text">TLS - A new version of SSL, Transport Layer Security will be used to secure the transmission (default).</span>
             </div>
-            <h2 class="content-h2">Enabled SSLProtocols</h2>
+            <h2 class="content-h2">Enabled SSL Protocols</h2>
             <p class="content-p">Specify a comma separated list of SSL/TLS protocol versions to allow. For example, to enable TLS 1.1 and TLS 1.2 only, specify TLSv1.1, TLSv1.2. Likewise, to enable all versions of SSL/TLS, specify SSLv3, TLSv1, TLSv1.1, TLSv1.2, TLSv1.3 (if running Java 11).</p>
             <h2 class="content-h2">Key Store Algorithm</h2>
             <p class="content-p">This field displays the certificate encoding algorithm. The field is pre- populated based on your installation. The available options are:</p>
@@ -116435,7 +116435,7 @@
             <div class="content-step">
 <span class="step-marker">3.</span>              <span class="step-body">Locate the following XML code:</span>
             </div>
-            <p class="content-p"><Server port="8005" shutdown="SHUTDOWN"> <Service name="admin"> <Connector name="default" port="8000"/> <Connector name="secured" port="8001" protocol="HTTP/1.1" SSLEnabled="true" truststoreAlgorithm="X509" enableLookups="false" disableUploadTimeout="true" scheme="https" secure="true" clientAuth="false" sslProtocol="TLS" keystoreFile="${admin.key store.file.secured}" keystorePass="${admin.key store.password.secured}" keystoreType="${admin.key store.type.secured}" keyAlias="${admin.key store.alias.secured}" truststoreFile="${admin.truststore.file.secured}" truststorePass="${admin.truststore.password.secured}" truststoreType="${admin.truststore.type.secured}" Key Location="Key Vault" keyName="goanywhere-sample"/> </Service> </Server></p>
+            <p class="content-p"><Server port="8005" shutdown="SHUTDOWN"> <Service name="admin"> <Connector name="default" port="8000"/> <Connector name="secured" port="8001" protocol="HTTP/1.1" SSLEnabled="true" truststoreAlgorithm="X509" enableLookups="false" disableUploadTimeout="true" scheme="https" secure="true" clientAuth="false" SSL Protocol="TLS" keystoreFile="${admin.key store.file.secured}" keystorePass="${admin.key store.password.secured}" keystoreType="${admin.key store.type.secured}" keyAlias="${admin.key store.alias.secured}" truststoreFile="${admin.truststore.file.secured}" truststorePass="${admin.truststore.password.secured}" truststoreType="${admin.truststore.type.secured}" Key Location="Key Vault" keyName="goanywhere-sample"/> </Service> </Server></p>
             <div class="content-step">
 <span class="step-marker">4.</span>              <span class="step-body">If you do not want to use the HTTP (only use HTTPS) connector, then comment out the line of code illustrated in blue.</span>
             </div>
