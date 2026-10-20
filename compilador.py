@@ -741,6 +741,12 @@ RE_PATRONES_DESFRAGMENTACION: list[tuple[re.Pattern, str]] = [
     (re.compile(r'\bRSA\s+Secur\s+ID\b', re.I), 'RSA SecurID'),
     (re.compile(r'\bSecur\s+ID\b', re.I), 'SecurID'),
     (re.compile(r'\bAuthentic\s+ation\b', re.I), 'Authentication'),
+
+    # Comandos CLI y rutas normalizadas
+    (re.compile(r'jstack\s*-\s*l\s*\[\s*PID\s*\]\s*>\s*threaddump\.txt', re.I), 'jstack -l [PID] > threaddump.txt'),
+    (re.compile(r'Kill\s*-\s*3\s*\[\s*PID\s*of\s*tomcat\s*\]\s*>\s*threaddump\.txt', re.I), 'kill -3 [PID of tomcat] > threaddump.txt'),
+    (re.compile(r'jdk1\.8\.0_\s+191', re.I), 'jdk1.8.0_191'),
+    (re.compile(r'\boption9\b', re.I), 'option 9'),
 ]
 
 # Palabras objetivo para la heurística de letras desprendidas
@@ -1462,8 +1468,8 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
         es_url = l.startswith(('http://', 'https://')) or '//' in l
         es_prep = bool(re.match(r'^(for|where|and|or|with|to|in|of|on|at|by|from|the|a|an)\b', l, re.I))
         ends_with_connector = bool(re.search(r'\b(the|a|an|of|to|in|for|from|with|by|and|or|on)\s*$', l, re.I))
-        es_campo_parametro = l.strip() in CAMPOS_PARAMETROS or l.strip().endswith('Tab')
-        if not sig_es_continuacion and es_cierre_previo and not es_url and not es_prep and not ends_with_connector and not es_frase and not es_codigo_xml and ((6 <= len(l) < 55) or es_campo_parametro) and not l.endswith(('.', ',', ';', ':')):
+        es_campo_parametro = l.strip() in CAMPOS_PARAMETROS or l.strip().endswith('Tab') or l.strip() in ('IBM i', 'AIX', 'Unix', 'Linux', 'macOS')
+        if not sig_es_continuacion and es_cierre_previo and not es_url and not es_prep and not ends_with_connector and not es_frase and not es_codigo_xml and ((4 <= len(l) < 55) or es_campo_parametro) and not l.endswith(('.', ',', ';', ':')):
             t = _reparar_palabras_rotas(re.sub(r'([a-z])([A-Z])', r'\1 \2', l).strip())
             if elementos and elementos[-1].get("texto") == t:
                 i += 1

@@ -54,3 +54,17 @@
   * Inversión H1 vs Figuras: **0 incidencias** (de 4 originales).
   * Glifos y tokens fragmentados auditados: **0 incidencias** (de 74 originales).
 - [x] **3.3.** Proteger el avance con Git commit.
+
+---
+
+## 3. Calibración Adicional: Páginas 3707 y 3708 ("How to Perform a Thread Dump")
+
+| Página | Hallazgo Detectado | Causa Raíz | Solución Aplicada en `compilador.py` | Estado |
+| :---: | :--- | :--- | :--- | :---: |
+| **3707** | Espaciado roto en path JDK y comando CLI | Scribd colapsa u oscila espacios en `jdk1.8.0_ 191` y `jstack-l[PID]>threaddump.txt`. | Reglas de normalización en `RE_PATRONES_DESFRAGMENTACION` para `jdk1.8.0_191` y `jstack -l [PID] > threaddump.txt`. | **RESUELTO [x]** |
+| **3708** | Subtítulo `IBM i` absorbido en párrafo | Umbral mínimo para `<h2>` era `len(l) >= 6`. `'IBM i'` tiene longitud 5, cayendo en el acumulador de párrafos. | Umbral ajustado a `4 <= len(l) < 55` y whitelist explícita para plataformas (`IBM i`, `AIX`, `Unix`, `Linux`, `macOS`). | **RESUELTO [x]** |
+| **3708** | Comando CLI y opción sin espacios | `Kill-3[PIDoftomcat]>threaddump.txt` y `option9` sin espacios estándar. | Reglas de normalización en `RE_PATRONES_DESFRAGMENTACION` para `kill -3 [PID of tomcat] > threaddump.txt` y `option 9`. | **RESUELTO [x]** |
+
+- [x] **3707-1.** Validado `preview_pagina_3707.html`: `<h1>How to Perform a Thread Dump</h1>`, `<h2>Windows</h2>`, paso 2 con `jdk1.8.0_191` y paso 3 con `jstack -l [PID] > threaddump.txt`.
+- [x] **3708-1.** Validado `preview_pagina_3708.html`: `<h2>Linux and Unix</h2>` con comando `kill -3 [PID of tomcat] > threaddump.txt`, y `<h2 class="content-h2">IBM i</h2>` correctamente clasificado con pasos 1-6 normalizados (`option 9`).
+- [x] **3708-2.** Sincronizado en maestro [`reporte/goanywhere_mft_user_guide_7_7_0/preview.html`](file:///c:/IA_Proyectos/botScribd/reporte/goanywhere_mft_user_guide_7_7_0/preview.html).
