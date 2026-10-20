@@ -672,6 +672,7 @@
       min-width: 16px;
       font-weight: 600;
     }
+    .content-note,
     .content-tip {
       background-color: #f2f9f4;
       border-left: 3.5pt solid #2e7d32;
@@ -683,6 +684,7 @@
       line-height: 1.45;
       color: #1c3821;
     }
+    .note-label,
     .tip-label {
       font-weight: 700;
       color: #2e7d32;
@@ -879,15 +881,20 @@
               {% if elem.marcador %}<span class="step-marker">{{ elem.marcador }}</span>{% endif %}
               <span class="step-body">{{ elem.texto | safe }}</span>
             </div>
+          {% elif elem.tipo == "note" %}
+            <div class="content-note">
+              <strong class="note-label">NOTE:</strong>
+              <span class="note-text">{{ elem.texto | safe }}</span>
+            </div>
           {% elif elem.tipo == "tip" %}
             <div class="content-tip">
               <strong class="tip-label">TIP:</strong>
-              <span class="tip-text">{{ elem.texto | replace("TIP:", "") | trim | safe }}</span>
+              <span class="tip-text">{{ elem.texto | safe }}</span>
             </div>
           {% elif elem.tipo == "warning" %}
             <div class="content-warning">
               <strong class="warning-label">WARNING:</strong>
-              <div class="warning-text">{{ elem.texto | replace("WARNING:", "") | trim | safe }}</div>
+              <div class="warning-text">{{ elem.texto | safe }}</div>
             </div>
           {% elif elem.tipo == "figura" %}
             <figure class="doc-figure{% if elem.ancho and elem.ancho > 550 %} doc-figure--large{% endif %}">

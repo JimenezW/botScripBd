@@ -1419,7 +1419,16 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
 
         # Bloques WARNING / TIP / NOTE
         if l.startswith(('WARNING:', 'TIP:', 'NOTE:')) or l in ('WARNING:', 'TIP:', 'NOTE:'):
-            es_warning = l.startswith('WARNING:') or l == 'WARNING:'
+            if l.startswith('WARNING:') or l == 'WARNING:':
+                tipo_bloque = "warning"
+                etiqueta = "WARNING:"
+            elif l.startswith('NOTE:') or l == 'NOTE:':
+                tipo_bloque = "note"
+                etiqueta = "NOTE:"
+            else:
+                tipo_bloque = "tip"
+                etiqueta = "TIP:"
+
             buf_callout = [l]
             i += 1
             while i < n and not re.match(r'^\d+\.\s', lineas[i].strip()) and not re.match(r'^[a-z]\.\s*', lineas[i].strip()) and lineas[i].strip() != 'l' and not lineas[i].strip().startswith(('TIP:', 'WARNING:', 'NOTE:')):
@@ -1435,8 +1444,7 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
             txt = _enriquecer_links(txt)
             cuerpo = re.sub(r'^(TIP|WARNING|NOTE)\s*:\s*', '', txt, flags=re.I).strip()
             if cuerpo:
-                tipo_bloque = "warning" if es_warning else "tip"
-                elementos.append({"tipo": tipo_bloque, "texto": txt})
+                elementos.append({"tipo": tipo_bloque, "etiqueta": etiqueta, "texto": cuerpo})
             continue
 
         es_frase = bool(re.match(
