@@ -767,6 +767,60 @@
       padding: 0;
     }
 
+    /* Tablas del documento */
+    .doc-table-wrapper {
+      margin: 10px 0 14px 0;
+      width: 100%;
+      overflow-x: auto;
+    }
+    .doc-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: Arial, "Helvetica Neue", sans-serif;
+      font-size: 9pt;
+      line-height: 1.4;
+      border: 1px solid #d2d6dc;
+    }
+    .doc-table th {
+      background: #b8bdc4;
+      color: #1a1a1a;
+      font-weight: 700;
+      font-size: 9.5pt;
+      text-align: left;
+      padding: 6px 10px;
+      border: 1px solid #a0a6b0;
+    }
+    .doc-table td {
+      padding: 8px 10px;
+      border: 1px solid #e2e8f0;
+      vertical-align: top;
+      color: #1a1a1a;
+    }
+    .doc-table tr:nth-child(even) td {
+      background: #f8fafc;
+    }
+    .doc-table .col-item {
+      font-weight: 600;
+      width: 18%;
+    }
+    .doc-table .col-usage {
+      width: 42%;
+    }
+    .doc-table .col-example {
+      width: 40%;
+      font-family: Arial, "Helvetica Neue", sans-serif;
+    }
+    .doc-table .code-expr {
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 8.8pt;
+      color: #0f2d4a;
+      background: #eef2f6;
+      padding: 1px 4px;
+      border-radius: 2px;
+      display: inline-block;
+      margin-bottom: 3px;
+    }
+
     /* Figuras e ilustraciones del documento */
     .doc-figure {
       margin: 14px auto 16px auto;
@@ -955,6 +1009,29 @@
             </figure>
           {% elif elem.tipo == "codigo" %}
             <pre class="content-code"><code>{{ elem.texto | safe }}</code></pre>
+          {% elif elem.tipo == "tabla" %}
+            <div class="doc-table-wrapper">
+              <table class="doc-table">
+                {% if elem.encabezados %}
+                <thead>
+                  <tr>
+                    {% for h in elem.encabezados %}
+                    <th>{{ h | safe }}</th>
+                    {% endfor %}
+                  </tr>
+                </thead>
+                {% endif %}
+                <tbody>
+                  {% for fila in elem.filas %}
+                  <tr>
+                    {% for celda in fila %}
+                    <td{% if elem.clases_columnas and loop.index0 < elem.clases_columnas|length %} class="{{ elem.clases_columnas[loop.index0] }}"{% endif %}>{{ celda | safe }}</td>
+                    {% endfor %}
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
           {% endif %}
         {% endfor %}
       </main>

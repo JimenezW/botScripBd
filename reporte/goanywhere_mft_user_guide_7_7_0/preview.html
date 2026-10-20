@@ -6,7 +6,7 @@
   <title>GoAnywhere MFT User Guide 7.7.0 · v7.7.0</title>
   <meta name="description" content="">
   <meta name="generator" content="compilador.py (Jinja2 3.1.6 + WeasyPrint)">
-  <meta name="dcterms.created" content="2026-10-20T16:48:14">
+  <meta name="dcterms.created" content="2026-10-20T17:03:21">
   <style>
     /* ═════════════════════ Fuentes locales (rutas relativas al HTML) ═════════════════════ */
 
@@ -609,6 +609,60 @@
       background: none;
       border: none;
       padding: 0;
+    }
+
+    /* Tablas del documento */
+    .doc-table-wrapper {
+      margin: 10px 0 14px 0;
+      width: 100%;
+      overflow-x: auto;
+    }
+    .doc-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: Arial, "Helvetica Neue", sans-serif;
+      font-size: 9pt;
+      line-height: 1.4;
+      border: 1px solid #d2d6dc;
+    }
+    .doc-table th {
+      background: #b8bdc4;
+      color: #1a1a1a;
+      font-weight: 700;
+      font-size: 9.5pt;
+      text-align: left;
+      padding: 6px 10px;
+      border: 1px solid #a0a6b0;
+    }
+    .doc-table td {
+      padding: 8px 10px;
+      border: 1px solid #e2e8f0;
+      vertical-align: top;
+      color: #1a1a1a;
+    }
+    .doc-table tr:nth-child(even) td {
+      background: #f8fafc;
+    }
+    .doc-table .col-item {
+      font-weight: 600;
+      width: 18%;
+    }
+    .doc-table .col-usage {
+      width: 42%;
+    }
+    .doc-table .col-example {
+      width: 40%;
+      font-family: Arial, "Helvetica Neue", sans-serif;
+    }
+    .doc-table .code-expr {
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 8.8pt;
+      color: #0f2d4a;
+      background: #eef2f6;
+      padding: 1px 4px;
+      border-radius: 2px;
+      display: inline-block;
+      margin-bottom: 3px;
     }
 
     /* Figuras e ilustraciones del documento */
@@ -25095,15 +25149,24 @@ C     )</code></pre>
       </header>
 
       <main class="doc-content-body">
-            <h2 class="content-h2">Item Usage Example</h2>
-            <p class="content-p">Strings Any text that is enclosed in single or double quotes is treated as a string value.</p>
-            <p class="content-p">If a string is enclosed with double quotes and a double quote is needed in the string value, it must be escaped by another double quote. If the string is enclosed in single quotes and a single quote is needed in the string value, it must be escaped by another single quote.</p>
-            <p class="content-p">The $ character is a special character used in projects to evaluate GoAnywhere's expression syntax.</p>
-            <p class="content-p">When used in a string, it must be escaped by another $, or the string will be treated as an expression. For example, printing the string 'Dollar $ign' will fail and would need to be entered as 'Dollar $$ign'.</p>
-            <p class="content-p">${x == 'enabled'} - Returns true if the variable "x" equals the string value 'enabled' ${x == "enabled"} - Returns true if the variable "x" equals the string value "enabled" ${length("x""x")} - Returns the value 3 since the double quote in the middle is escaped and resolves to one double quote.</p>
-            <p class="content-p">${length('x''x')} - Returns the value 3 since the single quote in the middle is escaped and resolves to one single quote.</p>
-            <p class="content-p">${length('x""x')} - Returns the value 4 as the double quotes in the middle are not escaped since the string is enclosed with single quotes.</p>
-            <p class="content-p">${length("x''x")} - Returns the value 4 as the single quotes in the middle are not escaped since the</p>
+            <div class="doc-table-wrapper">
+              <table class="doc-table">
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th>Usage</th>
+                    <th>Example</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="col-item">Strings</td>
+                    <td class="col-usage">Any text that is enclosed in single or double quotes is treated as a string value.<br><br>If a string is enclosed with double quotes and a double quote is needed in the string value, it must be escaped by another double quote. If the string is enclosed in single quotes and a single quote is needed in the string value, it must be escaped by another single quote.<br><br>The $ character is a special character used in projects to evaluate GoAnywhere's expression syntax. When used in a string, it must be escaped by another $, or the string will be treated as an expression. For example, printing the string 'Dollar $ign' will fail and would need to be entered as 'Dollar $$ign'.</td>
+                    <td class="col-example"><div style='margin-bottom:8px;'><span class='code-expr'>${x == 'enabled'}</span><br><small style='color:#4b5563;'>Returns true if the variable "x" equals the string value 'enabled'</small></div><div style='margin-bottom:8px;'><span class='code-expr'>${x == "enabled"}</span><br><small style='color:#4b5563;'>Returns true if the variable "x" equals the string value "enabled"</small></div><div style='margin-bottom:8px;'><span class='code-expr'>${length("x""x")}</span><br><small style='color:#4b5563;'>Returns the value 3 since the double quote in the middle is escaped and resolves to one double quote.</small></div><div style='margin-bottom:8px;'><span class='code-expr'>${length('x''x')}</span><br><small style='color:#4b5563;'>Returns the value 3 since the single quote in the middle is escaped and resolves to one single quote.</small></div><div style='margin-bottom:8px;'><span class='code-expr'>${length('x""x')}</span><br><small style='color:#4b5563;'>Returns the value 4 as the double quotes in the middle are not escaped since the string is enclosed with single quotes.</small></div><div><span class='code-expr'>${length("x''x")}</span><br><small style='color:#4b5563;'>Returns the value 4 as the single quotes in the middle are not escaped since the string is enclosed with double quotes.</small></div></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
       </main>
 
       <footer class="doc-page-footer">
@@ -25119,10 +25182,24 @@ C     )</code></pre>
       </header>
 
       <main class="doc-content-body">
-            <p class="content-p">ItemUsageExample string is enclosed with double quotes.</p>
-            <p class="content-p">Variables A variable refers to a value which may be a number, string or object. Multiple variables can be contained within one expression or function.</p>
-            <p class="content-p">${x} - Returns the value of variable "x" ${x + y} - Returns the result of variable "x" added to variable "y". Both variables must contain a numeric value.</p>
-            <p class="content-p">${x + 2} - Returns the result of variable "x" added to 2 ${concat(x,y)} - Returns the combined string values from variables x and y</p>
+            <div class="doc-table-wrapper">
+              <table class="doc-table">
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th>Usage</th>
+                    <th>Example</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="col-item">Variables</td>
+                    <td class="col-usage">A variable refers to a value which may be a number, string or object. Multiple variables can be contained within one expression or function.</td>
+                    <td class="col-example"><div style='margin-bottom:10px;'><span class='code-expr'>${x}</span><br><small style='color:#4b5563;'>Returns the value of variable "x"</small></div><div style='margin-bottom:10px;'><span class='code-expr'>${x + y}</span><br><small style='color:#4b5563;'>Returns the result of variable "x" added to variable "y". Both variables must contain a numeric value.</small></div><div style='margin-bottom:10px;'><span class='code-expr'>${x + 2}</span><br><small style='color:#4b5563;'>Returns the result of variable "x" added to 2</small></div><div><span class='code-expr'>${concat(x,y)}</span><br><small style='color:#4b5563;'>Returns the combined string values from variables x and y</small></div></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
       </main>
 
       <footer class="doc-page-footer">

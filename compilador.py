@@ -1323,6 +1323,71 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
     i = 0
     n = len(lineas)
 
+    # ═══════════════════════════════════════════════════════════════════════
+    # TABLA TÉCNICA: Expression Syntax (Item | Usage | Example)
+    # Páginas 591 y 592: Estructurar celdas y código de expresiones
+    # ═══════════════════════════════════════════════════════════════════════
+    if num == 591 and any('ItemUsageExample' in x or 'Item' in x for x in lineas[:4]):
+        # Construir fila para 'Strings'
+        uso_str = (
+            "Any text that is enclosed in single or double quotes is treated as a string value.<br><br>"
+            "If a string is enclosed with double quotes and a double quote is needed in the string value, "
+            "it must be escaped by another double quote. If the string is enclosed in single quotes and a single "
+            "quote is needed in the string value, it must be escaped by another single quote.<br><br>"
+            "The $ character is a special character used in projects to evaluate GoAnywhere's expression syntax. "
+            "When used in a string, it must be escaped by another $, or the string will be treated as an expression. "
+            "For example, printing the string 'Dollar $ign' will fail and would need to be entered as 'Dollar $$ign'."
+        )
+        ejemplos_str = (
+            "<div style='margin-bottom:8px;'><span class='code-expr'>${x == 'enabled'}</span><br>"
+            "<small style='color:#4b5563;'>Returns true if the variable \"x\" equals the string value 'enabled'</small></div>"
+            "<div style='margin-bottom:8px;'><span class='code-expr'>${x == \"enabled\"}</span><br>"
+            "<small style='color:#4b5563;'>Returns true if the variable \"x\" equals the string value \"enabled\"</small></div>"
+            "<div style='margin-bottom:8px;'><span class='code-expr'>${length(\"x\"\"x\")}</span><br>"
+            "<small style='color:#4b5563;'>Returns the value 3 since the double quote in the middle is escaped and resolves to one double quote.</small></div>"
+            "<div style='margin-bottom:8px;'><span class='code-expr'>${length('x''x')}</span><br>"
+            "<small style='color:#4b5563;'>Returns the value 3 since the single quote in the middle is escaped and resolves to one single quote.</small></div>"
+            "<div style='margin-bottom:8px;'><span class='code-expr'>${length('x\"\"x')}</span><br>"
+            "<small style='color:#4b5563;'>Returns the value 4 as the double quotes in the middle are not escaped since the string is enclosed with single quotes.</small></div>"
+            "<div><span class='code-expr'>${length(\"x''x\")}</span><br>"
+            "<small style='color:#4b5563;'>Returns the value 4 as the single quotes in the middle are not escaped since the string is enclosed with double quotes.</small></div>"
+        )
+        elementos.append({
+            "tipo": "tabla",
+            "encabezados": ["Item", "Usage", "Example"],
+            "clases_columnas": ["col-item", "col-usage", "col-example"],
+            "filas": [
+                ["Strings", uso_str, ejemplos_str]
+            ]
+        })
+        return {"running_header": running_header, "elementos": elementos}
+
+    if num == 592 and any('Variables' in x for x in lineas[:8]):
+        # Construir fila para 'Variables'
+        uso_var = (
+            "A variable refers to a value which may be a number, string or object. "
+            "Multiple variables can be contained within one expression or function."
+        )
+        ejemplos_var = (
+            "<div style='margin-bottom:10px;'><span class='code-expr'>${x}</span><br>"
+            "<small style='color:#4b5563;'>Returns the value of variable \"x\"</small></div>"
+            "<div style='margin-bottom:10px;'><span class='code-expr'>${x + y}</span><br>"
+            "<small style='color:#4b5563;'>Returns the result of variable \"x\" added to variable \"y\". Both variables must contain a numeric value.</small></div>"
+            "<div style='margin-bottom:10px;'><span class='code-expr'>${x + 2}</span><br>"
+            "<small style='color:#4b5563;'>Returns the result of variable \"x\" added to 2</small></div>"
+            "<div><span class='code-expr'>${concat(x,y)}</span><br>"
+            "<small style='color:#4b5563;'>Returns the combined string values from variables x and y</small></div>"
+        )
+        elementos.append({
+            "tipo": "tabla",
+            "encabezados": ["Item", "Usage", "Example"],
+            "clases_columnas": ["col-item", "col-usage", "col-example"],
+            "filas": [
+                ["Variables", uso_var, ejemplos_var]
+            ]
+        })
+        return {"running_header": running_header, "elementos": elementos}
+
     while i < n:
         l = lineas[i].strip()
         if not l:
