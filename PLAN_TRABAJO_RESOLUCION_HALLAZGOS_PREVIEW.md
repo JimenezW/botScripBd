@@ -68,3 +68,17 @@
 - [x] **3707-1.** Validado `preview_pagina_3707.html`: `<h1>How to Perform a Thread Dump</h1>`, `<h2>Windows</h2>`, paso 2 con `jdk1.8.0_191` y paso 3 con `jstack -l [PID] > threaddump.txt`.
 - [x] **3708-1.** Validado `preview_pagina_3708.html`: `<h2>Linux and Unix</h2>` con comando `kill -3 [PID of tomcat] > threaddump.txt`, y `<h2 class="content-h2">IBM i</h2>` correctamente clasificado con pasos 1-6 normalizados (`option 9`).
 - [x] **3708-2.** Sincronizado en maestro [`reporte/goanywhere_mft_user_guide_7_7_0/preview.html`](file:///c:/IA_Proyectos/botScribd/reporte/goanywhere_mft_user_guide_7_7_0/preview.html).
+
+---
+
+## 4. Tercer Barrido Sistemático Integral (Auditoría Semántica en Páginas 1 a 3,712)
+
+| Caso | Alcance | Causa Raíz | Solución Aplicada en `compilador.py` | Estado |
+| :---: | :--- | :--- | :--- | :---: |
+| **Comando CLI `setspn`** | Págs 2698, 2699 | Sintaxis de comando pegada (`setspn-s[protocol]...` y `>setspn-sHTTPS`). | Reglas en `RE_PATRONES_DESFRAGMENTACION` para `setspn -s [protocol]` y `> setspn -s HTTPS`. | **RESUELTO [x]** |
+| **Ruta/Variable `[AzureBlobStorage]`** | Pág 203 | Colapso léxico `[AzureBlobStorageresourcename]`. | Regla de desfragmentación `[AzureBlobStorage resourcename]`. | **RESUELTO [x]** |
+| **Duplicación léxica de glosario y términos** | Págs 594, 2098, 2394, 3642, 3646, 3647 | Spans hijos en capas repetían el término inicial (`Method Calls Method Calls`, `JKS JKS`, `SSH SSH`, `SSL SSL`, `Add Add`). | Desduplicación sistemática en post-procesamiento de `<p>` en `_parsear_contenido_pagina`. | **RESUELTO [x]** |
+
+- [x] **4.1.** Recompilado y sincronizado el documento maestro [`reporte/goanywhere_mft_user_guide_7_7_0/preview.html`](file:///c:/IA_Proyectos/botScribd/reporte/goanywhere_mft_user_guide_7_7_0/preview.html) en 36.25 s.
+- [x] **4.2.** Verificación de cero comandos CLI o rutas mutiladas en todo el documento.
+- [x] **4.3.** Cambios protegidos bajo control de versiones Git.

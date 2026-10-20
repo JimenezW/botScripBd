@@ -6,7 +6,7 @@
   <title>GoAnywhere MFT User Guide 7.7.0 · v7.7.0</title>
   <meta name="description" content="">
   <meta name="generator" content="compilador.py (Jinja2 3.1.6 + WeasyPrint)">
-  <meta name="dcterms.created" content="2026-10-19T20:41:20">
+  <meta name="dcterms.created" content="2026-10-19T20:56:16">
   <style>
     /* ═════════════════════ Fuentes locales (rutas relativas al HTML) ═════════════════════ */
 
@@ -12465,9 +12465,9 @@
             <h2 class="content-h2">Authentication Type</h2>
             <p class="content-p">Specify the authentication type to use for this request. Valid options are AccessKey and SASToken.</p>
             <h2 class="content-h2">Account Name</h2>
-            <p class="content-p">Specify the Storage Account Name found on the MicrosoftAzurePortal's > All Resources>[AzureBlobStorageresourcename]>AccessKeys tab.</p>
+            <p class="content-p">Specify the Storage Account Name found on the MicrosoftAzurePortal's > All Resources>[AzureBlobStorage resourcename]>AccessKeys tab.</p>
             <h2 class="content-h2">Account Key</h2>
-            <p class="content-p">Specify a Default Key found on the MicrosoftAzurePortal's > AllResources >[AzureBlobStorageresourcename]>AccessKeys tab. Microsoft generates two keys by default. Either default key can be used on the Azure Blob Storage resource.</p>
+            <p class="content-p">Specify a Default Key found on the MicrosoftAzurePortal's > AllResources >[AzureBlobStorage resourcename]>AccessKeys tab. Microsoft generates two keys by default. Either default key can be used on the Azure Blob Storage resource.</p>
             <h2 class="content-h2">SASToken</h2>
             <p class="content-p">Specify the SAS (Shared Access Signature) Token used to authenticate to the Azure account. The SAS Token is generated from the Azure Portal. See this page for instructions on generating a SAS token.</p>
             <h2 class="content-h2">Container</h2>
@@ -25229,7 +25229,7 @@
             <p class="content-p">${x == true} - Returns if the variable "x" is equal to true. The keyword true does not need quotes and will not be interpreted as a variable.</p>
             <h2 class="content-h2">${data[1] == null} -</h2>
             <p class="content-p">Returns true if the first column in the RowSet is null.</p>
-            <p class="content-p">Method Calls Method Calls are way to retrieve additional METADATA for a variable. To call a method, insert a colon and the method name immediately after the variable name. Each variable type (File List, Local File, Email List, etc) provides a different set of methods that are available. Refer to the Variables topic for a complete list of methods that are available for each variable type.</p>
+            <p class="content-p">Method Calls are way to retrieve additional METADATA for a variable. To call a method, insert a colon and the method name immediately after the variable name. Each variable type (File List, Local File, Email List, etc) provides a different set of methods that are available. Refer to the Variables topic for a complete list of methods that are available for each variable type.</p>
             <h2 class="content-h2">${File Info</h2>
             <p class="content-p">("C:\\file.txt"):size} - The FileInfo function returns the size of the specified file.</p>
       </main>
@@ -77650,7 +77650,7 @@
       </header>
 
       <main class="doc-content-body">
-            <p class="content-p">SSL SSL Enabled From the drop-down list, select the appropriate option:</p>
+            <p class="content-p">SSL Enabled From the drop-down list, select the appropriate option:</p>
             <figure class="doc-figure doc-figure--large">
               <img src="figuras/fig_p2098_1.png" alt="Figura del documento" class="doc-figure-img">
             </figure>
@@ -88086,7 +88086,7 @@
             <p class="content-p">Move an item on this page to a new Domain.</p>
             <h2 class="content-h2">Copy</h2>
             <p class="content-p">Copy an item on this page.</p>
-            <p class="content-p">Add Add an item to this page.</p>
+            <p class="content-p">Add an item to this page.</p>
             <h2 class="content-h2">View</h2>
             <p class="content-p">View the details of an item on this page.</p>
       </main>
@@ -98410,7 +98410,7 @@
 <span class="step-marker">a.</span>              <span class="step-body">Open a command prompt as an administrator by clicking Start, right-click CommandPrompt, and then click Runas administrator.</span>
             </div>
             <div class="content-step content-step--sub">
-<span class="step-marker">b.</span>              <span class="step-body">Execute the setspn command-line tool from the Command Prompt using the following syntax: setspn-s[protocol]/[web_client_url][account_domain]\\ [service_principal]</span>
+<span class="step-marker">b.</span>              <span class="step-body">Execute the setspn command-line tool from the Command Prompt using the following syntax: setspn -s [protocol]/[web_client_url][account_domain]\\ [service_principal]</span>
             </div>
       </main>
 
@@ -98441,7 +98441,7 @@
             </div>
             <div class="content-bullet">
               <span class="bullet-bullet">&bull;</span>
-              <span class="bullet-text">service_principal - The Service Principal Account name created in step 1. EXAMPLE: C:\\WINDOWS\\system32>setspn-sHTTPS/example.com DomainName\\dev-example</span>
+              <span class="bullet-text">service_principal - The Service Principal Account name created in step 1. EXAMPLE: C:\\WINDOWS\\system32> setspn -s HTTPS/example.com DomainName\\dev-example</span>
             </div>
             <div class="content-step">
 <span class="step-marker">3.</span>              <span class="step-body">Configure the GoAnywhere Kerberos Single Sign On settings:</span>
@@ -131568,7 +131568,7 @@
             <p class="content-p">J JCEServiceProvider A vendor that provides JCE (Java Cryptology Extensions). Example providers of JCEs are IBM and Sun. A JCE is a framework and implementation for encryption, key generation and key agreement, and Message Authentication Code (MAC) algorithms.</p>
             <h2 class="content-h2">JDBCdrivers</h2>
             <p class="content-p">A JDBC driver is a software component that enables a Java application to interact with a database.</p>
-            <p class="content-p">JKS JKS (Java Key Store) is Java's standard file format for storing certificates and keys.</p>
+            <p class="content-p">JKS (Java Key Store) is Java's standard file format for storing certificates and keys.</p>
             <h2 class="content-h2">JSON</h2>
             <h2 class="content-h2">Java Script Object Notation</h2>
       </main>
@@ -131672,7 +131672,7 @@
             <p class="content-p">SMS Short Message Service SMTP Simple Mail Transfer Protocol (SMTP) is an Internet standard for electronic mail (e-mail) transmission across Internet Protocol (IP) networks.</p>
             <h2 class="content-h2">SOAP</h2>
             <h2 class="content-h2">Simple Object Access Protocol</h2>
-            <p class="content-p">SSH SSH is an abbreviation for Secure Shell. SSH is both a computer program and an associated network protocol designed for encrypting communications between two untrusted hosts over a network. It utilizes Public keys to provide asymmetric cryptology.</p>
+            <p class="content-p">SSH is an abbreviation for Secure Shell. SSH is both a computer program and an associated network protocol designed for encrypting communications between two untrusted hosts over a network. It utilizes Public keys to provide asymmetric cryptology.</p>
       </main>
 
       <footer class="doc-page-footer">
@@ -131688,7 +131688,7 @@
       </header>
 
       <main class="doc-content-body">
-            <p class="content-p">SSL SSL is an abbreviation for Secure Sockets Layer. SSL is a security protocol for encrypting communications between two hosts over a network. SSL utilizes certificates to establish trust between the two hosts. SSL can be used over several network protocols, including FTP, HTTP and Email.</p>
+            <p class="content-p">SSL is an abbreviation for Secure Sockets Layer. SSL is a security protocol for encrypting communications between two hosts over a network. SSL utilizes certificates to establish trust between the two hosts. SSL can be used over several network protocols, including FTP, HTTP and Email.</p>
             <p class="content-p">SSO Single Sign On Symmetric A key system that utilizes a single key to encrypt and decrypt.</p>
             <h2 class="content-h2">Symmetric Cryptology</h2>
             <p class="content-p">A form of cryptology in which a single key can be used to encrypt and decrypt data. The key must be kept secret or the security is compromised. Also known as Secret key cryptology. ZIP password protection and AES encryption are both forms of Symmetric Cryptology.</p>

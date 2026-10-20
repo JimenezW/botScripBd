@@ -747,6 +747,9 @@ RE_PATRONES_DESFRAGMENTACION: list[tuple[re.Pattern, str]] = [
     (re.compile(r'Kill\s*-\s*3\s*\[\s*PID\s*of\s*tomcat\s*\]\s*>\s*threaddump\.txt', re.I), 'kill -3 [PID of tomcat] > threaddump.txt'),
     (re.compile(r'jdk1\.8\.0_\s+191', re.I), 'jdk1.8.0_191'),
     (re.compile(r'\boption9\b', re.I), 'option 9'),
+    (re.compile(r'setspn\s*-\s*s\s*\[protocol\]', re.I), 'setspn -s [protocol]'),
+    (re.compile(r'>setspn\s*-\s*s\s*HTTPS', re.I), '> setspn -s HTTPS'),
+    (re.compile(r'\[AzureBlobStorageresourcename\]', re.I), '[AzureBlobStorage resourcename]'),
 ]
 
 # Palabras objetivo para la heurística de letras desprendidas
@@ -1531,6 +1534,12 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
             continue
         if e.get("tipo") == "p" and re.match(r'^[.,;:!?\s]*$', e.get("texto", "")):
             continue
+        # Desduplicar términos técnicos absorbidos al inicio del párrafo (ej. "Method Calls Method Calls", "JKS JKS")
+        if e.get("tipo") == "p":
+            t_orig = e.get("texto", "")
+            t_limp = re.sub(r'^(Method Calls|JKS|SSH|SSL|Add)\s+\1\b', r'\1', t_orig)
+            if t_limp != t_orig:
+                e["texto"] = t_limp
         elementos_filtrados.append(e)
 
     return {"running_header": running_header, "elementos": elementos_filtrados}
