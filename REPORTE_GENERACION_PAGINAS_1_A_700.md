@@ -106,3 +106,26 @@ Los estándares aplicados en esta corrida quedaron incorporados formalmente en [
 
 1. `feat: generar paginas 101-180 en html con verificacion y anclaje de 37 figuras (Criterio 25)`
 2. `feat: generacion masiva de paginas 1 a 700 con supresion de callouts vacios y Criterio 26`
+3. `fix(compilador): perfeccionar regla 4c de cierre de pasos y validar barrido paginas 1-100 (12/12)`
+
+---
+
+## 6. Barrido y Verificación de Ajustes (Páginas 1 a 100)
+
+Tras la compilación de las 700 páginas, se ejecutó una auditoría exhaustiva mediante script DOM ([scratch/barrido_paginas_1_100.py](file:///c:/IA_Proyectos/botScribd/scratch/barrido_paginas_1_100.py)) para asegurar la no reaparición de inconsistencias previas:
+
+| Componente / Regla | Página(s) | Criterio Validado | Estado |
+| :--- | :--- | :--- | :---: |
+| **Intercalado de 4 figuras** | Pág. 57 | Figuras intercaladas entre pasos 3 y 4 con párrafos de extensión (no amontonadas al final). | **OK** |
+| **Prevención de falso H1 y anclaje** | Pág. 58 | Sin falso H1 en `Click the`; figura anclada antes de *What's Next?*. | **OK** |
+| **Doble figura y subtítulos** | Pág. 63 | Dos figuras posicionadas correctamente con H2 `User Name` y `Authentication Credentials`. | **OK** |
+| **Orden H2 y figuras / Desfragmentación** | Pág. 64 | H2 precede a cada figura; textos desfragmentados (`Access to the`, `Permission to`). | **OK** |
+| **Apertura superior de figuras** | Págs. 70, 71, 75 | Primer elemento hijo de `<main>` es la figura correspondiente (`figure.doc-figure`). | **OK** |
+| **Figura post-paso 5 y pre-H2** | Pág. 74 | Figura ventana *Done* situada después del paso 5 y antes del nuevo H2. | **OK** |
+| **Viñetas subordinadas** | Pág. 76 | Clases `.content-bullet--sub` con sangría de 32px respetadas (4 viñetas hijas). | **OK** |
+| **Figura puerto 443** | Pág. 78 | Figura del puerto 443 tras el párrafo narrativo y antes del subtítulo H2. | **OK** |
+| **Diferenciación de H2** | Pág. 81 | Sin falso H1 en `Upload (Write)`; H2s válidos conservados. | **OK** |
+| **Anclaje de Gadgets** | Págs. 89, 93-100 | Figuras de gadgets ubicadas inmediatamente tras el párrafo descriptivo y antes de *Optional Parameters*. | **OK** |
+
+**Resultado global:** **12/12 verificaciones exitosas** (100% de conformidad).
+
