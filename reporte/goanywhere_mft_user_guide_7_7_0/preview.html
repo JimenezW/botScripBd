@@ -6,7 +6,7 @@
   <title>GoAnywhere MFT User Guide 7.7.0 · v7.7.0</title>
   <meta name="description" content="">
   <meta name="generator" content="compilador.py (Jinja2 3.1.6 + WeasyPrint)">
-  <meta name="dcterms.created" content="2026-10-20T17:03:21">
+  <meta name="dcterms.created" content="2026-10-20T17:17:04">
   <style>
     /* ═════════════════════ Fuentes locales (rutas relativas al HTML) ═════════════════════ */
 
@@ -25218,9 +25218,24 @@ C     )</code></pre>
             <h2 class="content-h2">Item Usage Example</h2>
             <h2 class="content-h2">Row Set</h2>
             <h2 class="content-h2">Values</h2>
-            <p class="content-p">RowSet values can be accessed by placing the column name or column number inside of [] (square brackets).</p>
-            <p class="content-p">Column names must be placed inside double or single quotes. Additional functions, equations and other expressions can be placed in the square brackets.</p>
-            <p class="content-p">${data[1]} - Returns the value of the first column ${data[x]} - Returns the value of the column with a name contained in the variable "x" ${data['columnName']} - Returns the value of the column with a name of "columnName" ${data[length(x)]} - Returns the value of the column with an index that is the length of variable "x"</p>
+            <div class="doc-table-wrapper">
+              <table class="doc-table">
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th>Usage</th>
+                    <th>Example</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="col-item">RowSet Values</td>
+                    <td class="col-usage">RowSet values can be accessed by placing the column name or column number inside of [ ] (square brackets). Column names must be placed inside double or single quotes. Additional functions, equations and other expressions can be placed in the square brackets.</td>
+                    <td class="col-example"><div style='margin-bottom:10px;'><span class='code-expr'>${data[1]}</span><br><small style='color:#4b5563;'>Returns the value of the first column</small></div><div style='margin-bottom:10px;'><span class='code-expr'>${data[x]}</span><br><small style='color:#4b5563;'>Returns the value of the column with a name contained in the variable "x"</small></div><div style='margin-bottom:10px;'><span class='code-expr'>${data['columnName']}</span><br><small style='color:#4b5563;'>Returns the value of the column with a name of "columnName"</small></div><div><span class='code-expr'>${data[length(x)]}</span><br><small style='color:#4b5563;'>Returns the value of the column with an index that is the length of variable "x"</small></div></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
       </main>
 
       <footer class="doc-page-footer">
@@ -25237,105 +25252,31 @@ C     )</code></pre>
 
       <main class="doc-content-body">
             <h2 class="content-h2">Item Usage Example</h2>
-            <p class="content-p">Keywords The following keywords are reserved for use by expressions and cannot be used as variable names in GoAnywhere:</p>
-            <div class="content-bullet">
-              <span class="bullet-bullet">&bull;</span>
-              <span class="bullet-text">true</span>
-            </div>
-            <div class="content-bullet">
-              <span class="bullet-bullet">&bull;</span>
-              <span class="bullet-text">false</span>
-            </div>
-            <div class="content-bullet">
-              <span class="bullet-bullet">&bull;</span>
-              <span class="bullet-text">and</span>
-            </div>
-            <div class="content-bullet">
-              <span class="bullet-bullet">&bull;</span>
-              <span class="bullet-text">or</span>
-            </div>
-            <div class="content-bullet">
-              <span class="bullet-bullet">&bull;</span>
-              <span class="bullet-text">ne</span>
-            </div>
-            <div class="content-bullet">
-              <span class="bullet-bullet">&bull;</span>
-              <span class="bullet-text">eq</span>
-            </div>
-            <div class="content-bullet">
-              <span class="bullet-bullet">&bull;</span>
-              <span class="bullet-text">gt</span>
-            </div>
-            <div class="content-bullet">
-              <span class="bullet-bullet">&bull;</span>
-              <span class="bullet-text">lt</span>
-            </div>
-            <div class="content-bullet">
-              <span class="bullet-bullet">&bull;</span>
-              <span class="bullet-text">le</span>
-            </div>
-            <div class="content-bullet">
-              <span class="bullet-bullet">&bull;</span>
-              <span class="bullet-text">ge</span>
-            </div>
-            <div class="content-bullet">
-              <span class="bullet-bullet">&bull;</span>
-              <span class="bullet-text">not</span>
-            </div>
-            <div class="content-bullet">
-              <span class="bullet-bullet">&bull;</span>
-              <span class="bullet-text">null if</span>
-            </div>
-            <div class="content-bullet">
-              <span class="bullet-bullet">&bull;</span>
-              <span class="bullet-text">else</span>
-            </div>
-            <div class="content-bullet">
-              <span class="bullet-bullet">&bull;</span>
-              <span class="bullet-text">elseif</span>
-            </div>
-            <div class="content-bullet">
-              <span class="bullet-bullet">&bull;</span>
-              <span class="bullet-text">break</span>
-            </div>
-            <div class="content-bullet">
-              <span class="bullet-bullet">&bull;</span>
-              <span class="bullet-text">continue</span>
-            </div>
-            <div class="content-bullet">
-              <span class="bullet-bullet">&bull;</span>
-              <span class="bullet-text">do</span>
-            </div>
-            <div class="content-bullet">
-              <span class="bullet-bullet">&bull;</span>
-              <span class="bullet-text">while</span>
-            </div>
-            <div class="content-bullet">
-              <span class="bullet-bullet">&bull;</span>
-              <span class="bullet-text">dowhile</span>
-            </div>
-            <div class="content-bullet">
-              <span class="bullet-bullet">&bull;</span>
-              <span class="bullet-text">for</span>
-            </div>
-            <div class="content-bullet">
-              <span class="bullet-bullet">&bull;</span>
-              <span class="bullet-text">foreach</span>
-            </div>
-            <div class="content-bullet">
-              <span class="bullet-bullet">&bull;</span>
-              <span class="bullet-text">try</span>
-            </div>
-            <div class="content-bullet">
-              <span class="bullet-bullet">&bull;</span>
-              <span class="bullet-text">catch ${contains('x','x',false)} - False does not need quotes and will not be interpreted as a variable since it is a reserved keyword representing a boolean value.</span>
-            </div>
-            <p class="content-p">${x == true} - Returns if the variable "x" is equal to true. The keyword true does not need quotes and will not be interpreted as a variable.</p>
             <h2 class="content-h2">${data[1] == null} -</h2>
-            <p class="content-p">Returns true if the first column in the RowSet is null.</p>
-            <p class="content-p">Method Calls are way to retrieve additional METADATA for a variable. To call a method, insert a colon and the method name immediately after the variable name. Each variable type (File List, Local File, Email List, etc) provides a different set of methods that are available. Refer to the <a href="#page-662" class="doc-link">Variables</a> topic for a complete list of methods that are available for each variable type.</p>
             <h2 class="content-h2">${File Info</h2>
-            <p class="content-p">("C:\\file.txt"):size} - The FileInfo function returns the size of the specified file.</p>
+            <div class="doc-table-wrapper">
+              <table class="doc-table">
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th>Usage</th>
+                    <th>Example</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="col-item">Keywords</td>
+                    <td class="col-usage">The following keywords are reserved for use by expressions and cannot be used as variable names in GoAnywhere:<br><br><div style='display:grid; grid-template-columns: repeat(3, 1fr); gap: 4px; font-family: Consolas, monospace; font-size: 8.8pt; color: #1e293b; padding-left: 6px;'><div>&bull; true</div><div>&bull; le</div><div>&bull; continue</div><div>&bull; false</div><div>&bull; ge</div><div>&bull; do</div><div>&bull; and</div><div>&bull; not</div><div>&bull; while</div><div>&bull; or</div><div>&bull; null</div><div>&bull; dowhile</div><div>&bull; ne</div><div>&bull; if</div><div>&bull; for</div><div>&bull; eq</div><div>&bull; else</div><div>&bull; foreach</div><div>&bull; gt</div><div>&bull; elseif</div><div>&bull; try</div><div>&bull; lt</div><div>&bull; break</div><div>&bull; catch</div></div></td>
+                    <td class="col-example"><div style='margin-bottom:12px;'><span class='code-expr'>${contains('x', 'x', false)}</span><br><small style='color:#4b5563;'>False does not need quotes and will not be interpreted as a variable since it is a reserved keyword representing a boolean value.</small></div><div style='margin-bottom:12px;'><span class='code-expr'>${x == true}</span><br><small style='color:#4b5563;'>Returns if the variable "x" is equal to true. The keyword true does not need quotes and will not be interpreted as a variable.</small></div><div><span class='code-expr'>${data[1] == null}</span><br><small style='color:#4b5563;'>Returns true if the first column in the RowSet is null.</small></div></td>
+                  </tr>
+                  <tr>
+                    <td class="col-item">Method Calls</td>
+                    <td class="col-usage">Method Calls are way to retrieve additional METADATA for a variable. To call a method, insert a colon and the method name immediately after the variable name. Each variable type (File List, Local File, Email List, etc) provides a different set of methods that are available. Refer to the <strong>Variables</strong> topic for a complete list of methods that are available for each variable type.</td>
+                    <td class="col-example"><div><span class='code-expr'>${FileInfo("C:\file.txt"):size}</span><br><small style='color:#4b5563;'>The FileInfo function returns the size of the specified file.</small></div></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
       </main>
 
       <footer class="doc-page-footer">
@@ -25352,10 +25293,30 @@ C     )</code></pre>
 
       <main class="doc-content-body">
             <h2 class="content-h2">Item Usage Example</h2>
-            <p class="content-p">Grouping Parentheses can be placed in expressions to determine the order of precedence.</p>
-            <p class="content-p">${x+(2-1)} - Calculates the equation in parentheses first before adding it to the variable "x" ${(x >= 0 || y >= 0) && z == 'enabled'} - Returns true if "x" or "y" are greater than zero and "z" is equal to "enabled" Functions A <a href="#page-602" class="doc-link">function</a> is declared by placing parentheses after the function name. If parameters are needed, they should be placed inside the parentheses and must be separated by commas. Each parameter can contain additional functions, equations, strings, variables and any other expression value.</p>
             <h2 class="content-h2">${Substring('text', 3)} -</h2>
-            <p class="content-p">Returns the value "xt" from the Substring <a href="#page-602" class="doc-link">function</a> ${Concat('x','y','z')} - Returns the value "xyz" from the Concat function ${Length(Concat('x', 'y', 'z'))} - Returns the value 3 as the Concat function passed in "xyz" to the Length function</p>
+            <div class="doc-table-wrapper">
+              <table class="doc-table">
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th>Usage</th>
+                    <th>Example</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="col-item">Grouping</td>
+                    <td class="col-usage">Parentheses can be placed in expressions to determine the order of precedence.</td>
+                    <td class="col-example"><div style='margin-bottom:10px;'><span class='code-expr'>${x+(2-1)}</span><br><small style='color:#4b5563;'>Calculates the equation in parentheses first before adding it to the variable "x"</small></div><div><span class='code-expr'>${(x >= 0 || y >= 0) && z == 'enabled'}</span><br><small style='color:#4b5563;'>Returns true if "x" or "y" are greater than zero and "z" is equal to "enabled"</small></div></td>
+                  </tr>
+                  <tr>
+                    <td class="col-item">Functions</td>
+                    <td class="col-usage">A <strong>function</strong> is declared by placing parentheses after the function name. If parameters are needed, they should be placed inside the parentheses and must be separated by commas. Each parameter can contain additional functions, equations, strings, variables and any other expression value.</td>
+                    <td class="col-example"><div style='margin-bottom:8px;'><span class='code-expr'>${Substring('text', 3)}</span><br><small style='color:#4b5563;'>Returns the value "xt" from the Substring function</small></div><div style='margin-bottom:8px;'><span class='code-expr'>${Concat('x','y','z')}</span><br><small style='color:#4b5563;'>Returns the value "xyz" from the Concat function</small></div><div><span class='code-expr'>${Length(Concat('x', 'y', 'z'))}</span><br><small style='color:#4b5563;'>Returns the value 3 as the Concat function passed in "xyz" to the Length function</small></div></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
       </main>
 
       <footer class="doc-page-footer">
@@ -25372,7 +25333,24 @@ C     )</code></pre>
 
       <main class="doc-content-body">
             <h2 class="content-h2">Item Usage Example</h2>
-            <p class="content-p">Numbers An expression may contain whole numbers, decimals or numbers written in scientific notation. Numbers can optionally be formatted with <a href="#page-3586" class="doc-link">patterns</a> by using the FormatNumber(number, pattern) function.</p>
+            <div class="doc-table-wrapper">
+              <table class="doc-table">
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th>Usage</th>
+                    <th>Example</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="col-item">Numbers</td>
+                    <td class="col-usage">An expression may contain whole numbers, decimals or numbers written in scientific notation. Numbers can optionally be formatted with patterns by using the FormatNumber(number, pattern) function.</td>
+                    <td class="col-example"><div style='margin-bottom:8px;'><span class='code-expr'>${10.00}</span><br><small style='color:#4b5563;'>Represents the value 10.00</small></div><div style='margin-bottom:8px;'><span class='code-expr'>${2e2}</span><br><small style='color:#4b5563;'>Represents the value 200</small></div><div style='margin-bottom:8px;'><span class='code-expr'>${3.820954E6}</span><br><small style='color:#4b5563;'>Represents the value 3820954</small></div><div><span class='code-expr'>${FormatNumber(3820, '#,###')}</span><br><small style='color:#4b5563;'>Returns the value 3,820 as a string</small></div></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
       </main>
 
       <footer class="doc-page-footer">
@@ -25391,15 +25369,27 @@ C     )</code></pre>
             <h2 class="content-h2">Item Usage Example</h2>
             <h2 class="content-h2">Math</h2>
             <h2 class="content-h2">Operators</h2>
-            <p class="content-p">Valid math operators are:</p>
             <h2 class="content-h2">+ Addition</h2>
             <h2 class="content-h2">- Subtraction</h2>
             <h2 class="content-h2">* Multiplication</h2>
-            <p class="content-p">/ Division - When dividing numbers that result in a decimal value, the maximum number of digits to the right of the decimal point is 16.</p>
-            <p class="content-p">% Returns the remainder after the first operand is divided by the second operand.</p>
-            <p class="content-p">^ Raises the first operand to the power of the second operand.</p>
-            <p class="content-p">Expressions containing more than one mathematical step will calculate exponents, multiplication and division before addition and subtraction.</p>
-            <p class="content-p">${1+5-3*4/2} - Returns the value 0 ${2^3} - Returns the value of 2 taken to the power of 3 ${10%3} - Returns the value 1</p>
+            <div class="doc-table-wrapper">
+              <table class="doc-table">
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th>Usage</th>
+                    <th>Example</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="col-item">Math Operators</td>
+                    <td class="col-usage">Valid math operators are:<br><br><div style='margin-left: 6px; font-size: 8.8pt; line-height: 1.5; color: #1e293b;'><div><strong>+</strong> &nbsp; Addition</div><div><strong>-</strong> &nbsp; Subtraction</div><div><strong>*</strong> &nbsp; Multiplication</div><div><strong>/</strong> &nbsp; Division - When dividing numbers that result in a decimal value, the maximum number of digits to the right of the decimal point is 16.</div><div><strong>%</strong> &nbsp; Returns the remainder after the first operand is divided by the second operand.</div><div><strong>^</strong> &nbsp; Raises the first operand to the power of the second operand.</div></div><br>Expressions containing more than one mathematical step will calculate exponents, multiplication and division before addition and subtraction.</td>
+                    <td class="col-example"><div style='margin-bottom:10px;'><span class='code-expr'>${1+5-3*4/2}</span><br><small style='color:#4b5563;'>Returns the value 0</small></div><div style='margin-bottom:10px;'><span class='code-expr'>${2^3}</span><br><small style='color:#4b5563;'>Returns the value of 2 taken to the power of 3</small></div><div><span class='code-expr'>${10%3}</span><br><small style='color:#4b5563;'>Returns the value 1</small></div></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
       </main>
 
       <footer class="doc-page-footer">
@@ -25418,12 +25408,31 @@ C     )</code></pre>
             <h2 class="content-h2">Item Usage Example</h2>
             <h2 class="content-h2">Logical</h2>
             <h2 class="content-h2">Operators</h2>
-            <p class="content-p">Multiple conditions can be separated with the logical operators AND (&&) and OR (||). The AND operator requires both sides to evaluate to true. If the first operand evaluates to false the second operand is not evaluated. The OR operator requires that either side evaluates to true. If the first operand evaluates to true the second operand is not evaluated.</p>
             <h2 class="content-h2">${(x == y) || (1+1 eq 2)} -</h2>
-            <p class="content-p">Returns true as the second parameter is true ${true || EndsWith(x,'csv')} - The EndsWith function is not called because the first operand is evaluated to true and meets the condition.</p>
             <h2 class="content-h2">${(x+y==y+x) && (1+1 eq</h2>
-            <p class="content-p">2)} - Returns true as both sides evaluate to true Comparison Operators Both string and symbolic operators are supported.</p>
-            <p class="content-p">== or eq Equals <> or ne Not Equal < or lt Less Than >or gt Greater Than <= or le Less Than or Equal to >= or ge Greater Than or Equal to ${x == x} - Returns "true" as the left operand equals the operand on the right ${1+1 eq 2} - Returns "true" as the result of the left operand equals the value of the right operand</p>
+            <div class="doc-table-wrapper">
+              <table class="doc-table">
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th>Usage</th>
+                    <th>Example</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="col-item">Logical Operators</td>
+                    <td class="col-usage">Multiple conditions can be separated with the logical operators AND (&&) and OR (||). The AND operator requires both sides to evaluate to true. If the first operand evaluates to false the second operand is not evaluated. The OR operator requires that either side evaluates to true. If the first operand evaluates to true the second operand is not evaluated.</td>
+                    <td class="col-example"><div style='margin-bottom:8px;'><span class='code-expr'>${(x == y) || (1+1 eq 2)}</span><br><small style='color:#4b5563;'>Returns true as the second parameter is true</small></div><div style='margin-bottom:8px;'><span class='code-expr'>${true || EndsWith(x,'csv')}</span><br><small style='color:#4b5563;'>The EndsWith function is not called because the first operand is evaluated to true and meets the condition.</small></div><div><span class='code-expr'>${(x+y==y+x) && (1+1 eq 2)}</span><br><small style='color:#4b5563;'>Returns true as both sides evaluate to true</small></div></td>
+                  </tr>
+                  <tr>
+                    <td class="col-item">Comparison Operators</td>
+                    <td class="col-usage">Both string and symbolic operators are supported.<br><br><div style='margin-left: 6px; font-size: 8.8pt; line-height: 1.5; color: #1e293b;'><div><strong>==</strong> or <strong>eq</strong> &nbsp; Equals</div><div><strong>&lt;&gt;</strong> or <strong>ne</strong> &nbsp; Not Equal</div><div><strong>&lt;</strong> or <strong>lt</strong> &nbsp; Less Than</div><div><strong>&gt;</strong> or <strong>gt</strong> &nbsp; Greater Than</div><div><strong>&lt;=</strong> or <strong>le</strong> &nbsp; Less Than or Equal to</div><div><strong>&gt;=</strong> or <strong>ge</strong> &nbsp; Greater Than or Equal to</div></div></td>
+                    <td class="col-example"><div style='margin-bottom:10px;'><span class='code-expr'>${x == x}</span><br><small style='color:#4b5563;'>Returns "true" as the left operand equals the operand on the right</small></div><div><span class='code-expr'>${1+1 eq 2}</span><br><small style='color:#4b5563;'>Returns "true" as the result of the left operand equals the value of the right operand</small></div></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
       </main>
 
       <footer class="doc-page-footer">
@@ -33385,17 +33394,61 @@ C     )</code></pre>
       </header>
 
       <main class="doc-content-body">
-            <p class="content-p">The following table describes the Header and Footer replacement variables available in the Write Excel task:</p>
             <h2 class="content-h2">Replacement</h2>
             <h2 class="content-h2">Variable</h2>
             <h2 class="content-h2">Definition</h2>
-            <p class="content-p">&P Page number. &N Number of pages.</p>
-            <p class="content-p">&D Prints the system date. &T Prints the system time.</p>
-            <p class="content-p">&F The file name of the Excel file.</p>
-            <p class="content-p">&Z The file path where the Excel file was created.</p>
-            <p class="content-p">&A Name of the sheet. &U Begins and ends underline text. For example, "&U This is &U text" will print "This is text".</p>
-            <p class="content-p">&B Begins and ends bold text. For example, "&B This is &B text" will print " Thisis text".</p>
-            <p class="content-p">&I Begins and ends italicized text. For example, "&I This is &I text" will print " This is text".</p>
+            <div class="doc-table-wrapper">
+              <table class="doc-table">
+                <thead>
+                  <tr>
+                    <th>Replacement Variable</th>
+                    <th>Definition</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="col-item">&amp;P</td>
+                    <td class="col-usage">Page number.</td>
+                  </tr>
+                  <tr>
+                    <td class="col-item">&amp;N</td>
+                    <td class="col-usage">Number of pages.</td>
+                  </tr>
+                  <tr>
+                    <td class="col-item">&amp;D</td>
+                    <td class="col-usage">Prints the system date.</td>
+                  </tr>
+                  <tr>
+                    <td class="col-item">&amp;T</td>
+                    <td class="col-usage">Prints the system time.</td>
+                  </tr>
+                  <tr>
+                    <td class="col-item">&amp;F</td>
+                    <td class="col-usage">The file name of the Excel file.</td>
+                  </tr>
+                  <tr>
+                    <td class="col-item">&amp;Z</td>
+                    <td class="col-usage">The file path where the Excel file was created.</td>
+                  </tr>
+                  <tr>
+                    <td class="col-item">&amp;A</td>
+                    <td class="col-usage">Name of the sheet.</td>
+                  </tr>
+                  <tr>
+                    <td class="col-item">&amp;U</td>
+                    <td class="col-usage">Begins and ends underline text. For example, "&amp;U This is &amp;U text" will print "<u>This is text</u>".</td>
+                  </tr>
+                  <tr>
+                    <td class="col-item">&amp;B</td>
+                    <td class="col-usage">Begins and ends bold text. For example, "&amp;B This is &amp;B text" will print "<strong>This is text</strong>".</td>
+                  </tr>
+                  <tr>
+                    <td class="col-item">&amp;I</td>
+                    <td class="col-usage">Begins and ends italicized text. For example, "&amp;I This is &amp;I text" will print "<em>This is text</em>".</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
       </main>
 
       <footer class="doc-page-footer">
@@ -103521,10 +103574,50 @@ C     )</code></pre>
             <h2 class="content-h2">SFTP gamft-sftp@46583 SFTP Audit Log</h2>
             <h2 class="content-h2">Go Drive gamft-godrive@46583 Go Drive Audit Log</h2>
             <h2 class="content-h2">Go Fast gamft-gofast@46583 Go Fast Audit Log</h2>
-            <p class="content-p">Structured data parameters are split in two columns. The column on the left displays the available parameters and the column on the right displays the parameters that are sent to the Syslog server. Click to select parameters and then use the direction buttons between the columns to move parameters to the appropriate side. Syslog messages will not be sent for a protocol when there are no parameters selected.</p>
-            <p class="content-p">The following table lists the optional structured data parameters that can be selected for each SD-ID:</p>
             <h2 class="content-h2">SD-IDData</h2>
-            <p class="content-p">Parameters gamft- admin@46583 entry_id entry_type comp_type comp_id admin_ user_id admin_ user_name created_on override_ message comp_name field_label old_value new_value domain</p>
+            <div class="doc-table-wrapper">
+              <table class="doc-table">
+                <thead>
+                  <tr>
+                    <th>Protocol</th>
+                    <th>SD-ID</th>
+                    <th>Type</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="col-item">AS2</td>
+                    <td class="col-item">gamft-as2@46583</td>
+                    <td class="col-usage">AS2 Audit Log</td>
+                  </tr>
+                  <tr>
+                    <td class="col-item">FTP</td>
+                    <td class="col-item">gamft-ftp@46583</td>
+                    <td class="col-usage">FTP Audit Log</td>
+                  </tr>
+                  <tr>
+                    <td class="col-item">FTPS</td>
+                    <td class="col-item">gamft-ftps@46583</td>
+                    <td class="col-usage">FTPS Audit Log</td>
+                  </tr>
+                  <tr>
+                    <td class="col-item">SFTP</td>
+                    <td class="col-item">gamft-sftp@46583</td>
+                    <td class="col-usage">SFTP Audit Log</td>
+                  </tr>
+                  <tr>
+                    <td class="col-item">GoDrive</td>
+                    <td class="col-item">gamft-godrive@46583</td>
+                    <td class="col-usage">GoDrive Audit Log</td>
+                  </tr>
+                  <tr>
+                    <td class="col-item">GoFast</td>
+                    <td class="col-item">gamft-gofast@46583</td>
+                    <td class="col-usage">GoFast Audit Log</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
       </main>
 
       <footer class="doc-page-footer">
@@ -128870,10 +128963,71 @@ C     )</code></pre>
 
       <main class="doc-content-body">
             <h1 class="content-h1">Support ed File Encodings</h1>
-            <p class="content-p">The following table lists file encodings supported by GoAnywhere. Support for encodings may vary depending on the version of JVM installed and which region the host machine is marked as residing in.</p>
             <h2 class="content-h2">Name Aliasor Alisases Description</h2>
             <h2 class="content-h2">CESU-8 CESU8 cs CESU-8 Unicode CESU-8</h2>
-            <p class="content-p">IBM00858 cp858 858 PC-Multilingual-850+euro cp00858 ccsid00858 Variant of Cp850 with Euro character IBM437 ibm437 437 ibm-437 cspc8codepage437 cp437 windows-437 MS-DOS United States, Australia, New Zealand, South Africa IBM775 ibm-775 ibm775 775 cp775 PC Baltic IBM850 cp850 cspc850multilingual ibm850 850 ibm- 850 MS-DOS Latin-1 IBM852 csPCp852 ibm-852 ibm852 852 cp852 MS-DOS Latin-2 IBM855 ibm855 855 ibm-855 cp855 cspcp855 IBM Cyrillic IBM857 ibm857 857 cp857 csIBM857 ibm-857 IBM Turkish IBM862 csIBM862 cp862 ibm862 862 cspc862latinhebrew ibm-862 PC Hebrew IBM866 ibm866 866 ibm-866 csIBM866 cp866 MS-DOS Russian</p>
+            <div class="doc-table-wrapper">
+              <table class="doc-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Alias or Aliases</th>
+                    <th>Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="col-item">CESU-8</td>
+                    <td class="col-usage">CESU8 csCESU-8</td>
+                    <td class="col-example">Unicode CESU-8</td>
+                  </tr>
+                  <tr>
+                    <td class="col-item">IBM00858</td>
+                    <td class="col-usage">cp858 858 PC-Multilingual-850+euro cp00858 ccsid00858</td>
+                    <td class="col-example">Variant of Cp850 with Euro character</td>
+                  </tr>
+                  <tr>
+                    <td class="col-item">IBM437</td>
+                    <td class="col-usage">ibm437 437 ibm-437 cspc8codepage437 cp437 windows-437</td>
+                    <td class="col-example">MS-DOS United States, Australia, New Zealand, South Africa</td>
+                  </tr>
+                  <tr>
+                    <td class="col-item">IBM775</td>
+                    <td class="col-usage">ibm-775 ibm775 775 cp775</td>
+                    <td class="col-example">PC Baltic</td>
+                  </tr>
+                  <tr>
+                    <td class="col-item">IBM850</td>
+                    <td class="col-usage">cp850 cspc850multilingual ibm850 850 ibm-850</td>
+                    <td class="col-example">MS-DOS Latin-1</td>
+                  </tr>
+                  <tr>
+                    <td class="col-item">IBM852</td>
+                    <td class="col-usage">csPCp852 ibm-852 ibm852 852 cp852</td>
+                    <td class="col-example">MS-DOS Latin-2</td>
+                  </tr>
+                  <tr>
+                    <td class="col-item">IBM855</td>
+                    <td class="col-usage">ibm855 855 ibm-855 cp855 cspcp855</td>
+                    <td class="col-example">IBM Cyrillic</td>
+                  </tr>
+                  <tr>
+                    <td class="col-item">IBM857</td>
+                    <td class="col-usage">ibm857 857 cp857 csIBM857 ibm-857</td>
+                    <td class="col-example">IBM Turkish</td>
+                  </tr>
+                  <tr>
+                    <td class="col-item">IBM862</td>
+                    <td class="col-usage">csIBM862 cp862 ibm862 862 cspc862latinhebrew ibm-862</td>
+                    <td class="col-example">PC Hebrew</td>
+                  </tr>
+                  <tr>
+                    <td class="col-item">IBM866</td>
+                    <td class="col-usage">ibm866 866 ibm-866 csIBM866 cp866</td>
+                    <td class="col-example">MS-DOS Russian</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
       </main>
 
       <footer class="doc-page-footer">
@@ -128891,7 +129045,69 @@ C     )</code></pre>
       <main class="doc-content-body">
             <h2 class="content-h2">ISO-8859-1 819 ISO8859-1 l1 ISO_8859-1:1987 ISO_</h2>
             <h2 class="content-h2">8859-1 8859_1 iso-ir-100 latin1 cp819</h2>
-            <p class="content-p">ISO8859_1 IBM819 ISO_8859_1 IBM-819 csISOLatin1 ISO-8859-1, Latin Alphabet No. 1 ISO-8859-2 ISO8859-2 ibm912 l2 ISO_8859-2 8859_2 cp912 ISO_8859-2:1987 iso8859_2 iso-ir-101 latin2 912 csISOLatin2 ibm-912 Latin Alphabet No. 2 ISO-8859-4 8859_4 latin4 l4 cp914 ISO_8859-4:1988 ibm914 ISO_8859-4 iso-ir-110 iso8859_4 csISOLatin4 iso8859-4 914 ibm-914 Latin Alphabet No. 4 ISO-8859-5 ISO_8859-5:1988 csISOLatinCyrillic iso-ir-144 iso8859_5 cp915 8859_5 ibm-915 ISO_8859- 5 ibm915 915 cyrillic ISO8859-5 Latin/Cyrillic Alphabet ISO-8859-7 greek 8859_7 greek8 ibm813 ISO_8859-7 iso8859_7 ELOT_928 cp813 ISO_8859- 7:1987 sun_eu_greek csISOLatinGreek iso-ir- 126 813 iso8859-7 ECMA-118 ibm-813 Latin/Greek Alphabet (ISO- 8859-7:2003) ISO-8859-9 ibm-920 ISO_8859-9 8859_9 ISO_8859- 9:1989 ibm920 latin5 l5 iso8859_9 cp920 920 iso-ir-148 ISO8859-9 csISOLatin5 Latin Alphabet No. 5 ISO-8859-13 iso_8859-13 ISO8859-13 iso8859_13 8859_ 13 Latin Alphabet No. 7 ISO-8859-15 ISO8859-15 LATIN0 ISO8859_15_FDIS ISO8859_15 cp923 8859_15 L9 ISO-8859-15 IBM923 csISOlatin9 ISO_8859-15 IBM-923 csISOlatin0 923 LATIN9 Latin Alphabet No. 9 KOI8-R koi8_r koi8 cskoi8r KOI8-R, Russian KOI8-U koi8_u KOI8-U, Ukrainian</p>
+            <div class="doc-table-wrapper">
+              <table class="doc-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Alias or Aliases</th>
+                    <th>Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="col-item">ISO-8859-1</td>
+                    <td class="col-usage">819 ISO8859-1 l1 ISO_8859-1:1987 ISO_8859-1 8859_1 iso-ir-100 latin1 cp819 ISO8859_1 IBM819 ISO_8859_1 IBM-819 csISOLatin1</td>
+                    <td class="col-example">ISO-8859-1, Latin Alphabet No. 1</td>
+                  </tr>
+                  <tr>
+                    <td class="col-item">ISO-8859-2</td>
+                    <td class="col-usage">ISO8859-2 ibm912 l2 ISO_8859-2 8859_2 cp912 ISO_8859-2:1987 iso8859_2 iso-ir-101 latin2 912 csISOLatin2 ibm-912</td>
+                    <td class="col-example">Latin Alphabet No. 2</td>
+                  </tr>
+                  <tr>
+                    <td class="col-item">ISO-8859-4</td>
+                    <td class="col-usage">8859_4 latin4 l4 cp914 ISO_8859-4:1988 ibm914 ISO_8859-4 iso-ir-110 iso8859_4 csISOLatin4 iso8859-4 914 ibm-914</td>
+                    <td class="col-example">Latin Alphabet No. 4</td>
+                  </tr>
+                  <tr>
+                    <td class="col-item">ISO-8859-5</td>
+                    <td class="col-usage">ISO_8859-5:1988 csISOLatinCyrillic iso-ir-144 iso8859_5 cp915 8859_5 ibm-915 ISO_8859-5 ibm915 915 cyrillic ISO8859-5</td>
+                    <td class="col-example">Latin/Cyrillic Alphabet</td>
+                  </tr>
+                  <tr>
+                    <td class="col-item">ISO-8859-7</td>
+                    <td class="col-usage">greek 8859_7 greek8 ibm813 ISO_8859-7 iso8859_7 ELOT_928 cp813 ISO_8859-7:1987 sun_eu_greek csISOLatinGreek iso-ir-126 813 iso8859-7 ECMA-118 ibm-813</td>
+                    <td class="col-example">Latin/Greek Alphabet (ISO-8859-7:2003)</td>
+                  </tr>
+                  <tr>
+                    <td class="col-item">ISO-8859-9</td>
+                    <td class="col-usage">ibm-920 ISO_8859-9 8859_9 ISO_8859-9:1989 ibm920 latin5 l5 iso8859_9 cp920 920 iso-ir-148 ISO8859-9 csISOLatin5</td>
+                    <td class="col-example">Latin Alphabet No. 5</td>
+                  </tr>
+                  <tr>
+                    <td class="col-item">ISO-8859-13</td>
+                    <td class="col-usage">iso_8859-13 ISO8859-13 iso8859_13 8859_13</td>
+                    <td class="col-example">Latin Alphabet No. 7</td>
+                  </tr>
+                  <tr>
+                    <td class="col-item">ISO-8859-15</td>
+                    <td class="col-usage">ISO8859-15 LATIN0 ISO8859_15_FDIS ISO8859_15 cp923 8859_15 L9 ISO-8859-15 IBM923 csISOLatin9 ISO_8859-15 IBM-923 csISOLatin0 923 LATIN9</td>
+                    <td class="col-example">Latin Alphabet No. 9</td>
+                  </tr>
+                  <tr>
+                    <td class="col-item">KOI8-R</td>
+                    <td class="col-usage">koi8_r koi8 cskoi8r</td>
+                    <td class="col-example">KOI8-R, Russian</td>
+                  </tr>
+                  <tr>
+                    <td class="col-item">KOI8-U</td>
+                    <td class="col-usage">koi8_u</td>
+                    <td class="col-example">KOI8-U, Ukrainian</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
       </main>
 
       <footer class="doc-page-footer">
@@ -128907,7 +129123,44 @@ C     )</code></pre>
       </header>
 
       <main class="doc-content-body">
-            <p class="content-p">US-ASCII ANSI_X3.4-1968 cp367 csASCII iso-ir-6 ASCII iso_646.irv:1983 ANSI_X3.4-1986 ascii7 default ISO_646.irv:1991 ISO646-US IBM367 646 us American Standard Code for information Interchange UTF-8 unicode-1-1-utf-8 UTF8 Eight-bit Unicode (or UCS) Transformation Format UTF-16 UTF_16 unicode utf16 UnicodeBig Sixteen-bit Unicode (or UCS) Transformation Format, byte order identified by an optional byte-order mark UTF-16BE X-UTF-16BE UTF_16BE ISO-10646-UCS-2 UnicodeBigUnmarked Sixteen-bit Unicode (or UCS) Transformation Format, big- endian byte order UTF-16LE UnicodeLittleUnmarked UTF_16LE X-UTF- 16LE Sixteen-bit Unicode (or UCS) Transformation Format, little- endian byte order</p>
+            <div class="doc-table-wrapper">
+              <table class="doc-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Alias or Aliases</th>
+                    <th>Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="col-item">US-ASCII</td>
+                    <td class="col-usage">ANSI_X3.4-1968 cp367 csASCII iso-ir-6 ASCII iso_646.irv:1983 ANSI_X3.4-1986 ascii7 default ISO_646.irv:1991 ISO646-US IBM367 646 us</td>
+                    <td class="col-example">American Standard Code for Information Interchange</td>
+                  </tr>
+                  <tr>
+                    <td class="col-item">UTF-8</td>
+                    <td class="col-usage">unicode-1-1-utf-8 UTF8</td>
+                    <td class="col-example">Eight-bit Unicode (or UCS) Transformation Format</td>
+                  </tr>
+                  <tr>
+                    <td class="col-item">UTF-16</td>
+                    <td class="col-usage">UTF_16 unicode utf16 UnicodeBig</td>
+                    <td class="col-example">Sixteen-bit Unicode (or UCS) Transformation Format, byte order identified by an optional byte-order mark</td>
+                  </tr>
+                  <tr>
+                    <td class="col-item">UTF-16BE</td>
+                    <td class="col-usage">X-UTF-16BE UTF_16BE ISO-10646-UCS-2 UnicodeBigUnmarked</td>
+                    <td class="col-example">Sixteen-bit Unicode (or UCS) Transformation Format, big-endian byte order</td>
+                  </tr>
+                  <tr>
+                    <td class="col-item">UTF-16LE</td>
+                    <td class="col-usage">UnicodeLittleUnmarked UTF_16LE X-UTF-16LE</td>
+                    <td class="col-example">Sixteen-bit Unicode (or UCS) Transformation Format, little-endian byte order</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
       </main>
 
       <footer class="doc-page-footer">

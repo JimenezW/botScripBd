@@ -1792,6 +1792,28 @@ def _cargar_enlaces_internos(origen: Path | None) -> dict[int, list[dict]]:
     return {}
 
 
+def _cargar_tablas_documento(origen: Path | None) -> dict[int, list[dict]]:
+    """Carga el catálogo tablas_documento.json buscando en origen."""
+    if not origen:
+        return {}
+    ruta = origen / "tablas_documento.json"
+    if ruta.is_file():
+        try:
+            datos = leer_json(ruta)
+            raw_pags = datos.get("paginas", {}) if isinstance(datos, dict) else {}
+            cat: dict[int, list[dict]] = {}
+            for k, v in raw_pags.items():
+                try:
+                    cat[int(k)] = v
+                except ValueError:
+                    pass
+            log.info("Catálogo de tablas cargado desde %s (%d páginas con tablas)", ruta, len(cat))
+            return cat
+        except Exception as e:
+            log.warning("No se pudo leer catálogo de tablas en %s: %s", ruta, e)
+    return {}
+
+
 def _vincular_enlaces_internos(elementos: list[dict], enlaces_pagina: list[dict]) -> list[dict]:
     """Envuelve los subtítulos o términos exactos con etiquetas <a href="#page-N" class="doc-link">."""
     if not enlaces_pagina:
@@ -2153,6 +2175,7 @@ def _reconstruir_paginas_documento(
     indice_toc: dict | None = None,
     figuras_dict: dict[int, list[dict]] | None = None,
     enlaces_dict: dict[int, list[dict]] | None = None,
+    tablas_dict: dict[int, list[dict]] | None = None,
     dir_html: Path | None = None
 ) -> list[dict]:
     """Genera la lista de páginas reconstruidas fielmente a partir de paginas.json guiado por el TOC."""
@@ -2218,6 +2241,16 @@ def _reconstruir_paginas_documento(
             if page_enlaces:
                 elementos = _vincular_enlaces_internos(elementos, page_enlaces)
 
+            # Inyectar tablas técnicas si la página tiene tabla registrada en el catálogo
+            page_tablas = tablas_dict.get(num, []) if tablas_dict else []
+            if page_tablas:
+                # Preservar encabezados H1/H2 y sustituir los párrafos de texto desestructurado con la tabla limpia
+                elementos_base = [e for e in elementos if e.get("tipo") in ("h1", "h2")]
+                if not elementos_base:
+                    elementos = list(page_tablas)
+                else:
+                    elementos = elementos_base + list(page_tablas)
+
             paginas_doc.append({
                 "tipo": "contenido",
                 "numero": num,
@@ -2254,6 +2287,8 @@ def adaptar_paginas_json(
     figuras_dict = _cargar_figuras_paginas(origen)
     # Cargar hipervínculos internos del catálogo
     enlaces_dict = _cargar_enlaces_internos(origen)
+    # Cargar tablas técnicas estructuradas del catálogo
+    tablas_dict = _cargar_tablas_documento(origen)
 
     if pagina_objetivo:
         seleccion = [p for p in paginas if p.get("numero_pagina") == pagina_objetivo]
@@ -2285,6 +2320,7 @@ def adaptar_paginas_json(
         indice_toc=indice_toc,
         figuras_dict=figuras_dict,
         enlaces_dict=enlaces_dict,
+        tablas_dict=tablas_dict,
         dir_html=dir_html
     )
 
