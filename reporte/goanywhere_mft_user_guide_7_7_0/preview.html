@@ -6,7 +6,7 @@
   <title>GoAnywhere MFT User Guide 7.7.0 · v7.7.0</title>
   <meta name="description" content="">
   <meta name="generator" content="compilador.py (Jinja2 3.1.6 + WeasyPrint)">
-  <meta name="dcterms.created" content="2026-10-20T14:08:18">
+  <meta name="dcterms.created" content="2026-10-20T15:05:15">
   <style>
     /* ═════════════════════ Fuentes locales (rutas relativas al HTML) ═════════════════════ */
 
@@ -567,6 +567,30 @@
     a.doc-link:hover, .doc-link:hover {
       color: #00483a;
       text-decoration: underline;
+    }
+
+    /* Bloques de código preformateado en páginas de contenido */
+    .content-code {
+      background-color: #f5f7fa;
+      border: 1pt solid #d9e2ec;
+      border-left: 3.5pt solid #486581;
+      border-radius: 4px;
+      padding: 10px 14px;
+      margin: 12px 0 14px 0;
+      font-family: "JetBrains Mono", "Cascadia Code", "Fira Code", Consolas, "Liberation Mono", "DejaVu Sans Mono", monospace;
+      font-size: 8.8pt;
+      line-height: 1.5;
+      color: #102a43;
+      white-space: pre;
+      overflow-x: auto;
+    }
+    .content-code code {
+      font-family: inherit;
+      font-size: inherit;
+      color: inherit;
+      background: none;
+      border: none;
+      padding: 0;
     }
 
     /* Figuras e ilustraciones del documento */
@@ -1376,12 +1400,12 @@
             <span class="toc-item-page">440</span>
           </div>
           <div class="toc-row">
-            <span class="toc-item-title">Execution from an ILE Progr am</span>
+            <span class="toc-item-title">Execution from an ILE Program</span>
             <span class="toc-item-leader"></span>
             <span class="toc-item-page">442</span>
           </div>
           <div class="toc-row">
-            <span class="toc-item-title">Executi on from Windows, Linux, AIX, and Unix</span>
+            <span class="toc-item-title">Execution from Windows, Linux, AIX, and Unix</span>
             <span class="toc-item-leader"></span>
             <span class="toc-item-page">444</span>
           </div>
@@ -12978,7 +13002,7 @@
             <h2 class="content-h2">Password</h2>
             <p class="content-p">The password to use for connecting to the FTP server. To update an existing Password, click the ChangePassword link and specify a new password. If Allow Viewing of Resource Passwords is enabled on the Admin Security Settings page, an additional <a href="#page-132" class="doc-link">password recovery</a> option is available.</p>
             <h2 class="content-h2">Account</h2>
-            <p class="content-p">The account name for the User ID specified in the User field. This is only necessary if an Account is required by the server.</p>
+            <p class="content-p">The account name for the userId specified in the User field. This is only necessary if an Account is required by the server.</p>
             <h2 class="content-h2">Connection Tab</h2>
             <figure class="doc-figure doc-figure--large">
               <img src="figuras/fig_p0222_1.png" alt="Figura del documento" class="doc-figure-img">
@@ -13225,7 +13249,7 @@
             <h2 class="content-h2">Password</h2>
             <p class="content-p">The password to use for connecting to the FTPS server. To update an existing Password, click the ChangePassword link and specify a new password. If Allow Viewing of Resource Passwords is enabled on the Admin Security Settings page, an additional <a href="#page-132" class="doc-link">password recovery</a> option is available.</p>
             <h2 class="content-h2">Account</h2>
-            <p class="content-p">The account name for the User ID specified in the User field. This is only necessary if an Account is required by the server.</p>
+            <p class="content-p">The account name for the userId specified in the User field. This is only necessary if an Account is required by the server.</p>
             <h2 class="content-h2">Connection Tab</h2>
             <figure class="doc-figure doc-figure--large">
               <img src="figuras/fig_p0231_1.png" alt="Figura del documento" class="doc-figure-img">
@@ -16605,7 +16629,7 @@
 
       <main class="doc-content-body">
             <h1 class="content-h1">SSH Servers (SFTP/SCP/SSH) Resource</h1>
-            <p class="content-p">GoAnywhere can connect to SSH Servers for performing SFTP (SSH File Transfer Protocol) file transfers, SCP (Secure Copy) file transfers and for running SSH remote commands. When defining an SSH Server resource in GoAnywhere, you need to indicate the connection properties such as the host name (or IP address) and User ID.</p>
+            <p class="content-p">GoAnywhere can connect to SSH Servers for performing SFTP (SSH File Transfer Protocol) file transfers, SCP (Secure Copy) file transfers and for running SSH remote commands. When defining an SSH Server resource in GoAnywhere, you need to indicate the connection properties such as the host name (or IP address) and userId.</p>
             <p class="content-p">You can specify a password, SSH private key or both for authentication. SFTP Servers can be configured as Resources in GoAnywhere and then specified as file repositories for Web User virtual folder locations. Projects in GoAnywhere can also connect to SFTP resources to upload, download and manage documents by using qualified file paths (using the resource name) within various Tasks.</p>
             <h2 class="content-h2">Basic Tab</h2>
             <figure class="doc-figure doc-figure--large">
@@ -19686,9 +19710,9 @@
             <p class="content-p">For example:</p>
             <h2 class="content-h2">/Payroll/Send Direct Deposit</h2>
             <h2 class="content-h2">User</h2>
-            <p class="content-p">The GoAnywhere User ID to run the Project under. This User ID must be defined in the GoAnywhere Administrator. Specify *DFT to use the default User and password specified in the CFGGA (Configure GoAnywhere) command.</p>
+            <p class="content-p">The GoAnywhere userId to run the Project under. This userId must be defined in the GoAnywhere Administrator. Specify *DFT to use the default User and password specified in the CFGGA (Configure GoAnywhere) command.</p>
             <h2 class="content-h2">Password</h2>
-            <p class="content-p">The Password for the GoAnywhere User ID. The Password is case sensitive.</p>
+            <p class="content-p">The Password for the GoAnywhere userId. The Password is case sensitive.</p>
       </main>
 
       <footer class="doc-page-footer">
@@ -19813,26 +19837,26 @@
       </header>
 
       <main class="doc-content-body">
-            <h1 class="content-h1">Execution from an ILE Progr am</h1>
+            <h1 class="content-h1">Execution from an ILE Program</h1>
             <p class="content-p">A Service Program is included with GoAnywhere which contains a procedure for executing Projects from within an ILE program (ILE RPG, ILE COBOL, ILE C).</p>
             <p class="content-p">The name of the Service Program is RUNPROJSRV, which can be found in the GoAnywhere installation library. You can bind to this Service Program when creating your ILE program.</p>
-            <p class="content-p">The name of the procedure to call is RunProject (contained in the RUNPROJSRV service program). You can specify parameters for the RunProject procedure, including the name of the Project to run, variable/value overrides, User ID, password and URL of the GoAnywhere installation.</p>
-            <p class="content-p">ExampleRPGsource:</p>
-            <h2 class="content-h2">D/COPY GoAnywhere/QRPGLESRC,P#PROJECT</h2>
-            <h2 class="content-h2">C callp Run Project (project</h2>
-            <h2 class="content-h2">C:priority</h2>
-            <h2 class="content-h2">C:mode</h2>
-            <h2 class="content-h2">C:url</h2>
-            <h2 class="content-h2">C:timeout</h2>
-            <h2 class="content-h2">C:user Id</h2>
-            <h2 class="content-h2">C:password</h2>
-            <h2 class="content-h2">C:Msg Id</h2>
-            <h2 class="content-h2">C:Msg</h2>
-            <h2 class="content-h2">C:error</h2>
-            <h2 class="content-h2">C:variable1:value1</h2>
-            <h2 class="content-h2">C:variable2:value2</h2>
-            <h2 class="content-h2">C ' ' ' ' ' '</h2>
-            <p class="content-p">C)</p>
+            <p class="content-p">The name of the procedure to call is RunProject (contained in the RUNPROJSRV service program). You can specify parameters for the RunProject procedure, including the name of the Project to run, variable/value overrides, userId, password and URL of the GoAnywhere installation.</p>
+            <p class="content-p">Example RPG source:</p>
+            <pre class="content-code"><code>D/COPY GoAnywhere/QRPGLESRC,P#PROJECT
+C     callp RunProject (project
+C     :priority
+C     :mode
+C     :url
+C     :timeout
+C     :userId
+C     :password
+C     :MsgId
+C     :Msg
+C     :error
+C     :variable1:value1
+C     :variable2:value2
+C     ' ' ' ' ' '
+C     )</code></pre>
             <div class="content-note">
               <strong class="note-label">NOTE:</strong>
               <span class="note-text">The variables and values parameters for RunProject are optional (they do not have to be specified).</span>
@@ -19872,7 +19896,7 @@
       </header>
 
       <main class="doc-content-body">
-            <h1 class="content-h1">Executi on from Windows, Linux, AIX, and Unix</h1>
+            <h1 class="content-h1">Execution from Windows, Linux, AIX, and Unix</h1>
             <p class="content-p">GoAnywhere Projects can be executed from the command line of a variety of platforms (for example, Windows, Linux, Unix, AIX, HP-UX and Solaris) using GoAnywhere Command (GACmd). When the command is run, GACmd performs an HTTP(S) request to the specified GoAnywhere server and executes the specified function. With GACmd, it is possible to execute GoAnywhere functions from custom programs, scripts and scheduler software.</p>
             <h2 class="content-h2">Executing GoAnywhere Command</h2>
             <figure class="doc-figure doc-figure--large">
@@ -21003,7 +21027,7 @@
               <strong class="note-label">NOTE:</strong>
               <span class="note-text">The next execution time of a repeating job will be based on when the current execution finishes (not when it started). For instance, if a job execution finishes at 9:02 AM, and if the Run Every parameter is set to 5 minutes, then the next execution time for the job will be 9:07 AM. If a Repeat option is selected, you can indicate how long the Scheduled Job should repeat and how long the delay should be between repeats.</span>
             </div>
-            <h2 class="content-h2">Example1-Repeat Always</h2>
+            <h2 class="content-h2">Example 1-Repeat Always</h2>
             <p class="content-p">: You could set up a scheduled job that runs every day by specifying the Daily schedule frequency type. Let's say the StartTime is set for 9:00 AM and the advanced option is set to repeat Always for 2 hours with a 5 minute delay between executions. With this example, the Scheduled Job will first run at 9:00 AM. If the job takes 2 minutes to run, then it will repeat again</p>
       </main>
 
@@ -21021,8 +21045,8 @@
 
       <main class="doc-content-body">
             <p class="content-p">at 9:07 AM, then again at 9:14 AM, and so on, until 11 AM (when the 2 hours expires). This entire sequence would be repeated each day of the week.</p>
-            <p class="content-p">Example2-RepeatwhenJobFails: You could set up a scheduled job that runs every Monday using the Weekly schedule frequency type. Let's say the StartTime is set for 1 PM and the advanced option is set to repeat only when the JobFails for 3 hours with a 10 minute delay between executions. With this example, on Monday, the Scheduled Job will first run at 1 PM. If the Project takes 1 minute to run and if it fails, then the Scheduled Job will repeat again at 1:11 PM. If it fails again, then it will repeat again at 1:22 PM, and so on until 4 PM (when the 3 hours expire). This entire sequence would be repeated the next Monday.</p>
-            <h2 class="content-h2">Example3-Repeatwhena Specified Conditionis Met</h2>
+            <p class="content-p">Example 2-RepeatwhenJobFails: You could set up a scheduled job that runs every Monday using the Weekly schedule frequency type. Let's say the StartTime is set for 1 PM and the advanced option is set to repeat only when the JobFails for 3 hours with a 10 minute delay between executions. With this example, on Monday, the Scheduled Job will first run at 1 PM. If the Project takes 1 minute to run and if it fails, then the Scheduled Job will repeat again at 1:11 PM. If it fails again, then it will repeat again at 1:22 PM, and so on until 4 PM (when the 3 hours expire). This entire sequence would be repeated the next Monday.</p>
+            <h2 class="content-h2">Example 3-Repeatwhena Specified Conditionis Met</h2>
             <figure class="doc-figure doc-figure--large">
               <img src="figuras/fig_p0475_1.png" alt="Figura del documento" class="doc-figure-img">
             </figure>
@@ -25013,7 +25037,7 @@
             <p class="content-p">Expressions can be entered manually or constructed using the <a href="#page-600" class="doc-link">Expression Wizard</a> by clicking the buttton next to a field in a Project.</p>
             <h2 class="content-h2">How Expressions Work</h2>
             <p class="content-p">Most fields within Tasks and Elements support the use of expressions. The contents of a field are handled as text, until GoAnywhere encounters the ${} notation. The content inside the ${} notation is then parsed as code that returns a value to the field.</p>
-            <h2 class="content-h2">Example1</h2>
+            <h2 class="content-h2">Example 1</h2>
             <p class="content-p">In the following example, the Text field for the Print task contains both plain text and an expression. When GoAnywhere encounters the ${} notation, it resolves the contents inside the expression as code and returns a new value. GoAnywhere will recognize the CurrentDate <a href="#page-602" class="doc-link">Function</a> and return the date to the Text field. When this task executes, "Today is 03/23/16" will be writ ten to the Job Log.</p>
       </main>
 
@@ -25030,12 +25054,12 @@
       </header>
 
       <main class="doc-content-body">
-            <h2 class="content-h2">Example2</h2>
+            <h2 class="content-h2">Example 2</h2>
             <figure class="doc-figure">
               <img src="figuras/fig_p0589_1.png" alt="Figura del documento" class="doc-figure-img">
             </figure>
             <p class="content-p">Fields also support multiple expressions. Each individual expression must be wrapped within its own ${} notation. In the next example, GoAnywhere will parse and return a value for each expression. "Today is 03/32/16. The time is 4:00 PM" will be written to the Job Log.</p>
-            <h2 class="content-h2">Example3</h2>
+            <h2 class="content-h2">Example 3</h2>
             <p class="content-p">In another example, three expressions are used to create a file path. One expression contains a variable for the directory name, another expression contains a variable with a file name, and the last expression contains a file extension. All three expressions for building a file path by using the syntax of ${dir}\\${file}.${ext}. The output could be: "c:\\temp\\customerExport.csv".</p>
       </main>
 
@@ -26800,11 +26824,11 @@
             <h1 class="content-h1">Nested Functions in Expressions</h1>
             <p class="content-p">Multiple nested functions can be used inside an expression to perform more complex operations on variables, strings and data. When using nested expressions, the ${} notation begins and ends an entire expression.</p>
             <p class="content-p">GoAnywhere parses expressions using the standard order of operations, which is Parentheses, Exponents, Multiplication and Division, and finally Addition and Subtraction. When multiple parentheses are found in expressions, GoAnywhere parses the expression in the inner parentheses before the outer.</p>
-            <h2 class="content-h2">Nested Function Example1</h2>
+            <h2 class="content-h2">Nested Function Example 1</h2>
             <p class="content-p">In the following example, the value of the 'customerName' variable is " KHarris". Note that the value has a leading space. An administrator wants to insert this value into an email, but wants to remove any leading spaces and convert the text to all lower case letters. The administrator can nest the Lower and Trim functions to update the value of the 'customerName' variable. The syntax would be:</p>
             <h2 class="content-h2">${Trim(Lower(customer Name))}</h2>
             <p class="content-p">Following the order of operations, the inner function (Lower) is executed first, followed by the outer function (Trim). The output of the expression for " KHarris" is "kharris".</p>
-            <h2 class="content-h2">Nested Function Example2</h2>
+            <h2 class="content-h2">Nested Function Example 2</h2>
             <p class="content-p">In the following example, an administrator wants to calculate a value from an invoice. The variable 'var1' has a string value of "20.5". The administrator needs to convert that string to a decimal, multiply the value by 5, and then format the value as currency. Here is the expression the administrator created:</p>
             <h2 class="content-h2">${Format Number(Decimal(var1) * 5,'$#,##0.00')}</h2>
             <p class="content-p">Following the order of operations, GoAnywhere resolves the expression in the following order:</p>
@@ -26899,7 +26923,7 @@
             <p class="content-p">If(condition, resultOfTrue, resultOfFalse) condition - Any function or variable that returns a boolean value (true or false).</p>
             <h2 class="content-h2">result Of True</h2>
             <p class="content-p">- Any string, variable, or function that is used if the condition returns 'true.' resultOfFalse - Any string, variable, or function that is used if the condition returns 'false.' As noted, the condition and results of If functions can also be another function.</p>
-            <h2 class="content-h2">Example1</h2>
+            <h2 class="content-h2">Example 1</h2>
             <p class="content-p">An administrator wants to stop processing on an invoice if the value of an item ID is less that 20 characters in length. Use the Length function to determine the number of characters in a variable. The administrator created the following expression:</p>
             <h2 class="content-h2">${If(Length(item ID) < 20, 'Invalid Item ID', item ID)}</h2>
             <p class="content-p">The condition of the If function is: Length(itemID) < 20 The resultOfTrue returns the String message, 'Invalid Item ID' The resultOfFalse returns the itemID.</p>
@@ -26932,7 +26956,7 @@
             <div class="content-step">
 <span class="step-marker">3.</span>              <span class="step-body">The condition of the If statement, 9 < 20, is true. GoAnywhere will use the resultOfTrue parameter, which returns 'Invalid Item ID'.</span>
             </div>
-            <h2 class="content-h2">Example2</h2>
+            <h2 class="content-h2">Example 2</h2>
             <p class="content-p">An administrator wants to read the 6th character of an item ID and apply a 10% discount to the cost of the item if the 6th character of the item ID is a 'D' (which indicates a Discount). The administrator created the following expression: ${If(Substring(var1, 6,1) == 'D', itemCost *.9, itemCost)} The condition of the If Function is: Substring(var1, 6,1) == 'D' The resultOfTrue returns the value of the itemCost variable multiplied by.9.</p>
             <p class="content-p">The resultOfFalse returns the value of the itemCost variable without any modification.</p>
             <p class="content-p">When the Project executes, the variable 'var1' is assigned the value of '12345D12.' The variable 'itemCost' is assigned the value of 100.</p>
@@ -26968,7 +26992,7 @@
             </div>
             <h2 class="content-h2">Adding Else If Logic to If Funct ion s</h2>
             <p class="content-p">Else If logic can be added to an If function by nesting another If function as a result parameter.</p>
-            <h2 class="content-h2">Example3</h2>
+            <h2 class="content-h2">Example 3</h2>
             <p class="content-p">Here is an example where the resultOfFalse is another If function: ${If(x > 2 && x < 5, 'First Condition is True', if(x == 7, 'Second Condition is True', 'Both Conditions are False'))} The condition of the If Function is: x > 2 && x <5.</p>
             <p class="content-p">The resultOfTrue returns the String 'First Condition is True'.</p>
             <p class="content-p">The resultOfFalse is another If function: If(x == 7, 'Second Condition is True', 'Both Conditions are False').</p>
@@ -27004,7 +27028,7 @@
             <div class="content-step">
 <span class="step-marker">4.</span>              <span class="step-body">The condition of the nested If statement is true, so GoAnywhere returns the nested resultOfTrue parameter, which is 'The Second Condition is True.'</span>
             </div>
-            <h2 class="content-h2">Example4</h2>
+            <h2 class="content-h2">Example 4</h2>
             <p class="content-p">An administrator has created a Project to evaluate a customer's credit score and then assigns an interest rate. If the credit score is greater than or equals 700, the customer will receive the best rate (2%). If the score is between 600-699, the customer will receive a higher interest rate (4%), and if the score is less than or equal to 599 the customer receives the highest rate (10%).</p>
             <p class="content-p">The administrator has created the following expression: ${If(creditScore >= 700, "2%", If(creditScore >= 600 && creditScore <= 699, "4%", "10%"))} When the Project executes, the variable 'creditScore' is assigned a value of 525 and then GoAnywhere resolves the expression:</p>
             <div class="content-step">
@@ -28831,7 +28855,7 @@
             <h2 class="content-h2">submitted On</h2>
             <p class="content-p">The date the <a href="#page-2182" class="doc-link">Secure</a> Form was submitted.</p>
             <h2 class="content-h2">user</h2>
-            <p class="content-p">The Web User ID that submitted the <a href="#page-2182" class="doc-link">Secure</a> Form. This will return an empty string value when an anonymous user completes the Secure Form.</p>
+            <p class="content-p">The Web userId that submitted the <a href="#page-2182" class="doc-link">Secure</a> Form. This will return an empty string value when an anonymous user completes the Secure Form.</p>
             <h2 class="content-h2">title</h2>
             <p class="content-p">The title that was specified on the <a href="#page-2182" class="doc-link">Secure</a> Form.</p>
             <h2 class="content-h2">instructions</h2>
@@ -96368,11 +96392,11 @@
             </div>
             <div class="content-bullet">
               <span class="bullet-bullet">&bull;</span>
-              <span class="bullet-text">User - An LDAP trusted user ID for performing searches within the LDAP server.</span>
+              <span class="bullet-text">User - An LDAP trusted userId for performing searches within the LDAP server.</span>
             </div>
             <div class="content-bullet">
               <span class="bullet-bullet">&bull;</span>
-              <span class="bullet-text">Password - The password for the trusted user ID. To update an existing password, click the ChangePassword link and specify a new password.</span>
+              <span class="bullet-text">Password - The password for the trusted userId. To update an existing password, click the ChangePassword link and specify a new password.</span>
             </div>
             <div class="content-bullet">
               <span class="bullet-bullet">&bull;</span>
@@ -96722,9 +96746,9 @@
             <h2 class="content-h2">Implicit SSL</h2>
             <p class="content-p">When enabled, GoAnywhere will trust any certificate from the LDAP server. When not enabled, the certificate will be validated using the Key Management <a href="#page-2953" class="doc-link">System</a>.</p>
             <h2 class="content-h2">User</h2>
-            <p class="content-p">An LDAP trusted user ID for performing searches within the LDAP server.</p>
+            <p class="content-p">An LDAP trusted userId for performing searches within the LDAP server.</p>
             <h2 class="content-h2">Password</h2>
-            <p class="content-p">The password for the trusted user ID. To update an ex isting password, click the C hangePassword link and specify a new password.</p>
+            <p class="content-p">The password for the trusted userId. To update an ex isting password, click the C hangePassword link and specify a new password.</p>
             <h2 class="content-h2">Base DN</h2>
             <p class="content-p">The Base DN within the LDAP server restricts where GoAnywhere will find users and groups.</p>
             <h2 class="content-h2">Object Class Attribute</h2>
@@ -96754,7 +96778,7 @@
             <p class="content-p">When User group membership is enforced, only users that have a matching LDAP and GoAnywhere User Group will by synchronized.</p>
             <h2 class="content-h2">User Authentication</h2>
             <h2 class="content-h2">Create User Automatically During Login</h2>
-            <p class="content-p">If the User account does not exist in GoAnywhere when the user first logs in, their account will be created in GoAnywhere as long as their LDAP user ID and password is valid.</p>
+            <p class="content-p">If the User account does not exist in GoAnywhere when the user first logs in, their account will be created in GoAnywhere as long as their LDAP userId and password is valid.</p>
       </main>
 
       <footer class="doc-page-footer">
@@ -97026,7 +97050,7 @@
       <main class="doc-content-body">
             <div class="content-bullet content-bullet--sub">
               <span class="bullet-bullet">&bull;</span>
-              <span class="bullet-text">SubjectType - Specifies which field defines the user's identity for the app. Options include the user's user name, federation ID, user ID, a custom attribute, or an algorithmically calculated persistent ID. A custom attribute can be any custom field added to the User object in the organization, as long as it is one of the following data types: Email, Text, URL, or Formula (with Text Return Type). After you select Custom Attribute for the subject type, Salesforce displays a CustomAttribute field with a list of the available User object custom fields in the organization.</span>
+              <span class="bullet-text">SubjectType - Specifies which field defines the user's identity for the app. Options include the user's user name, federation ID, userId, a custom attribute, or an algorithmically calculated persistent ID. A custom attribute can be any custom field added to the User object in the organization, as long as it is one of the following data types: Email, Text, URL, or Formula (with Text Return Type). After you select Custom Attribute for the subject type, Salesforce displays a CustomAttribute field with a list of the available User object custom fields in the organization.</span>
             </div>
             <div class="content-bullet content-bullet--sub">
               <span class="bullet-bullet">&bull;</span>
@@ -97949,9 +97973,9 @@
             <h2 class="content-h2">Implicit SSL</h2>
             <p class="content-p">When enabled, GoAnywhere will trust any certificate from the Active Directory server. When not enabled, the certificate will be validated using the Default Trusted Certificates <a href="#page-3035" class="doc-link">Key Store</a>.</p>
             <h2 class="content-h2">User</h2>
-            <p class="content-p">An Active Directory trusted user ID for performing searches within the Active Directory server.</p>
+            <p class="content-p">An Active Directory trusted userId for performing searches within the Active Directory server.</p>
             <h2 class="content-h2">Password</h2>
-            <p class="content-p">The password for the trusted user ID. To update an existing password, click the ChangePassword link and specify a new password.</p>
+            <p class="content-p">The password for the trusted userId. To update an existing password, click the ChangePassword link and specify a new password.</p>
             <h2 class="content-h2">Base DN</h2>
             <p class="content-p">The Base DN within the Active Directory server restricts where GoAnywhere will find users and groups.</p>
             <h2 class="content-h2">Object Class Attribute</h2>
@@ -97998,7 +98022,7 @@
       <main class="doc-content-body">
             <h2 class="content-h2">User Authentication</h2>
             <h2 class="content-h2">Create User Automatically During Login</h2>
-            <p class="content-p">If the User account does not exist in GoAnywhere when the user first logs in, their account will be created in GoAnywhere as long as their Active Directory user ID and password is valid.</p>
+            <p class="content-p">If the User account does not exist in GoAnywhere when the user first logs in, their account will be created in GoAnywhere as long as their Active Directory userId and password is valid.</p>
             <h2 class="content-h2">Update User Info</h2>
             <p class="content-p">When the User logs in, GoAnywhere can update their account information with the latest attributes from the Active Directory server.</p>
             <h2 class="content-h2">User Groups</h2>
@@ -98183,7 +98207,7 @@
             <figure class="doc-figure">
               <img src="figuras/fig_p2689_1.png" alt="Figura del documento" class="doc-figure-img">
             </figure>
-            <p class="content-p">The user ID of the user.</p>
+            <p class="content-p">The userId of the user.</p>
             <h2 class="content-h2">Password</h2>
             <p class="content-p">The password for the user.</p>
       </main>
@@ -107330,7 +107354,7 @@
             <p class="content-p">Based on if certificates are required for authentication, you can follow one of the "Quick Start" sections below to exchange data with a FTPS server using certificates stored in the Key Management System.</p>
             <p class="content-p">When no certificates are required for authentication Follow the steps below if no certificates are required:</p>
             <div class="content-step">
-<span class="step-marker">1.</span>              <span class="step-body">Add an FTPS Resource in GoAnywhere. Specify the parameters (host name, port, user ID, password, etc.) for the server. Do not specify any certificates for the Resource. This will instruct GoAnywhere to trust this FTPS server no matter what certificate is sent during the SSL handshake.</span>
+<span class="step-marker">1.</span>              <span class="step-body">Add an FTPS Resource in GoAnywhere. Specify the parameters (host name, port, userId, password, etc.) for the server. Do not specify any certificates for the Resource. This will instruct GoAnywhere to trust this FTPS server no matter what certificate is sent during the SSL handshake.</span>
             </div>
             <div class="content-step">
 <span class="step-marker">2.</span>              <span class="step-body">Add an FTPS task to a GoAnywhere Project and choose the FTPS Resource (c reated in step 1).</span>
@@ -107395,7 +107419,7 @@
 <span class="step-marker">c.</span>              <span class="step-body">If this is a certificate chain, where the certificate that signed your certificate was signed by another certificate and so on, then all certificates in the chain must be added to your Key Vault.</span>
             </div>
             <div class="content-step">
-<span class="step-marker">3.</span>              <span class="step-body">Add an FTPS Resource in GoAnywhere. Specify the parameters (host name, port, user id, password, certificates, etc.) for the connection.</span>
+<span class="step-marker">3.</span>              <span class="step-body">Add an FTPS Resource in GoAnywhere. Specify the parameters (host name, port, userid, password, certificates, etc.) for the connection.</span>
             </div>
       </main>
 
@@ -107437,7 +107461,7 @@
             <p class="content-p">Depending on what is required for authentication, you can follow one of the "Quick Start" sections below to exchange data with a FTPS server. If certificates are required, they are stored in the File Based Certificate manager.</p>
             <p class="content-p">When no certificates are required for authentication Follow the steps below if no certificates are required:</p>
             <div class="content-step">
-<span class="step-marker">1.</span>              <span class="step-body">Add an FTPS Resource in GoAnywhere. Specify the parameters (host name, port, user id, password, etc.) for the server. Do not specify any certificates for the Resource. This will instruct GoAnywhere to trust this FTPS server no matter what certificate is sent during the SSL handshake.</span>
+<span class="step-marker">1.</span>              <span class="step-body">Add an FTPS Resource in GoAnywhere. Specify the parameters (host name, port, userid, password, etc.) for the server. Do not specify any certificates for the Resource. This will instruct GoAnywhere to trust this FTPS server no matter what certificate is sent during the SSL handshake.</span>
             </div>
             <div class="content-step">
 <span class="step-marker">2.</span>              <span class="step-body">Add an FTPS task to a GoAnywhere Project and choose the FTPS Resource (c reated in step 1).</span>
@@ -107517,7 +107541,7 @@
 
       <main class="doc-content-body">
             <div class="content-step">
-<span class="step-marker">3.</span>              <span class="step-body">Add an FTPS Resource in GoAnywhere. Specify the parameters (host name, port, user id, password, certificates, etc.) for the connection.</span>
+<span class="step-marker">3.</span>              <span class="step-body">Add an FTPS Resource in GoAnywhere. Specify the parameters (host name, port, userid, password, certificates, etc.) for the connection.</span>
             </div>
             <div class="content-step">
 <span class="step-marker">4.</span>              <span class="step-body">Add an FTPS task to a GoAnywhere Project and choose the FTPS Resource (created in step 3).</span>
@@ -131115,7 +131139,7 @@
             <h2 class="content-h2">REST</h2>
             <p class="content-p">GoAnywhere supports REST requests to execute Web User actions on a GoAnywhere Server.</p>
             <h2 class="content-h2">HTTP Authentication for REST Requests</h2>
-            <p class="content-p">GoAnywhere uses basic authentication with the User ID and Password of a Web User in GoAnywhere.</p>
+            <p class="content-p">GoAnywhere uses basic authentication with the userId and Password of a Web User in GoAnywhere.</p>
             <h2 class="content-h2">REST URI White Space Replacement</h2>
             <p class="content-p">Some items in your Secure Folders may have names that contain spaces. When using this name in a REST URI, the spaces must be encoded using '+' or '%20'. For example, a Secure Folder is named "Trading Partner" in GoAnywhere. To access this Secure Folder using a REST request, the spaces must be encoded in the URI: EXAMPLE:</p>
             <h2 class="content-h2">Using'%20'</h2>

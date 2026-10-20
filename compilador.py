@@ -764,6 +764,13 @@ RE_PATRONES_DESFRAGMENTACION: list[tuple[re.Pattern, str]] = [
     (re.compile(r'\bRSA\s+Secur\s+ID\b', re.I), 'RSA SecurID'),
     (re.compile(r'\bSecur\s+ID\b', re.I), 'SecurID'),
     (re.compile(r'\bAuthentic\s+ation\b', re.I), 'Authentication'),
+    (re.compile(r'\bExecuti\s+on\b', re.I), 'Execution'),
+    (re.compile(r'\bProgr\s+am\b', re.I), 'Program'),
+    (re.compile(r'\bExample([1-9])\b'), r'Example \1'),
+    (re.compile(r'\bExampleRPGsource:?', re.I), 'Example RPG source:'),
+    (re.compile(r'\bRun\s+Project\b', re.I), 'RunProject'),
+    (re.compile(r'\buser\s+Id\b', re.I), 'userId'),
+    (re.compile(r'\bMsg\s+Id\b', re.I), 'MsgId'),
 
     # Comandos CLI y rutas normalizadas
     (re.compile(r'jstack\s*-\s*l\s*\[\s*PID\s*\]\s*>\s*threaddump\.txt', re.I), 'jstack -l [PID] > threaddump.txt'),
@@ -811,10 +818,15 @@ def _reparar_palabras_rotas(texto: str) -> str:
     res = texto
     # 1. Aplicar patrones compilados del dominio
     for pat, rep in RE_PATRONES_DESFRAGMENTACION:
-        def _rep_func(m: re.Match) -> str:
-            t = m.group(0)
-            return rep.lower() if t.islower() else rep
-        res = pat.sub(_rep_func, res)
+        if callable(rep):
+            res = pat.sub(rep, res)
+        elif '\\' in rep:
+            res = pat.sub(rep, res)
+        else:
+            def _rep_func(m: re.Match, replacement=rep) -> str:
+                t = m.group(0)
+                return replacement.lower() if t.islower() else replacement
+            res = pat.sub(_rep_func, res)
     # 2. Aplicar heurística dinámica de desfragmentación
     res = _desfragmentar_letras_sueltas(res)
     # 3. Normalizar rutas de navegación de menús con '>'
@@ -1339,6 +1351,50 @@ def _parsear_contenido_pagina(num: int, lineas_limpias: list[str], indice_toc: d
                 elementos.append({"tipo": tipo_tit, "texto": tit})
                 i += 2
                 continue
+
+        # Detección de bloque de código (ej. ILE RPG en pág 442, snippets técnicos)
+        es_inicio_codigo_rpg = (
+            l.startswith(('D/COPY', 'D/', 'C callp', 'C CALLP'))
+            or (l.startswith(('C ', 'C:')) and len(l) > 2 and (not l[2:].strip().isalpha() or ':' in l or 'RunProject' in l or 'Run Project' in l))
+            or (elementos and 'Example RPG source' in elementos[-1].get("texto", "") and (l.startswith('D/') or l.startswith('C ') or l.startswith('C:')))
+        )
+        if es_inicio_codigo_rpg:
+            buf_codigo = []
+            while i < n:
+                linea_cod = lineas[i].strip()
+                if not linea_cod:
+                    i += 1
+                    continue
+                if linea_cod.startswith(('TIP:', 'WARNING:', 'NOTE:')) or linea_cod == 'l' or re.match(r'^\d+\.\s', linea_cod):
+                    break
+                norm_c = re.sub(r'[^a-zA-Z0-9]', '', linea_cod).lower()
+                if norm_c in temas_esta_pag:
+                    break
+                es_linea_rpg = (
+                    linea_cod.startswith(('D/', 'D/COPY', 'C ', 'C:', 'C)', 'C )'))
+                    or (buf_codigo and linea_cod.startswith(':'))
+                    or (buf_codigo and re.match(r"^['\s]+$", linea_cod))
+                )
+                if not es_linea_rpg and buf_codigo:
+                    break
+                # Reparar y formatear la línea de código
+                linea_reparada = _reparar_palabras_rotas(linea_cod)
+                # Normalizar identación típica RPG si inicia con C : o C:
+                if linea_reparada.startswith('C :'):
+                    linea_reparada = 'C     :' + linea_reparada[3:]
+                elif linea_reparada.startswith('C:'):
+                    linea_reparada = 'C     :' + linea_reparada[2:]
+                elif linea_reparada.startswith('C callp'):
+                    linea_reparada = 'C     callp ' + linea_reparada[7:].strip()
+                elif linea_reparada.startswith('C )') or linea_reparada == 'C)':
+                    linea_reparada = 'C     )'
+                elif linea_reparada.startswith("C '"):
+                    linea_reparada = 'C     ' + linea_reparada[2:].strip()
+                buf_codigo.append(linea_reparada)
+                i += 1
+            if buf_codigo:
+                elementos.append({"tipo": "codigo", "texto": "\n".join(buf_codigo)})
+            continue
 
         # Detección de viñeta (bullet) 'l' (acumula oraciones completas hasta siguiente ítem o encabezado)
         if l == 'l':

@@ -725,6 +725,30 @@
       text-decoration: underline;
     }
 
+    /* Bloques de código preformateado en páginas de contenido */
+    .content-code {
+      background-color: #f5f7fa;
+      border: 1pt solid #d9e2ec;
+      border-left: 3.5pt solid #486581;
+      border-radius: 4px;
+      padding: 10px 14px;
+      margin: 12px 0 14px 0;
+      font-family: {{ fuente_mono }};
+      font-size: 8.8pt;
+      line-height: 1.5;
+      color: #102a43;
+      white-space: pre;
+      overflow-x: auto;
+    }
+    .content-code code {
+      font-family: inherit;
+      font-size: inherit;
+      color: inherit;
+      background: none;
+      border: none;
+      padding: 0;
+    }
+
     /* Figuras e ilustraciones del documento */
     .doc-figure {
       margin: 14px auto 16px auto;
@@ -906,6 +930,8 @@
               <figcaption class="doc-figure-caption">{{ elem.caption }}</figcaption>
               {% endif %}
             </figure>
+          {% elif elem.tipo == "codigo" %}
+            <pre class="content-code"><code>{{ elem.texto | safe }}</code></pre>
           {% endif %}
         {% endfor %}
       </main>
