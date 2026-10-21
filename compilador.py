@@ -1821,26 +1821,36 @@ def _vincular_enlaces_internos(elementos: list[dict], enlaces_pagina: list[dict]
 
     for elem in elementos:
         t_elem = elem.get("texto", "")
-        if not t_elem:
+        # Si no tiene 'texto', solo procesar si es una tabla
+        if not t_elem and elem.get("tipo") != "tabla":
             continue
+
         for en in enlaces_pagina:
             txt_link = en.get("texto", "").strip()
             dest_ref = en.get("destino_ref", "")
             if not txt_link or not dest_ref or len(txt_link) < 3:
                 continue
             # 1. Si el elemento es h1 o h2 y coincide con el texto del enlace (o contiene el enlace)
-            if elem.get("tipo") in ("h1", "h2"):
+            if elem.get("tipo") in ("h1", "h2") and t_elem:
                 norm_elem = re.sub(r'[^a-zA-Z0-9]', '', t_elem).lower()
                 norm_link = re.sub(r'[^a-zA-Z0-9]', '', txt_link).lower()
                 if norm_elem == norm_link:
                     elem["texto"] = f'<a href="{dest_ref}" class="doc-link">{t_elem}</a>'
                     break
-            # 2. Si el elemento es un párrafo o viñeta, reemplazar mención textual exacta si no está ya enlazada
-            elif elem.get("tipo") in ("p", "bullet", "numero", "subpaso"):
+            # 2. Si el elemento es un párrafo, viñeta o bloque informativo (note/tip/warning)
+            elif elem.get("tipo") in ("p", "bullet", "numero", "subpaso", "note", "tip", "warning") and t_elem:
                 if f'href="{dest_ref}"' not in t_elem:
                     pat = re.compile(rf'\b({re.escape(txt_link)})\b', re.I)
                     if pat.search(t_elem):
                         elem["texto"] = pat.sub(rf'<a href="{dest_ref}" class="doc-link">\1</a>', t_elem, count=1)
+            # 3. Si el elemento es una tabla estructurada, vincular celdas de texto
+            elif elem.get("tipo") == "tabla" and "filas" in elem:
+                for fila in elem["filas"]:
+                    for col_idx, celda in enumerate(fila):
+                        if isinstance(celda, str) and f'href="{dest_ref}"' not in celda:
+                            pat = re.compile(rf'\b({re.escape(txt_link)})\b', re.I)
+                            if pat.search(celda):
+                                fila[col_idx] = pat.sub(rf'<a href="{dest_ref}" class="doc-link">\1</a>', celda, count=1)
 
     return elementos
 
@@ -2246,15 +2256,11 @@ def _reconstruir_paginas_documento(
             if page_tablas:
                 # Preservar figuras que ya fueron intercaladas en la página
                 figs_en_pagina = [e for e in elementos if e.get("tipo") == "figura"]
-                # Preservar encabezados H1/H2 solo si page_tablas no define ya sus propios encabezados H1/H2
-                tiene_encabezado_en_tabla = any(t.get("tipo") in ("h1", "h2") for t in page_tablas)
-                if tiene_encabezado_en_tabla:
-                    elementos_base = []
-                else:
-                    elementos_base = [e for e in elementos if e.get("tipo") in ("h1", "h2")]
-                
-                # Armar elementos respetando figuras primero (o según orden) y luego el bloque estructurado de tablas/texto
-                elementos = elementos_base + figs_en_pagina + list(page_tablas)
+                # Preservar encabezados H1/H2 legítimos solo si page_tablas los incluye explícitamente;
+                # si no, omitir los H2 espurios que Scribd fragmentó de los títulos de las columnas de la tabla
+                elementos = figs_en_pagina + list(page_tablas)
+                if page_enlaces:
+                    elementos = _vincular_enlaces_internos(elementos, page_enlaces)
 
             paginas_doc.append({
                 "tipo": "contenido",
