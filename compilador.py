@@ -2244,12 +2244,17 @@ def _reconstruir_paginas_documento(
             # Inyectar tablas técnicas si la página tiene tabla registrada en el catálogo
             page_tablas = tablas_dict.get(num, []) if tablas_dict else []
             if page_tablas:
-                # Preservar encabezados H1/H2 y sustituir los párrafos de texto desestructurado con la tabla limpia
-                elementos_base = [e for e in elementos if e.get("tipo") in ("h1", "h2")]
-                if not elementos_base:
-                    elementos = list(page_tablas)
+                # Preservar figuras que ya fueron intercaladas en la página
+                figs_en_pagina = [e for e in elementos if e.get("tipo") == "figura"]
+                # Preservar encabezados H1/H2 solo si page_tablas no define ya sus propios encabezados H1/H2
+                tiene_encabezado_en_tabla = any(t.get("tipo") in ("h1", "h2") for t in page_tablas)
+                if tiene_encabezado_en_tabla:
+                    elementos_base = []
                 else:
-                    elementos = elementos_base + list(page_tablas)
+                    elementos_base = [e for e in elementos if e.get("tipo") in ("h1", "h2")]
+                
+                # Armar elementos respetando figuras primero (o según orden) y luego el bloque estructurado de tablas/texto
+                elementos = elementos_base + figs_en_pagina + list(page_tablas)
 
             paginas_doc.append({
                 "tipo": "contenido",

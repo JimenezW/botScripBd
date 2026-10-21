@@ -168,24 +168,26 @@ def generar_catalogo_tablas(dir_salida: Path = ORIGEN_DEFECTO) -> Path:
     }]
 
     # PÁGINA 596: Numbers
-    tablas["596"] = [{
-        "tipo": "tabla",
-        "encabezados": ["Item", "Usage", "Example"],
-        "clases_columnas": ["col-item", "col-usage", "col-example"],
-        "filas": [[
-            "Numbers",
-            "An expression may contain whole numbers, decimals or numbers written in scientific notation. "
-            "Numbers can optionally be formatted with patterns by using the FormatNumber(number, pattern) function.",
-            "<div style='margin-bottom:8px;'><span class='code-expr'>${10.00}</span><br>"
-            "<small style='color:#4b5563;'>Represents the value 10.00</small></div>"
-            "<div style='margin-bottom:8px;'><span class='code-expr'>${2e2}</span><br>"
-            "<small style='color:#4b5563;'>Represents the value 200</small></div>"
-            "<div style='margin-bottom:8px;'><span class='code-expr'>${3.820954E6}</span><br>"
-            "<small style='color:#4b5563;'>Represents the value 3820954</small></div>"
-            "<div><span class='code-expr'>${FormatNumber(3820, '#,###')}</span><br>"
-            "<small style='color:#4b5563;'>Returns the value 3,820 as a string</small></div>"
-        ]]
-    }]
+    tablas["596"] = [
+        {
+            "tipo": "tabla",
+            "encabezados": ["Item", "Usage", "Example"],
+            "clases_columnas": ["col-item", "col-usage", "col-example"],
+            "filas": [[
+                "Numbers",
+                "An expression may contain whole numbers, decimals or numbers written in scientific notation. "
+                "Numbers can optionally be formatted with patterns by using the FormatNumber(number, pattern) function.",
+                "<div style='margin-bottom:8px;'><span class='code-expr'>${10.00}</span><br>"
+                "<small style='color:#4b5563;'>Represents the value 10.00</small></div>"
+                "<div style='margin-bottom:8px;'><span class='code-expr'>${2e2}</span><br>"
+                "<small style='color:#4b5563;'>Represents the value 200</small></div>"
+                "<div style='margin-bottom:8px;'><span class='code-expr'>${3.820954E6}</span><br>"
+                "<small style='color:#4b5563;'>Represents the value 3820954</small></div>"
+                "<div><span class='code-expr'>${FormatNumber(3820, '#,###')}</span><br>"
+                "<small style='color:#4b5563;'>Returns the value 3,820 as a string</small></div>"
+            ]]
+        }
+    ]
 
     # PÁGINA 597: Math Operators
     math_ops_grid = (
@@ -260,63 +262,105 @@ def generar_catalogo_tablas(dir_salida: Path = ORIGEN_DEFECTO) -> Path:
     # 2. VARIABLES DE REEMPLAZO EN EXCEL (Página 846)
     # Encabezados: Replacement Variable | Definition
     # ═══════════════════════════════════════════════════════════════════════
-    tablas["846"] = [{
-        "tipo": "tabla",
-        "encabezados": ["Replacement Variable", "Definition"],
-        "clases_columnas": ["col-item", "col-usage"],
-        "filas": [
-            ["&amp;P", "Page number."],
-            ["&amp;N", "Number of pages."],
-            ["&amp;D", "Prints the system date."],
-            ["&amp;T", "Prints the system time."],
-            ["&amp;F", "The file name of the Excel file."],
-            ["&amp;Z", "The file path where the Excel file was created."],
-            ["&amp;A", "Name of the sheet."],
-            ["&amp;U", "Begins and ends underline text. For example, \"&amp;U This is &amp;U text\" will print \"<u>This is text</u>\"."],
-            ["&amp;B", "Begins and ends bold text. For example, \"&amp;B This is &amp;B text\" will print \"<strong>This is text</strong>\"."],
-            ["&amp;I", "Begins and ends italicized text. For example, \"&amp;I This is &amp;I text\" will print \"<em>This is text</em>\"."]
-        ]
-    }]
+    tablas["846"] = [
+        {
+            "tipo": "p",
+            "texto": "The following table describes the Header and Footer replacement variables available in the Write Excel task:"
+        },
+        {
+            "tipo": "tabla",
+            "encabezados": ["Replacement Variable", "Definition"],
+            "clases_columnas": ["col-item", "col-usage"],
+            "filas": [
+                ["&amp;P", "Page number."],
+                ["&amp;N", "Number of pages."],
+                ["&amp;D", "Prints the system date."],
+                ["&amp;T", "Prints the system time."],
+                ["&amp;F", "The file name of the Excel file."],
+                ["&amp;Z", "The file path where the Excel file was created."],
+                ["&amp;A", "Name of the sheet."],
+                ["&amp;U", "Begins and ends underline text. For example, \"&amp;U This is &amp;U text\" will print \"<u>This is text</u>\"."],
+                ["&amp;B", "Begins and ends bold text. For example, \"&amp;B This is &amp;B text\" will print \"<strong>This is text</strong>\"."],
+                ["&amp;I", "Begins and ends italicized text. For example, \"&amp;I This is &amp;I text\" will print \"<em>This is text</em>\"."]
+            ]
+        }
+    ]
 
     # ═══════════════════════════════════════════════════════════════════════
     # 3. AUDIT LOG SETTINGS / PROTOCOLS (Página 2858)
     # Encabezados: Protocol | SD-ID | Type
     # ═══════════════════════════════════════════════════════════════════════
-    tablas["2858"] = [{
-        "tipo": "tabla",
-        "encabezados": ["Protocol", "SD-ID", "Type"],
-        "clases_columnas": ["col-item", "col-item", "col-usage"],
-        "filas": [
-            ["AS2", "gamft-as2@46583", "AS2 Audit Log"],
-            ["FTP", "gamft-ftp@46583", "FTP Audit Log"],
-            ["FTPS", "gamft-ftps@46583", "FTPS Audit Log"],
-            ["SFTP", "gamft-sftp@46583", "SFTP Audit Log"],
-            ["GoDrive", "gamft-godrive@46583", "GoDrive Audit Log"],
-            ["GoFast", "gamft-gofast@46583", "GoFast Audit Log"]
-        ]
-    }]
+    tablas["2858"] = [
+        {
+            "tipo": "tabla",
+            "encabezados": ["Protocol", "SD-ID", "Type"],
+            "clases_columnas": ["col-item", "col-item", "col-usage"],
+            "filas": [
+                ["AS2", "gamft-as2@46583", "AS2 Audit Log"],
+                ["FTP", "gamft-ftp@46583", "FTP Audit Log"],
+                ["FTPS", "gamft-ftps@46583", "FTPS Audit Log"],
+                ["SFTP", "gamft-sftp@46583", "SFTP Audit Log"],
+                ["GoDrive", "gamft-godrive@46583", "GoDrive Audit Log"],
+                ["GoFast", "gamft-gofast@46583", "GoFast Audit Log"]
+            ]
+        },
+        {
+            "tipo": "p",
+            "texto": "Structured data parameters are split in two columns. The column on the left displays the available parameters and the column on the right displays the parameters that are sent to the Syslog server. Click to select parameters and then use the direction buttons between the columns to move parameters to the appropriate side. Syslog messages will not be sent for a protocol when there are no parameters selected."
+        },
+        {
+            "tipo": "p",
+            "texto": "The following table lists the optional structured data parameters that can be selected for each SD-ID:"
+        },
+        {
+            "tipo": "tabla",
+            "encabezados": ["SD-ID", "Data Parameters"],
+            "clases_columnas": ["col-item", "col-usage"],
+            "filas": [
+                [
+                    "gamft-admin@46583",
+                    "<div style='display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; font-size: 8.5pt; font-family: Consolas, monospace;'>"
+                    "<div>entry_id</div><div>admin_user_id</div><div>comp_name</div><div>domain</div>"
+                    "<div>entry_type</div><div>admin_user_name</div><div>field_label</div><div>old_value</div>"
+                    "<div>comp_type</div><div>created_on</div><div>new_value</div><div>override_message</div>"
+                    "<div>comp_id</div><div></div><div></div><div></div>"
+                    "</div>"
+                ]
+            ]
+        }
+    ]
 
     # ═══════════════════════════════════════════════════════════════════════
     # 4. CODIFICACIONES DE ARCHIVOS SOPORTADAS (Páginas 3611 a 3613)
     # Encabezados: Name | Alias or Aliases | Description
     # ═══════════════════════════════════════════════════════════════════════
-    tablas["3611"] = [{
-        "tipo": "tabla",
-        "encabezados": ["Name", "Alias or Aliases", "Description"],
-        "clases_columnas": ["col-item", "col-usage", "col-example"],
-        "filas": [
-            ["CESU-8", "CESU8 csCESU-8", "Unicode CESU-8"],
-            ["IBM00858", "cp858 858 PC-Multilingual-850+euro cp00858 ccsid00858", "Variant of Cp850 with Euro character"],
-            ["IBM437", "ibm437 437 ibm-437 cspc8codepage437 cp437 windows-437", "MS-DOS United States, Australia, New Zealand, South Africa"],
-            ["IBM775", "ibm-775 ibm775 775 cp775", "PC Baltic"],
-            ["IBM850", "cp850 cspc850multilingual ibm850 850 ibm-850", "MS-DOS Latin-1"],
-            ["IBM852", "csPCp852 ibm-852 ibm852 852 cp852", "MS-DOS Latin-2"],
-            ["IBM855", "ibm855 855 ibm-855 cp855 cspcp855", "IBM Cyrillic"],
-            ["IBM857", "ibm857 857 cp857 csIBM857 ibm-857", "IBM Turkish"],
-            ["IBM862", "csIBM862 cp862 ibm862 862 cspc862latinhebrew ibm-862", "PC Hebrew"],
-            ["IBM866", "ibm866 866 ibm-866 csIBM866 cp866", "MS-DOS Russian"]
-        ]
-    }]
+    tablas["3611"] = [
+        {
+            "tipo": "h1",
+            "texto": "Supported File Encodings"
+        },
+        {
+            "tipo": "p",
+            "texto": "The following table lists file encodings supported by GoAnywhere. Support for encodings may vary depending on the version of JVM installed and which region the host machine is marked as residing in."
+        },
+        {
+            "tipo": "tabla",
+            "encabezados": ["Name", "Alias or Aliases", "Description"],
+            "clases_columnas": ["col-item", "col-usage", "col-example"],
+            "filas": [
+                ["CESU-8", "CESU8 csCESU-8", "Unicode CESU-8"],
+                ["IBM00858", "cp858 858 PC-Multilingual-850+euro cp00858 ccsid00858", "Variant of Cp850 with Euro character"],
+                ["IBM437", "ibm437 437 ibm-437 cspc8codepage437 cp437 windows-437", "MS-DOS United States, Australia, New Zealand, South Africa"],
+                ["IBM775", "ibm-775 ibm775 775 cp775", "PC Baltic"],
+                ["IBM850", "cp850 cspc850multilingual ibm850 850 ibm-850", "MS-DOS Latin-1"],
+                ["IBM852", "csPCp852 ibm-852 ibm852 852 cp852", "MS-DOS Latin-2"],
+                ["IBM855", "ibm855 855 ibm-855 cp855 cspcp855", "IBM Cyrillic"],
+                ["IBM857", "ibm857 857 cp857 csIBM857 ibm-857", "IBM Turkish"],
+                ["IBM862", "csIBM862 cp862 ibm862 862 cspc862latinhebrew ibm-862", "PC Hebrew"],
+                ["IBM866", "ibm866 866 ibm-866 csIBM866 cp866", "MS-DOS Russian"]
+            ]
+        }
+    ]
 
     tablas["3612"] = [{
         "tipo": "tabla",
